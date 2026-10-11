@@ -25,3 +25,17 @@
    shared stats code) in a reply entry here.
 2. Request UNI and CONCH access on Hugging Face with your IIIT e-mail.
 3. Try one frozen TS slide through TRIDENT + UNI on an Ada 2080 Ti node and log the seconds per slide.
+
+## 2026-10-12 · Uniyal (via Claude Code)
+
+**Did:** connected Claude Code to Ada (key + Windows ssh-agent), cloned this repo to `~/project` on Ada,
+ran the smoke test `jobs/check_env.sbatch` (job 17358, gnode043). Wrote `docs/ADA.md`.
+
+**Results:** Ada changed since the official guide: SSH via `ada-gw1/ada-gw2.iiit.ac.in`; GPU partition is `u22`
+(Ubuntu 22.04), RTX 2080 Ti via `--constraint=2080ti`; modules `u22/cuda/12.x`, `u22/python/3.12.x`;
+**compute nodes have internet** (GDC, Hugging Face, PyPI); `/share1` is gateway-only.
+
+**Blocked on:** my Ada GPU quota (4 GPUs / 40 CPUs per user) is mostly used by my other projects right now.
+
+**Ask for Srivastava:** your Ada account has its own 40 CPU / 4 GPU quota, so the frozen-slide extraction
+(1c/1e) is probably best run under your account. `docs/ADA.md` has the job template and the key-setup steps.

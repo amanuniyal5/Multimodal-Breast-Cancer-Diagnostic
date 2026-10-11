@@ -36,7 +36,7 @@ This GitHub repo is the only shared channel. Treat it as the team's memory.
 ## Environment facts
 
 - Laptop work: Python 3.12, `pip install -r requirements.txt`. On Windows set `LOKY_MAX_CPU_COUNT=4`.
-- Ada: SLURM, Ubuntu 18.04, 11 GB GPUs. GTX 1080 Ti → fp32; RTX 2080 Ti → fp16 autocast; no bf16.
+- Ada: SLURM, partition `u22` (Ubuntu 22.04), RTX 2080 Ti via `--constraint=2080ti`, 11 GB GPUs. GTX 1080 Ti → fp32; RTX 2080 Ti → fp16 autocast; no bf16.
   Long-term data goes in `/share1/$USER/` (100 GB, master node only); `/scratch` is per compute node and purged
   after 7 days. Never put data in the repo checkout. Full details: `docs/ADA.md`.
 - Hugging Face: UNI / CONCH / TITAN are gated and need an institutional (IIIT) e-mail.
