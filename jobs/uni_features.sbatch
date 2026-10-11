@@ -21,8 +21,7 @@ W=/scratch/$USER/trace_$SLURM_JOB_ID
 mkdir -p $W
 echo "node $(hostname); scratch free: $(df -h /scratch | tail -1)"
 t0=$(date +%s)
-huggingface-cli download IUCompPath/TRACE --repo-type dataset \
-    --include "data/TCGA-BRCA/${MODEL}/${MAG}/*" --local-dir $W --max-workers 8 > /dev/null
+python -c "from huggingface_hub import snapshot_download as s; s('IUCompPath/TRACE', repo_type='dataset', allow_patterns=['data/TCGA-BRCA/${MODEL}/${MAG}/*'], local_dir='$W', max_workers=8)"
 echo "download done in $(( $(date +%s) - t0 ))s: $(du -sh $W | cut -f1)"
 python scripts/build_bags.py --parquet-dir $W/data/TCGA-BRCA/${MODEL}/${MAG} --work $W/bags \
     --out $HOME/project/data/features --name ${MODEL}_${MAG} --cap $CAP
