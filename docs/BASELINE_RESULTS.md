@@ -48,7 +48,70 @@ These are **linear probes on slide-level embeddings**, not the final ABMIL model
 | ESR1 > 0.5 log2 from cut-off | 45 | 36 | 9 | 6.6e-5 |
 | ESR1 > 1.0 log2 from cut-off | 44 | 35 | 9 | 1.1e-4 |
 
-## Caveats
+## Caveats (B0–B6)
 
 - One encoder (TITAN), one RNA cut-off scheme (GMM), one CV seed.
 - 57 ER-discordant patients exist; 54 have TITAN embeddings.
+
+---
+
+# Extended TITAN baselines (E1–E5): 5 seeds, site-grouped CV
+
+`python scripts/extended_titan.py` (12 Oct 2026) → `results/extended_titan.csv`. RPPA labels = 2-component GMM on
+RPPA protein (ER-α, HER2). Seed SDs are across 5 different fold assignments; CIs are paired bootstrap on seed 0.
+
+## E1: per-label AUC (mean ± SD over 5 seeds)
+
+| Label | n | AUC |
+|---|---|---|
+| ER (IHC) | 1,004 | 0.882 ± 0.004 |
+| ER (ESR1 RNA) | 1,039 | **0.929 ± 0.006** |
+| ER (RPPA protein) | 852 | 0.891 ± 0.004 |
+| PR (IHC) | 1,001 | 0.804 ± 0.007 |
+| PR (PGR RNA) | 1,039 | 0.792 ± 0.004 |
+| HER2 (strict clinical) | 590 | 0.690 ± 0.015 |
+| HER2 (ERBB2 amplified) | 1,027 | 0.749 ± 0.005 |
+| HER2 (RPPA protein) | 852 | 0.719 ± 0.013 |
+| HER2 IHC 0 vs 1+ | 318 | 0.447 ± 0.030 |
+| HER2 IHC 0 vs low (1+ or 2+/FISH−) | 454 | 0.418 ± 0.024 |
+| Shuffled ER (control) | 1,004 | 0.462 ± 0.011 |
+
+## E2 / E4: 1a paired comparisons (same patients, same folds)
+
+| Comparison | n | Ref AUC (IHC) | Δ mean ± SD (5 seeds) | Seed-0 95% CI |
+|---|---|---|---|---|
+| ER: RNA − IHC (patients with all 3 ER labels) | 801 | 0.869 | **+0.055 ± 0.004** | +0.034, +0.088 |
+| ER: RPPA protein − IHC | 801 | 0.869 | +0.023 ± 0.006 | −0.005, +0.061 |
+| ER: RNA prevalence-matched cut-off − IHC | 989 | 0.881 | **+0.051 ± 0.005** | +0.035, +0.085 |
+| ER: RNA confident-only (GMM posterior > 0.9 / < 0.1) − IHC | 945 | 0.892 | **+0.054 ± 0.003** | +0.035, +0.085 |
+| PR: RNA − IHC | 986 | 0.800 | −0.007 ± 0.006 | −0.044, +0.020 |
+| HER2: ERBB2 amplification − strict clinical | 478 | 0.678 | +0.041 ± 0.009 | −0.024, +0.108 |
+| HER2: RPPA protein − strict clinical | 478 | 0.678 | +0.018 ± 0.011 | −0.056, +0.087 |
+
+## E3 / E4: 1b which side on discordant cases
+
+| Pair | Discordant n | Sides with molecular | Sides with IHC | Binomial p |
+|---|---|---|---|---|
+| ER IHC vs ESR1 RNA (GMM) | 54 | **39** | 15 | 0.0015 |
+| ER IHC vs ESR1 RNA (prevalence-matched) | 61 | **42** | 19 | 0.0044 |
+| ER IHC vs ESR1 RNA (confident-only) | 45 | **34** | 11 | 0.0008 |
+| ER IHC vs RPPA protein | 63 | 33 | 30 | 0.80 |
+| PR IHC vs PGR RNA | 169 | 69 | **100** | 0.021 |
+| HER2 strict vs ERBB2 amplification | 60 | 35 | 25 | 0.25 |
+
+## E5: 1d HER2-low (same patients)
+
+| Task | n (pos) | H&E (TITAN) AUC | ERBB2 mRNA alone AUC |
+|---|---|---|---|
+| HER2 0 vs 1+ | 313 (257) | 0.464 ± 0.038 | 0.649 |
+| HER2 0 vs low | 447 (391) | 0.398 ± 0.046 | 0.691 |
+
+## What the extended baselines say (preliminary, linear probe on TITAN)
+
+- **ER: the slide tracks mRNA, robustly.** The RNA-label advantage (+0.05 AUC) and the RNA side in 1b survive all
+  three cut-off schemes. RPPA protein sits in between and does not separate from IHC.
+- **PR goes the other way:** no 1a difference, and on discordant cases the model sides with **IHC** (100 of 169,
+  p = 0.02). 138 of the 172 PR-discordant cases are IHC+/RNA−, so the PGR cut-off needs the same sensitivity check.
+- **HER2:** amplification looks more predictable than the clinical label, but CIs cross zero (n = 478).
+- **HER2-low:** H&E is at or below chance under site-grouped CV; ERBB2 mRNA alone reaches 0.65–0.69.
+  Below-chance values (0.40) suggest site-linked label prevalence that flips between folds.
