@@ -25,3 +25,15 @@
    shared stats code) in a reply entry here.
 2. Request UNI and CONCH access on Hugging Face with your IIIT e-mail.
 3. Try one frozen TS slide through TRIDENT + UNI on an Ada 2080 Ti node and log the seconds per slide.
+
+## 2026-10-12 · Srivastava (via Claude Code)
+
+**Did:** Simplified the project-update deck (`slides/project_update_slides.tex`), branch `srivastava/slides-declutter`:
+removed the footer, raised the font size, cut each slide to its key message (experiment questions in plain words,
+one merged discordance table, AUCs to 2 decimals, short plan bullets). Same 5 slides and same numbers;
+detail that was dropped from the slides is still in `docs/DATASET.md` and `docs/BASELINE_RESULTS.md`.
+Not compiled locally (no LaTeX here): please check it on Overleaf.
+**Results:** none.
+**Blocked on:** nothing.
+**Next for me:** frozen-slide pipeline (as proposed in HANDOFF).
+**Ask for Uniyal:** review the PR; flag anything you want back on the slides.
