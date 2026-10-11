@@ -37,5 +37,20 @@ This GitHub repo is the only shared channel. Treat it as the team's memory.
 
 - Laptop work: Python 3.12, `pip install -r requirements.txt`. On Windows set `LOKY_MAX_CPU_COUNT=4`.
 - Ada: SLURM, Ubuntu 18.04, 11 GB GPUs. GTX 1080 Ti → fp32; RTX 2080 Ti → fp16 autocast; no bf16.
-  Large data goes in `/scratch/$USER/`, never in the repo checkout.
+  Long-term data goes in `/share1/$USER/` (100 GB, master node only); `/scratch` is per compute node and purged
+  after 7 days. Never put data in the repo checkout. Full details: `docs/ADA.md`.
 - Hugging Face: UNI / CONCH / TITAN are gated and need an institutional (IIIT) e-mail.
+
+## Ada cluster
+- Access: `ssh ada` (gateway `ada-gw1.iiit.ac.in`; `ssh ada2` = `ada-gw2`). Key: `~/.ssh/ada_claude` (passphrase, held by the Windows ssh-agent). Needs the IIIT VPN.
+  From Git Bash use Windows ssh so the agent is found: `/c/Windows/System32/OpenSSH/ssh.exe ada ...` (same for `scp.exe`).
+  `ada.iiit.ac.in` no longer accepts SSH. Never run training on the login node; always submit with sbatch.
+- Sync code: commit + push here, then `ssh ada "cd ~/project && git pull"` (first time:
+  `ssh ada "git clone https://github.com/amanuniyal5/Multimodal-Breast-Cancer-Diagnostic.git ~/project"`).
+  `rsync` is not installed on the Windows laptop.
+- Submit: `ssh ada "cd ~/project && sbatch jobs/<script>.sbatch"` (smoke test: `jobs/check_env.sbatch`)
+- Monitor: `ssh ada "squeue -u \$USER"`, `ssh ada "sacct -j <id> --format=JobID,State,Elapsed,MaxRSS"`, `ssh ada "tail -n 50 ~/project/logs/<id>.out"`
+- Fetch results: `scp -r ada:~/project/results/<file> ./results/`
+- Several failed logins in a row make a gateway refuse connections for ~10–15 min: don't retry in a loop.
+- Poll every few minutes at most (don't hammer the SLURM controller).
+- Do not scancel or delete remote files unless I ask.
