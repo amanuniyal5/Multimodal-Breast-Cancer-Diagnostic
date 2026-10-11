@@ -1,8 +1,9 @@
 #!/bin/bash
-# Smoke test: GPU visibility, CUDA modules, Python, internet access from a compute node.
+# Smoke test: GPU visibility, OS, modules, Python, internet access and disk from a compute node.
 #SBATCH -A research
 #SBATCH --qos=medium
-#SBATCH -p long
+#SBATCH -p u22
+#SBATCH --constraint=2080ti
 #SBATCH -J check_env
 #SBATCH -c 10
 #SBATCH --gres=gpu:1
@@ -11,12 +12,17 @@
 #SBATCH --output=logs/%j.out
 
 echo "node: $(hostname)  date: $(date)"
+grep PRETTY_NAME /etc/os-release
 echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
-module load u18/cuda/11.6 u18/cudnn/8.4.0-cuda-11.6 2>&1
-module list 2>&1
+echo "--- modules (cuda/python/conda):"
+module avail 2>&1 | tr -s ' ' '\n' | grep -i -E "cuda|cudnn|python|conda|anaconda|miniforge" | sort -u | head -40
+echo "--- python:"
 which python3; python3 --version
-df -h /scratch /ssd_scratch 2>/dev/null
+echo "--- disk:"
+df -h /scratch /ssd_scratch /share1 $HOME 2>/dev/null
 echo "--- internet from compute node:"
 curl -s -o /dev/null -w "GDC %{http_code}\n" --max-time 15 https://api.gdc.cancer.gov/status || echo "GDC unreachable"
 curl -s -o /dev/null -w "HuggingFace %{http_code}\n" --max-time 15 https://huggingface.co || echo "HF unreachable"
+curl -s -o /dev/null -w "PyPI %{http_code}\n" --max-time 15 https://pypi.org/simple/ || echo "PyPI unreachable"
+echo DONE
