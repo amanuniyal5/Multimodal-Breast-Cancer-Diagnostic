@@ -1,0 +1,47 @@
+# Large data: never commit
+data/features/
+data/slides/
+data/bags/
+data/raw/
+*.svs
+*.tif
+*.tiff
+*.ndpi
+*.parquet
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.npy
+*.npz
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# LaTeX build files
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Local Claude Code settings
+.claude/settings.local.json

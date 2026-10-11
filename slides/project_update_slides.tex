@@ -1,0 +1,252 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{Madrid}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\setbeamertemplate{navigation symbols}{}
+\setbeamerfont{block title}{size=\small}
+\setbeamertemplate{itemize items}[circle]
+\setlength{\tabcolsep}{4pt}
+
+\title[Which Truth Does the Slide See?]{Which Truth Does the Slide See?}
+\subtitle{Auditing what pathology foundation models learn when IHC, mRNA and PAM50 disagree\\[3pt]\small Project Update}
+\author[Uniyal \& Srivastava]{Aman Uniyal \and Aman Srivastava}
+\institute[IIIT Hyderabad]{Topics in AI for Healthcare\\[2pt]
+  \footnotesize Base project: Kamineni -- Multimodal Breast Cancer Diagnostic \& Outcome Assistant}
+\date{\today}
+
+\begin{document}
+
+%===================================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Final Project Proposal: Clinical Problem \& Pipeline}
+\scriptsize
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{block}{Clinical problem}
+\begin{itemize}
+  \item ER/PR/HER2 status decides breast-cancer therapy; clinically it is measured by \textbf{IHC}.
+  \item IHC disagrees with mRNA-level status in a sizeable minority; for HER2 0 vs 1+ (HER2-low, T-DXd eligibility) pathologists agree in only $\sim$26\% of cases.
+  \item H\&E AI models learn whichever label a dataset provides: \textbf{nobody knows which biological truth they track}.
+\end{itemize}
+\end{block}
+\begin{alertblock}{Research question}
+When IHC, RNA and PAM50 disagree, which one does an H\&E foundation-model classifier follow? Does it change between the FFPE diagnostic slide and the frozen slide cut from the sequenced tissue?
+\end{alertblock}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{block}{Five standalone experiments (stricter evaluation, no new architecture)}
+\begin{itemize}
+  \item[\textbf{1a}] IHC- vs RNA-defined label: which is more predictable from H\&E?
+  \item[\textbf{1b}] Train on concordant cases; on IHC$\neq$RNA cases, which side does the model take?
+  \item[\textbf{1c}] FFPE-DX vs frozen slide $\times$ IHC vs RNA label (interaction)
+  \item[\textbf{1d}] HER2 0 vs 1+: separable from H\&E vs from ERBB2 mRNA?
+  \item[\textbf{1e}] Within-patient agreement: top (TS) vs bottom (BS) frozen slide
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{6pt}
+\centering
+\textbf{Rough pipeline}\\[3pt]
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, fill=blue!6, align=center, font=\scriptsize,
+              text width=2.2cm, minimum height=0.8cm},
+  lab/.style={draw, rounded corners=3pt, fill=orange!12, align=center, font=\scriptsize,
+              text width=5.2cm, minimum height=0.5cm},
+  arr/.style={-{Stealth[length=2mm]}, thick}, node distance=0.42cm]
+  \node[box] (wsi) {H\&E slide\\FFPE-DX / frozen TS, BS};
+  \node[box, right=of wsi] (patch) {Tissue patches\\256\,px @ 20$\times$};
+  \node[box, right=of patch] (enc) {Frozen encoder\\UNI v1 (CONCH v1)};
+  \node[box, right=of enc] (head) {ABMIL / mean-pool\\logistic regression};
+  \node[box, right=of head] (out) {Score per label\\site-grouped 5-fold CV};
+  \node[lab, below=0.25cm of enc, xshift=1.3cm] (labels) {Patient-level labels: IHC $\mid$ RNA $\mid$ PAM50 $\mid$ RPPA protein};
+  \draw[arr] (wsi) -- (patch);
+  \draw[arr] (patch) -- (enc);
+  \draw[arr] (enc) -- (head);
+  \draw[arr] (head) -- (out);
+  \draw[arr] (labels.north -| head.south) -- (head.south);
+\end{tikzpicture}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Input Dataset \& Dataset Study (TCGA-BRCA)}
+\scriptsize
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+\begin{block}{Input dataset}
+\begin{itemize}
+  \item \textbf{TCGA-BRCA} (GDC, open access): 1,097 patients, 40 tissue-source sites; median age 58; 784 ductal, 203 lobular.
+  \item 4 label sources joined on patient barcode from $<$3\,MB of metadata (no slide opened): IHC (GDC clinical biotab); RNA, CNA, RPPA protein, PAM50 (cBioPortal PanCancer Atlas).
+\end{itemize}
+\end{block}
+\centering
+\begin{tabular}{lrrrl}
+\toprule
+Slides (tumour) & Slides & Patients & Size & Features \\
+\midrule
+DX (FFPE) & 1,131 & 1,060 & 1.16\,TB & TRACE \\
+TS (frozen, top) & 1,045 & 1,043 & 287\,GB & own \\
+BS (frozen, bottom) & 472 & 427 & 143\,GB & own \\
+TS+BS pairs & -- & 374 & -- & own \\
+\bottomrule
+\end{tabular}
+\raggedright
+\begin{itemize}
+  \item TRACE = public precomputed features (DX only); frozen slides are extracted on Ada.
+  \item Frozen slides are tumour-rich: median 80\% (TS) / 75\% (BS) tumour cells.
+  \item TCGA \texttt{her2\_status\_by\_ihc} is noisy (``Positive'' includes 11 IHC 1+ and 27 IHC 2+) $\rightarrow$ strict rule: 3+ or FISH+ = pos; 0/1+ or 2+/FISH$-$ = neg.
+\end{itemize}
+\end{column}
+\begin{column}{0.51\textwidth}
+\centering
+\begin{tabular}{llrr}
+\toprule
+Label & Source & Pos & Neg \\
+\midrule
+ER & IHC & 808 & 238 \\
+ER & RNA (ESR1, GMM cut-off) & 816 & 265 \\
+PR & IHC & 699 & 344 \\
+PR & RNA (PGR) & 614 & 467 \\
+HER2 & Clinical IHC/FISH (strict) & 145 & 468 \\
+HER2 & ERBB2 amplified (GISTIC) & 123 & 946 \\
+\midrule
+\multicolumn{4}{l}{HER2 IHC score 0 / 1+ / 2+ / 3+: 61 / 272 / 199 / 90} \\
+\multicolumn{4}{l}{PAM50 ($n$=981): LumA 499, LumB 197, Basal 171,} \\
+\multicolumn{4}{l}{\phantom{PAM50 ($n$=981): }Her2 78, Normal 36} \\
+\bottomrule
+\end{tabular}
+
+\vspace{5pt}
+\begin{tabular}{lrr}
+\toprule
+How often the ``truths'' disagree & Both & Discordant \\
+\midrule
+ER: IHC vs ESR1 RNA & 1,031 & 57 (5.5\%) \\
+PR: IHC vs PGR RNA & 1,028 & 172 (16.7\%) \\
+HER2: clinical vs ERBB2 amp & 591 & 64 (10.8\%) \\
+ER IHC+ but PAM50 Basal & -- & 20 \\
+\bottomrule
+\end{tabular}
+
+\vspace{4pt}
+\raggedright
+ER IHC+/RNA$-$ cases are mostly ER-low (22 of 26 with known \% have $<$40\% stained cells).\\[2pt]
+\textbf{Feasibility:} all 5 experiments run on public data. 1a: 989 paired patients; 1b: 57 / 172 / 64 discordant; 1c: 965 with DX+TS; 1d: 57 vs 261 (smallest); 1e: 374 TS--BS pairs.
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Baseline Experiments \& Analysis}
+\scriptsize
+\textbf{Setup:} precomputed TITAN slide embeddings (TRACE, 1,125 DX slides) $\rightarrow$ patient mean $\rightarrow$ L2 logistic regression; 5-fold CV, \emph{random} vs \emph{site-grouped} (40 sites); 95\% bootstrap CIs. Laptop CPU, $\sim$10 min. (Linear probes; final models use ABMIL on patch features.)
+\vspace{2pt}
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}
+\centering
+\begin{tabular}{lrrr}
+\toprule
+H\&E $\rightarrow$ label & $n$ & AUC random & AUC site \\
+\midrule
+ER (IHC) & 1,004 & 0.893 & 0.885 \\
+ER (RNA) & 1,039 & 0.936 & 0.921 \\
+PR (IHC) & 1,001 & 0.804 & 0.792 \\
+PR (RNA) & 1,039 & 0.797 & 0.787 \\
+HER2 (clinical) & 590 & 0.733 & 0.674 \\
+HER2 (ERBB2 amp) & 1,027 & 0.757 & 0.755 \\
+HER2 0 vs 1+ & 318 & 0.633 & \textbf{0.433} \\
+Shuffled ER (control) & 1,004 & 0.431 & 0.460 \\
+\bottomrule
+\end{tabular}
+\raggedright
+\begin{block}{Sanity / leakage checks}
+\begin{itemize}
+  \item Shuffled labels $\rightarrow$ AUC $\approx$ 0.46 \checkmark{} (no CV leakage)
+  \item Site-only model (no image): AUC 0.53--0.59
+  \item Embedding identifies the site: 81.6\% vs 18.4\% chance $\rightarrow$ site-grouped CV is mandatory
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.52\textwidth}
+\begin{block}{Preliminary 1a: IHC vs RNA label (same patients and folds)}
+\begin{itemize}
+  \item ER ($n$=989): IHC 0.882 vs RNA 0.930, $\Delta$ = \textbf{+0.048} [95\% CI +0.023, +0.074]
+  \item PR ($n$=986): $\Delta$ = +0.009 [$-$0.022, +0.041]
+  \item HER2 ($n$=568): $\Delta$ = +0.047 [$-$0.015, +0.104]
+\end{itemize}
+\end{block}
+\begin{block}{Preliminary 1b: train on ER-concordant, score 54 discordant}
+\begin{itemize}
+  \item Model sides with \textbf{RNA in 39/54} (binomial $p$ = 0.0015)
+  \item Robust: 36/45 after dropping cases within 0.5 log$_2$ of the RNA cut-off ($p = 6.6\times10^{-5}$)
+\end{itemize}
+\end{block}
+\begin{alertblock}{Takeaways}
+\begin{itemize}
+  \item For ER, H\&E morphology tracks \textbf{mRNA} more closely than clinical IHC.
+  \item The apparent HER2-low signal (0.63) falls to chance under site-grouped CV: \textbf{site leakage}.
+\end{itemize}
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Plan for the Next Week}
+\scriptsize
+\begin{columns}[T]
+\begin{column}{0.32\textwidth}
+\begin{block}{Pipeline improvements}
+\begin{itemize}
+  \item Replace the TITAN linear probe with \textbf{ABMIL on UNI v1 patch features} (TRACE, 20$\times$); keep mean-pool LR as reference.
+  \item Repeated site-grouped CV (5 folds $\times$ 5 seeds); DeLong / paired-bootstrap tests.
+  \item RNA cut-off sensitivity: GMM vs quartile vs PAM50-matched.
+  \item Replicate headline results with \textbf{CONCH v1}.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{Planned experiments \& analysis}
+\begin{itemize}
+  \item \textbf{1a} with ABMIL for ER, PR, HER2; add RPPA protein as a third label.
+  \item \textbf{1b} for PR (172) and HER2 (64); split ER by ER-low vs ER-high IHC.
+  \item \textbf{1d}: HER2 0 vs 1+ and 0 vs low, site-grouped only, vs an ERBB2-mRNA model.
+  \item Start the frozen-slide pipeline for \textbf{1c} and \textbf{1e}.
+  \item Attention heatmaps on discordant cases.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{Other specific next steps}
+\begin{itemize}
+  \item Request UNI / CONCH weights (Hugging Face, IIIT e-mail).
+  \item Download 1,517 tumour TS/BS slides (430\,GB) in batches; TRIDENT + UNI extraction on RTX 2080 Ti (fp16).
+  \item Check our extraction matches TRACE on $\sim$50 DX slides.
+  \item One shared label table and fixed split files in the team repo.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{6pt}
+\centering
+\begin{tabular}{lll}
+\toprule
+Compute on Ada (11\,GB GPUs) & Estimate & Note \\
+\midrule
+Frozen-slide feature extraction & $\sim$1 day on 4$\times$RTX 2080 Ti & $\sim$6M patches, encoder frozen \\
+ABMIL training grid (all experiments) & 40--80 GPU-hours & heads trained, encoder frozen \\
+Peak scratch storage & $\sim$550\,GB & 1.8\,TB available \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\end{document}
