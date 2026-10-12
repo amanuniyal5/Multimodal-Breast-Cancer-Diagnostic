@@ -1,6 +1,6 @@
 #!/bin/bash
 # Option-1 experiments (1a, 1b, 1d, shuffled control) with mean-pool LR and ABMIL on patch features.
-# Override with: sbatch --export=ALL,NAME=conch_v1_20x,MODELS=mean jobs/train_mil.sbatch
+# Override with: sbatch --export=ALL,NAME=conch_v1_20x,MODELS=mean jobs/train_mil.sbatch [extra train_mil.py args]
 #SBATCH -A research
 #SBATCH --qos=medium
 #SBATCH -p u22
@@ -20,5 +20,5 @@ source $HOME/venvs/whichtruth/bin/activate
 cd $HOME/project
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 python -u scripts/train_mil.py --feats data/features --name $NAME --cap 4096 \
-    --labels data/metadata/labels_patient.csv --out results --models $MODELS --seeds $SEEDS
+    --labels data/metadata/labels_patient.csv --out results --models $MODELS --seeds $SEEDS "$@"
 echo TRAIN_OK

@@ -38,6 +38,10 @@ ap.add_argument("--seeds", type=int, default=3)
 ap.add_argument("--epochs", type=int, default=15)
 ap.add_argument("--train-patches", type=int, default=2048)
 ap.add_argument("--lr", type=float, default=2e-4)
+ap.add_argument("--pr-cut", default="gmm", choices=["gmm", "prevmatch"],
+                help="PGR RNA label: GMM cut-off or threshold matching PR IHC prevalence")
+ap.add_argument("--only", default="all", choices=["all", "pr"], help="pr: run only the PR 1a group and PR 1b")
+ap.add_argument("--tag", default="", help="suffix for output file names")
 a = ap.parse_args()
 os.makedirs(a.out, exist_ok=True)
 SEEDS = list(range(a.seeds))
@@ -60,6 +64,9 @@ def gmm_pos(x):
     return pd.Series(g.predict(x.values.reshape(-1, 1)) == np.argmax(g.means_.ravel()), index=x.index).astype(float)
 
 
+if a.pr_cut == "prevmatch":
+    q = L.PGR_log2.quantile(1 - L.PR_IHC.mean())
+    L["PGR_RNApos"] = (L.PGR_log2 >= q).astype(float).where(L.PGR_log2.notna())
 L["ER_RPPApos"] = gmm_pos(L.ER_RPPA).reindex(L.index)
 L["HER2_RPPApos"] = gmm_pos(L.HER2_RPPA).reindex(L.index)
 L["HER2low_1plus"] = L.HER2_IHCscore.map({"0": 0, "1+": 1})
@@ -155,8 +162,9 @@ rows, preds = [], []
 for model in MODELS:
     log(f"===== model: {model} =====")
     # 1a paired groups (also gives the per-label AUC table)
-    for group in [["ER_IHC", "ESR1_RNApos", "ER_RPPApos"], ["PR_IHC", "PGR_RNApos"],
-                  ["HER2_STRICT", "ERBB2_AMP", "HER2_RPPApos"]]:
+    groups = [["ER_IHC", "ESR1_RNApos", "ER_RPPApos"], ["PR_IHC", "PGR_RNApos"],
+              ["HER2_STRICT", "ERBB2_AMP", "HER2_RPPApos"]]
+    for group in (groups if a.only == "all" else [["PR_IHC", "PGR_RNApos"]]):
         per = {col: [] for col in group}
         for s in SEEDS:
             d, o = oof(group, model, s)
@@ -171,7 +179,7 @@ for model in MODELS:
                          "delta_vs_IHC_mean": np.mean(np.subtract(per[col], per[group[0]])),
                          "delta_vs_IHC_sd": np.std(np.subtract(per[col], per[group[0]]))})
     # negative control and 1d
-    for col in ["ER_IHC_shuffled", "HER2low_1plus", "HER2_0_vs_low"]:
+    for col in (["ER_IHC_shuffled", "HER2low_1plus", "HER2_0_vs_low"] if a.only == "all" else []):
         aucs = []
         for s in SEEDS:
             # 1d: same patients for the H&E model and the ERBB2-mRNA comparator
@@ -183,8 +191,9 @@ for model in MODELS:
                      "pos": int(d[col].sum()), "AUC_mean": np.mean(aucs), "AUC_sd": np.std(aucs), **extra})
         log(f"{col}: AUC {np.mean(aucs):.3f} ± {np.std(aucs):.3f} {extra}")
     # 1b which side
-    for ihc, mol in [("ER_IHC", "ESR1_RNApos"), ("ER_IHC", "ER_RPPApos"), ("PR_IHC", "PGR_RNApos"),
-                     ("HER2_STRICT", "ERBB2_AMP")]:
+    pairs = [("ER_IHC", "ESR1_RNApos"), ("ER_IHC", "ER_RPPApos"), ("PR_IHC", "PGR_RNApos"),
+             ("HER2_STRICT", "ERBB2_AMP")]
+    for ihc, mol in (pairs if a.only == "all" else [("PR_IHC", "PGR_RNApos")]):
         d = L[[ihc, mol]].dropna()
         conc, disc = d[d[ihc] == d[mol]], d[d[ihc] != d[mol]]
         prob = np.mean([fit_predict(model, list(conc.index), list(disc.index), conc[ihc].astype(int).values, s)
@@ -196,7 +205,7 @@ for model in MODELS:
         preds.append(pd.DataFrame({"model": model, "exp": "1b", "label": f"{ihc} vs {mol}", "seed": -1,
                                    "patient": disc.index, "y": disc[mol].values, "p": prob}))
         log(f"1b {ihc} vs {mol}: n={len(disc)} molecular {k} / IHC {len(disc) - k}, p={pval:.3g}")
-    pd.DataFrame(rows).to_csv(os.path.join(a.out, f"mil_{a.name}_summary.csv"), index=False)
-    pd.concat(preds).to_csv(os.path.join(a.out, f"mil_{a.name}_oof.csv.gz"), index=False)
+    pd.DataFrame(rows).to_csv(os.path.join(a.out, f"mil_{a.name}{a.tag}_summary.csv"), index=False)
+    pd.concat(preds).to_csv(os.path.join(a.out, f"mil_{a.name}{a.tag}_oof.csv.gz"), index=False)
 
-log("saved", os.path.join(a.out, f"mil_{a.name}_summary.csv"))
+log("saved", os.path.join(a.out, f"mil_{a.name}{a.tag}_summary.csv"))
