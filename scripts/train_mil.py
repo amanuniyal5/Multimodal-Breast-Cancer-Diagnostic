@@ -140,8 +140,8 @@ def fit_predict(model, tr, te, y_tr, seed):
     return np.array(out)
 
 
-def oof(cols, model, seed):
-    d = L[cols + ["site"]].dropna()
+def oof(cols, model, seed, require=()):
+    d = L[cols + list(require) + ["site"]].dropna()
     pts, g = d.index.to_numpy(), d.site.values
     folds = list(StratifiedGroupKFold(5, shuffle=True, random_state=seed).split(pts, d[cols[0]].astype(int), g))
     out = {col: np.zeros(len(d)) for col in cols}
@@ -174,7 +174,8 @@ for model in MODELS:
     for col in ["ER_IHC_shuffled", "HER2low_1plus", "HER2_0_vs_low"]:
         aucs = []
         for s in SEEDS:
-            d, o = oof([col], model, s)
+            # 1d: same patients for the H&E model and the ERBB2-mRNA comparator
+            d, o = oof([col], model, s, require=["ERBB2_log2"] if col.startswith("HER2") else [])
             aucs.append(roc_auc_score(d[col].astype(int), o[col]))
         extra = {"AUC_ERBB2_mRNA": roc_auc_score(d[col].astype(int), L.loc[d.index, "ERBB2_log2"])} \
             if col.startswith("HER2") else {}
