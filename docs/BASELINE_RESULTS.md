@@ -115,3 +115,55 @@ RPPA protein (ER-α, HER2). Seed SDs are across 5 different fold assignments; CI
 - **HER2:** amplification looks more predictable than the clinical label, but CIs cross zero (n = 478).
 - **HER2-low:** H&E is at or below chance under site-grouped CV; ERBB2 mRNA alone reaches 0.65–0.69.
   Below-chance values (0.40) suggest site-linked label prevalence that flips between folds.
+
+---
+
+# Mean-pool baselines on UNI v1 and CONCH v1 patch features (3 seeds, site-grouped CV)
+
+Features: TRACE patch features for 1,055 patients (DX slides), patient feature = mean of all patches.
+UNI: `results/mil_uni_v1_20x_summary_meanonly.csv` (Ada job 17536); CONCH: `results/mil_conch_v1_20x_summary_meanonly.csv`.
+
+| | TITAN (5 seeds) | UNI v1 mean | CONCH v1 mean |
+|---|---|---|---|
+| 1a ER: IHC → RNA label (n = 801) | 0.869 → 0.924 | 0.873 → 0.908 | 0.843 → 0.866 |
+| 1a PR: IHC → RNA label, GMM cut-off (n = 986) | 0.800 → 0.793 | 0.795 → 0.733 | 0.778 → 0.748 |
+| 1a HER2: strict → amplification (n = 478) | 0.678 → 0.719 | 0.627 → 0.679 | 0.623 → 0.679 |
+| 1b ER discordant (n = 54), RNA : IHC | 39 : 15 (p = 0.0015) | 34 : 20 (p = 0.08) | 35 : 19 (p = 0.04) |
+| 1b PR discordant (n = 169), RNA : IHC | 69 : 100 (p = 0.02) | 55 : 114 (p < 0.001) | 61 : 108 (p < 0.001) |
+| 1b HER2 discordant (n = 60), amp : clinical | 35 : 25 (p = 0.25) | 44 : 16 (p < 0.001) | 39 : 21 (p = 0.03) |
+| Shuffled ER control | 0.46 | 0.51 | 0.46 |
+| HER2 0 vs low (ERBB2 mRNA alone 0.69) | 0.40 | 0.50 | 0.43 |
+
+# Robustness across encoders (`scripts/robustness_mean.py` → `results/robustness_mean.csv`)
+
+## R1: the PR "sides with IHC" result is a cut-off artefact
+
+PGR labels: GMM cut-off (614 positive) vs **prevalence-matched** cut-off (log2 ≥ 6.95, 724 positive, matching
+PR IHC prevalence) vs confident-only (GMM posterior > 0.9 / < 0.1, n = 903).
+
+| Encoder | PGR label | 1a Δ (RNA − IHC) | 1b n | RNA : IHC | p |
+|---|---|---|---|---|---|
+| TITAN | GMM | −0.004 | 169 | 69 : 100 | 0.021 |
+| TITAN | prevalence-matched | +0.039 | 133 | 69 : 64 | 0.73 |
+| TITAN | confident-only | +0.009 | 105 | 50 : 55 | 0.70 |
+| UNI mean | GMM | −0.047 | 169 | 55 : 114 | < 0.001 |
+| UNI mean | prevalence-matched | +0.003 | 133 | 61 : 72 | 0.39 |
+| UNI mean | confident-only | −0.028 | 105 | 44 : 61 | 0.12 |
+| CONCH mean | GMM | −0.030 | 169 | 61 : 108 | < 0.001 |
+| CONCH mean | prevalence-matched | +0.010 | 133 | 65 : 68 | 0.86 |
+| CONCH mean | confident-only | −0.000 | 105 | 43 : 62 | 0.08 |
+
+**Conclusion:** with a threshold that matches IHC prevalence, the PR preference disappears in all three encoders.
+The GMM threshold for PGR is too high (it calls many low-PGR IHC+ tumours RNA-negative). ER, by contrast, is
+robust to all three cut-off schemes (E4 above). ABMIL check with the prevalence-matched PGR label: Ada jobs 17660/17661.
+
+## R2: which ER-discordant cases drive "sides with RNA"
+
+| Encoder | IHC+/RNA− (n = 34) | IHC−/RNA+ (n = 20) | ER-low < 10% (n = 11) | 10–39% (n = 9) | ≥ 40% (n = 4) | % unknown (n = 30) |
+|---|---|---|---|---|---|---|
+| TITAN | 24 : 10 (p = 0.02) | 15 : 5 (p = 0.04) | 9 : 2 | 7 : 2 | 3 : 1 | 20 : 10 |
+| UNI mean | 21 : 13 | 13 : 7 | 9 : 2 | 6 : 3 | 1 : 3 | 18 : 12 |
+| CONCH mean | 22 : 12 | 13 : 7 | 9 : 2 | 7 : 2 | 1 : 3 | 18 : 12 |
+
+(RNA side : IHC side.) **ER-low tumours side with RNA in 9 of 11 cases in every encoder**, consistent with current
+guidelines that treat ER-low as biologically ER-negative. Both discordance directions lean to RNA; subgroups are small.
