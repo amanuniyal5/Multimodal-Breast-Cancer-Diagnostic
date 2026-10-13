@@ -103,3 +103,24 @@ Tier 3 (thumbnail overlay, discordant-case description), Tier 4 (frozen slides f
 
 **Note:** the attention-map `.npz` files (coords + weights) are only on Uniyal's Ada account, so the thumbnail overlay
 (Tier 3) is easiest from there.
+
+## 2026-10-14 (late night) · Srivastava (via Claude Code)
+
+**Correction to my previous entry:** UNI v1 access for my Hugging Face account was granted tonight (it previously had
+only UNI2-h); CONCH access is still pending. Token is on Ada (`~/.cache/huggingface/token`).
+
+**Results (Ada job 19989, fixed splits for TITAN/mean-pool, old folds for ABMIL):** files `results/stats_delong_1a.csv`,
+`results/stats_combined_1b.csv`, `results/er_discordant_summary.txt`.
+- 1a DeLong, ER RNA − IHC (n = 801): positive in all 5 variants, Δ +0.030 to +0.056, DeLong p ≤ 0.04; DeLong and bootstrap CIs agree.
+- 1b combined over 5 variants (one consensus call per patient, mean P over variants): ER 34:20 (p = 0.076; 66% of
+  individual calls side with RNA, cluster-bootstrap CI 54–76%); HER2 amplification 42:18 (p = 0.003); PR GMM IHC 116:53;
+  PR prevalence-matched 64:69 (p = 0.73). TITAN alone (39:15) is the strongest variant, so the pooled ER evidence is weaker.
+- ER-discordant patients: all 15 Basal IHC+/RNA− called ER−; all 9 LumA IHC−/RNA+ called ER+; Her2-enriched IHC+/RNA−
+  mostly called ER+ (8/11). The slide follows the intrinsic subtype.
+
+**Ada:** PyPI downloads from compute nodes stall for long periods (setup jobs 19985 timed out, 20011 failed, 19991 stalled).
+Overnight chain: `jobs/requeue_frozen.sh` → TRIDENT setup 20078 → UNI test on 3 slides 20079 → frozen extraction array
+20080 (6 tasks × 5 batches, 2 at a time). Old chain 20061/20076/20077 is on hold (superseded). DX UNI features rebuild: 19993.
+
+**Next open items:** check 20078–20080 and the seconds per slide; extraction-equivalence check vs TRACE on ~50 DX slides;
+write the Tier 2/3 numbers into `docs/baseline_report.md`; Tier 3 thumbnail overlay (needs Uniyal's attention `.npz`).

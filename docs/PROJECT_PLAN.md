@@ -81,7 +81,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] Ada access, venv, smoke test, storage plan (`docs/ADA.md`)
 - [x] UNI v1 and CONCH v1 patch features for 1,055 patients (`data/features/` on Ada)
 - [x] Fixed site-grouped splits `data/splits/folds.csv`; scikit-learn pinned
-- [~] Both members have Ada key access and can run `jobs/check_env.sbatch` under their own account (Srivastava, 2026-10-14)
+- [x] Both members have Ada key access and can run `jobs/check_env.sbatch` under their own account (Srivastava: job 19986)
 - [ ] Both members have UNI/CONCH access on Hugging Face (IIIT e-mail)
 
 **Exit gate:** labels, features and splits exist and are documented; both members can run jobs on Ada.
@@ -108,8 +108,8 @@ reference standards). We do **not** propose a new architecture.
 - [x] ER discordance breakdown (direction; ER-low vs higher % stained)
 - [x] Rerun all linear baselines on the fixed splits, one environment (Ada job 19737): all conclusions unchanged
 - [x] Update `docs/baseline_report.md` with the fixed-split numbers (Section 5b); ABMIL used the older folds
-- [~] DeLong test (paired AUC) alongside the bootstrap for headline 1a comparisons (Srivastava, 2026-10-14)
-- [~] Combined evidence across encoders for 1b (e.g. pooled binomial / sign consistency), clearly labelled (Srivastava, 2026-10-14)
+- [x] DeLong test (paired AUC) alongside the bootstrap for headline 1a comparisons (`scripts/stats_delong_1b.py`, `results/stats_delong_1a.csv`, job 19989; write-up in report pending)
+- [x] Combined evidence across encoders for 1b (e.g. pooled binomial / sign consistency), clearly labelled (`results/stats_combined_1b.csv`: ER consensus 34:20, p = 0.076; HER2 42:18, p = 0.003; write-up pending)
 - [x] Decide: rerun ABMIL on fixed splits? **No**: fixed-split linear numbers change no conclusion (revisit only for final tables)
 
 **Exit gate:** every headline number comes from the fixed splits (or is explicitly flagged), and has n, mean ± SD and a CI or p-value.
@@ -131,11 +131,11 @@ reference standards). We do **not** propose a new architecture.
 
 **Goal:** test whether slide location (frozen next to the sequenced tissue vs FFPE block) changes which truth is tracked, and how reproducible single-slide predictions are.
 
-- [ ] UNI weights downloaded on Ada (needs Hugging Face approval)
-- [~] Build GDC manifest of tumour TS/BS slides (1,517 slides, 430 GB) from `data/metadata/gdc_slides.csv` (Srivastava, 2026-10-14)
+- [~] UNI weights downloaded on Ada (needs Hugging Face approval) (Srivastava, 2026-10-14: access granted, token on Ada; first download in job 20079)
+- [x] Build GDC manifest of tumour TS/BS slides (1,517 slides, 430 GB) from `data/metadata/gdc_slides.csv` (`data/metadata/frozen_manifest.csv`: 1,516 slides, 373 pairs, 30 batches)
 - [~] Time one TS slide through TRIDENT + UNI on an RTX 2080 Ti; log seconds per slide (Srivastava, 2026-10-14)
 - [ ] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions)
-- [ ] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags
+- [~] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags (Srivastava, 2026-10-14: array 20080 queued)
 - [ ] Add % tumour cells per frozen slide (biospecimen table) as a covariate
 - [ ] **1c:** 2 × 2 (DX vs TS × IHC vs RNA) with mean-pool (ABMIL optional), fixed splits, interaction test
 - [ ] **1e:** TS vs BS agreement on 374 pairs: ICC of P(ER+), κ of calls, % flipped
