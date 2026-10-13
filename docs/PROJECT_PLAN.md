@@ -81,7 +81,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] Ada access, venv, smoke test, storage plan (`docs/ADA.md`)
 - [x] UNI v1 and CONCH v1 patch features for 1,055 patients (`data/features/` on Ada)
 - [x] Fixed site-grouped splits `data/splits/folds.csv`; scikit-learn pinned
-- [ ] Both members have Ada key access and can run `jobs/check_env.sbatch` under their own account
+- [~] Both members have Ada key access and can run `jobs/check_env.sbatch` under their own account (Srivastava, 2026-10-14)
 - [ ] Both members have UNI/CONCH access on Hugging Face (IIIT e-mail)
 
 **Exit gate:** labels, features and splits exist and are documented; both members can run jobs on Ada.
@@ -108,8 +108,8 @@ reference standards). We do **not** propose a new architecture.
 - [x] ER discordance breakdown (direction; ER-low vs higher % stained)
 - [x] Rerun all linear baselines on the fixed splits, one environment (Ada job 19737): all conclusions unchanged
 - [x] Update `docs/baseline_report.md` with the fixed-split numbers (Section 5b); ABMIL used the older folds
-- [ ] DeLong test (paired AUC) alongside the bootstrap for headline 1a comparisons
-- [ ] Combined evidence across encoders for 1b (e.g. pooled binomial / sign consistency), clearly labelled
+- [~] DeLong test (paired AUC) alongside the bootstrap for headline 1a comparisons (Srivastava, 2026-10-14)
+- [~] Combined evidence across encoders for 1b (e.g. pooled binomial / sign consistency), clearly labelled (Srivastava, 2026-10-14)
 - [x] Decide: rerun ABMIL on fixed splits? **No**: fixed-split linear numbers change no conclusion (revisit only for final tables)
 
 **Exit gate:** every headline number comes from the fixed splits (or is explicitly flagged), and has n, mean ± SD and a CI or p-value.
@@ -122,7 +122,7 @@ reference standards). We do **not** propose a new architecture.
 - [ ] Overlay heatmaps on slide thumbnails for ~6 example patients (download those DX slides) to confirm attention sits on tumour
 - [ ] Review the heatmaps: do ER-low cases look like ER-negative morphology?
 - [x] Attention statistics by group (entropy, fraction of patches holding 50% of attention; report Section 5c)
-- [ ] Describe discordant patients: PAM50, ER % stained, grade/histology (from the clinical table)
+- [~] Describe discordant patients: PAM50, ER % stained, grade/histology (from the clinical table) (Srivastava, 2026-10-14)
 - [ ] ER-low analysis written up as an exploratory lead (n = 11)
 
 **Exit gate:** a short, evidence-backed explanation section in the report, with 3–4 example heatmaps.
