@@ -83,3 +83,23 @@ tier → mark it `[~] in progress (Name, date)` and push → tick it `[x]` and l
 
 **Next open items:** Tier 0 (Ada + Hugging Face access for both), Tier 2 (DeLong test, combined 1b evidence),
 Tier 3 (thumbnail overlay, discordant-case description), Tier 4 (frozen slides for 1c/1e).
+
+## 2026-10-14 (night) · Srivastava (via Claude Code)
+
+**Did (in progress, results tomorrow):**
+- Ada access under `aman.srivastava` works (smoke test job 19986, RTX 2080 Ti). Own venv in `~/venvs/whichtruth`
+  (a fresh install took ~1 h on the NFS home; `jobs/setup_env.sbatch` now has 3 h, pip retries, skips torch if present).
+- Tier 2: `scripts/stats_delong_1b.py` (DeLong for 1a with different reference labels on the same patients, checked
+  against the classic DeLong; combined 1b evidence at patient level across variants) and `scripts/titan_oof.py`
+  (TITAN out-of-fold predictions on the fixed splits). Ada job 19989. TITAN reproduces the 1b counts exactly (ER 39:15).
+- Tier 3: `scripts/describe_discordant.py` (PAM50 / ER % / histology of the 54 ER-discordant patients vs model calls).
+  First look (4 variants): all 15 Basal IHC+/RNA− called ER−, all 9 LumA IHC−/RNA+ called ER+, Her2-enriched mostly follow IHC.
+- Tier 4 prep: `data/metadata/frozen_manifest.csv` (`scripts/make_frozen_manifest.py`: 1,516 TS/BS slides, 429 GB,
+  373 TS+BS pairs, 30 batches of ~15 GB); `scripts/extract_frozen.py` + `jobs/extract_frozen.sbatch` (GDC download →
+  TRIDENT → per-slide mean + capped bag, raw slide deleted). TRIDENT install job 19991; timing test with a random-weight
+  ViT-L (same architecture as UNI) job 20061; DX UNI features rebuilt under my account (job 19993).
+
+**Blocked on:** UNI access on Hugging Face for my account (requested by me, not yet approved / logged in on Ada).
+
+**Note:** the attention-map `.npz` files (coords + weights) are only on Uniyal's Ada account, so the thumbnail overlay
+(Tier 3) is easiest from there.
