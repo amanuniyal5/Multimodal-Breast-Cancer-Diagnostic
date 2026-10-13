@@ -13,9 +13,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import binomtest
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import StratifiedGroupKFold, cross_val_predict
+from sklearn.model_selection import cross_val_predict
 
-from common import linear_probe, load_titan
+from common import linear_probe, load_titan, site_folds
 
 warnings.filterwarnings("ignore")
 ap = argparse.ArgumentParser()
@@ -31,10 +31,10 @@ L = pd.read_csv(a.labels, index_col=0)
 def paired(lab_a, lab_b, name):
     d = L[[lab_a, lab_b, "site"]].dropna().join(E, how="inner")
     X, g = d[E.columns].values, d.site.values
-    cv = StratifiedGroupKFold(5, shuffle=True, random_state=1)
+    cv = site_folds(d.index, 0)  # fixed site-grouped folds (data/splits)
     ya, yb = d[lab_a].astype(int).values, d[lab_b].astype(int).values
-    pa = cross_val_predict(linear_probe(), X, ya, cv=cv, groups=g, method="predict_proba")[:, 1]
-    pb = cross_val_predict(linear_probe(), X, yb, cv=cv, groups=g, method="predict_proba")[:, 1]
+    pa = cross_val_predict(linear_probe(), X, ya, cv=cv, method="predict_proba")[:, 1]
+    pb = cross_val_predict(linear_probe(), X, yb, cv=cv, method="predict_proba")[:, 1]
     r = np.random.default_rng(0)
     diffs = []
     for _ in range(2000):

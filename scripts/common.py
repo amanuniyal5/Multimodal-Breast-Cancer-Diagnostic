@@ -16,6 +16,18 @@ def load_titan(path):
     return pd.DataFrame(X, index=t.case_submitter_id).groupby(level=0).mean()
 
 
+_FOLDS = {}
+
+
+def site_folds(patients, seed, path="data/splits/folds.csv"):
+    """Fixed site-grouped folds (scripts/make_splits.py) for an ordered list of patients.
+    Returns [(train_idx, test_idx), ...] as positional indices, identical on every machine and library version."""
+    if path not in _FOLDS:
+        _FOLDS[path] = pd.read_csv(path, index_col="patient")
+    f = _FOLDS[path].loc[list(patients), f"fold_s{seed}"].to_numpy()
+    return [(np.where(f != k)[0], np.where(f == k)[0]) for k in sorted(set(f))]
+
+
 def linear_probe():
     return make_pipeline(StandardScaler(),
                          LogisticRegression(C=0.01, max_iter=3000, class_weight="balanced"))

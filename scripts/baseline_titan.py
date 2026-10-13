@@ -17,11 +17,11 @@ import pandas as pd
 from scipy.stats import binomtest
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold, cross_val_predict
+from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import OneHotEncoder
 
-from common import bootstrap_auc_ci, linear_probe, load_titan
+from common import bootstrap_auc_ci, linear_probe, load_titan, site_folds
 
 warnings.filterwarnings("ignore")
 ap = argparse.ArgumentParser()
@@ -44,8 +44,8 @@ for task in tasks:
     y, X, g = d[task].astype(int).values, d[E.columns].values, d.site.values
     row = {"task": task, "n": len(y), "pos": int(y.sum())}
     for name, cv in [("random", StratifiedKFold(5, shuffle=True, random_state=0)),
-                     ("site", StratifiedGroupKFold(5, shuffle=True, random_state=0))]:
-        p = cross_val_predict(linear_probe(), X, y, cv=cv, groups=g if name == "site" else None,
+                     ("site", site_folds(d.index, 0))]:  # fixed site-grouped folds (data/splits)
+        p = cross_val_predict(linear_probe(), X, y, cv=cv,
                               method="predict_proba")[:, 1]
         lo, hi = bootstrap_auc_ci(y, p)
         row[f"AUC_{name}"] = round(roc_auc_score(y, p), 3)

@@ -21,9 +21,10 @@ from scipy.stats import binomtest
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.mixture import GaussianMixture
-from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+
+from common import site_folds
 
 warnings.filterwarnings("ignore")
 ap = argparse.ArgumentParser()
@@ -150,7 +151,7 @@ def fit_predict(model, tr, te, y_tr, seed):
 def oof(cols, model, seed, require=()):
     d = L[cols + list(require) + ["site"]].dropna()
     pts, g = d.index.to_numpy(), d.site.values
-    folds = list(StratifiedGroupKFold(5, shuffle=True, random_state=seed).split(pts, d[cols[0]].astype(int), g))
+    folds = site_folds(pts, seed)  # fixed site-grouped folds (data/splits)
     out = {col: np.zeros(len(d)) for col in cols}
     for tr, te in folds:
         for col in cols:

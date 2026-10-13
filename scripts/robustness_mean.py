@@ -16,9 +16,9 @@ import pandas as pd
 from scipy.stats import binomtest
 from sklearn.metrics import roc_auc_score
 from sklearn.mixture import GaussianMixture
-from sklearn.model_selection import StratifiedGroupKFold, cross_val_predict
+from sklearn.model_selection import cross_val_predict
 
-from common import linear_probe, load_titan
+from common import linear_probe, load_titan, site_folds
 
 warnings.filterwarnings("ignore")
 ap = argparse.ArgumentParser()
@@ -56,7 +56,7 @@ for enc, E in ENC.items():
         X = d[E.columns].values
         deltas, base = [], []
         for s in range(a.seeds):
-            folds = list(StratifiedGroupKFold(5, shuffle=True, random_state=s).split(X, d.PR_IHC.astype(int), d.site))
+            folds = site_folds(d.index, s)  # fixed site-grouped folds (data/splits)
             pi = cross_val_predict(linear_probe(), X, d.PR_IHC.astype(int), cv=folds, method="predict_proba")[:, 1]
             pm = cross_val_predict(linear_probe(), X, d[mol].astype(int), cv=folds, method="predict_proba")[:, 1]
             ai, am = roc_auc_score(d.PR_IHC.astype(int), pi), roc_auc_score(d[mol].astype(int), pm)

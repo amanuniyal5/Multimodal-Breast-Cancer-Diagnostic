@@ -17,9 +17,9 @@ import pandas as pd
 from scipy.stats import binomtest
 from sklearn.metrics import roc_auc_score
 from sklearn.mixture import GaussianMixture
-from sklearn.model_selection import StratifiedGroupKFold, cross_val_predict
+from sklearn.model_selection import cross_val_predict
 
-from common import linear_probe, load_titan
+from common import linear_probe, load_titan, site_folds
 
 warnings.filterwarnings("ignore")
 ap = argparse.ArgumentParser()
@@ -66,8 +66,7 @@ def oof(cols, seed):
     d = L[cols + ["site"]].dropna().join(E, how="inner")
     X, g = d[E.columns].values, d.site.values
     ref = d[cols[0]].astype(int).values
-    cv = StratifiedGroupKFold(5, shuffle=True, random_state=seed)
-    folds = list(cv.split(X, ref, g))
+    folds = site_folds(d.index, seed)  # fixed site-grouped folds (data/splits)
     out = {}
     for col in cols:
         y = d[col].astype(int).values
@@ -147,8 +146,7 @@ for col in ["HER2low_1plus", "HER2_0_vs_low"]:
     d = L[[col, "ERBB2_log2", "site"]].dropna().join(E, how="inner")
     y = d[col].astype(int).values
     he = [roc_auc_score(y, cross_val_predict(linear_probe(), d[E.columns].values, y,
-                                             cv=StratifiedGroupKFold(5, shuffle=True, random_state=s),
-                                             groups=d.site.values, method="predict_proba")[:, 1]) for s in SEEDS]
+                                             cv=site_folds(d.index, s), method="predict_proba")[:, 1]) for s in SEEDS]
     rna = roc_auc_score(y, d.ERBB2_log2)
     rows.append({"exp": "E5 1d", "label": col, "n": len(d), "pos": int(y.sum()), "AUC_HE_mean": np.mean(he),
                  "AUC_HE_sd": np.std(he), "AUC_ERBB2_mRNA": rna})
