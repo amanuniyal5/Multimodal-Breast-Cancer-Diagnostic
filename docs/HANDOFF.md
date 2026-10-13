@@ -1,7 +1,8 @@
 # Handoff: full context up to 12 Oct 2026
 
-Written for Aman Srivastava (and his Claude Code) so nothing from the planning sessions is lost.
-Update the "Current state" and "Next actions" sections whenever you hand work back.
+Written so either of us (and our Claude Code sessions) has the full context from the planning sessions.
+There are no fixed owners: whoever is working picks the next open item in `docs/PROJECT_PLAN.md`.
+Update the "Current state" section whenever you finish something.
 
 ---
 
@@ -57,13 +58,8 @@ Update the "Current state" and "Next actions" sections whenever you hand work ba
 
 ## 4. Next actions (see PROJECT_PLAN.md for the full week plan)
 
-| Owner (proposed) | Task |
-|---|---|
-| Uniyal | 1a / 1b / 1d on DX slides: ABMIL on UNI features, repeated site-grouped CV, cut-off sensitivity |
-| Srivastava | Frozen-slide pipeline on Ada (GDC manifest → TRIDENT + UNI), then 1c and 1e; shared statistics code |
-| Both | Request UNI/CONCH access today; agree on split files (`data/splits/`, to be created once) |
-
-Ownership is a proposal: confirm or change it in `comms/LOG.md`.
+No fixed owners. The authoritative to-do list, with checkboxes and the order to work in, is **`docs/PROJECT_PLAN.md`**
+(tiers 0–7). Before starting an item, mark it `[~] in progress (Name, date)` and push; see section 0.6 of the plan.
 
 ## 5. Gotchas learned the hard way
 

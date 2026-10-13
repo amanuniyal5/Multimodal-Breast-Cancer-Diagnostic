@@ -73,3 +73,13 @@ Details: `docs/baseline_report.md` Sections 5b and 5c.
 **Next:** Tier 2 (DeLong, combined 1b evidence), Tier 3 (thumbnail overlay), Tier 4 frozen slides.
 
 **Ask for Srivastava:** take Tier 4 (frozen slides, 1c/1e) and the DeLong / combined-evidence items in Tier 2.
+
+## 2026-10-13 (night) · Uniyal (via Claude Code)
+
+**Did:** removed all task assignments from the docs. **There are no fixed owners**: either of us does whatever is
+needed next. Earlier "Ask for Srivastava" items in this log are withdrawn as assignments.
+How it works now (`docs/PROJECT_PLAN.md` section 0.6): `git pull` → pick the first open item in the lowest unfinished
+tier → mark it `[~] in progress (Name, date)` and push → tick it `[x]` and log the result when done.
+
+**Next open items:** Tier 0 (Ada + Hugging Face access for both), Tier 2 (DeLong test, combined 1b evidence),
+Tier 3 (thumbnail overlay, discordant-case description), Tier 4 (frozen slides for 1c/1e).

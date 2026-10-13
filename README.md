@@ -66,7 +66,7 @@ CLAUDE.md               rules + context for Claude Code sessions working in this
 requirements.txt
 docs/
   HANDOFF.md            full context to date: history, decisions, what is done, what is next
-  PROJECT_PLAN.md       experiments, pipeline, timeline, owners, compute budget
+  PROJECT_PLAN.md       tiered plan with checklists and guardrails (no fixed owners): what to do next
   DATASET.md            dataset study: sources, label counts, discordance, slides, feasibility
   PIPELINE_AND_MODELS.md  foundation-model choice and step-by-step pipeline (Ada + laptop)
   baseline_report.md    consolidated baseline report: all encoders, ABMIL, sanity checks, interpretation
