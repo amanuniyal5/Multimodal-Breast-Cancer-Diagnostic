@@ -59,7 +59,7 @@ def influence(y, p):
     pos, neg = p[y == 1], p[y == 0]
     m, n = len(pos), len(neg)
     cmp = (pos[:, None] > neg[None, :]) + 0.5 * (pos[:, None] == neg[None, :])
-    v10, v01 = cmp.mean(1), cmp.mean(0)  # placement values
+    v10, v01 = cmp.mean(axis=1), cmp.mean(0)  # placement values
     auc = v10.mean()
     z = np.empty(len(y))
     z[y == 1] = (v10 - auc) / np.sqrt(m * (m - 1))
@@ -83,7 +83,7 @@ def classic_delong(y, p1, p2):
     for p in (p1, p2):
         pos, neg = p[y == 1], p[y == 0]
         c = (pos[:, None] > neg[None, :]) + 0.5 * (pos[:, None] == neg[None, :])
-        v10.append(c.mean(1)), v01.append(c.mean(0)), aucs.append(c.mean())
+        v10.append(c.mean(axis=1)), v01.append(c.mean(0)), aucs.append(c.mean())
     s10, s01 = np.cov(np.vstack(v10)), np.cov(np.vstack(v01))
     m, n = (y == 1).sum(), (y == 0).sum()
     s = s10 / m + s01 / n
@@ -140,7 +140,7 @@ for cut, variants, comps in [("GMM", VARIANTS, COMPARISONS),
             yr, ya = y[ref].loc[pts].values.astype(int), y[alt].loc[pts].values.astype(int)
             seeds = sorted(set(w[ref].columns) & set(w[alt].columns))
             per = [delong_paired(yr, w[ref].loc[pts, s].values, ya, w[alt].loc[pts, s].values) for s in seeds]
-            pr, pa = w[ref].loc[pts].mean(1).values, w[alt].loc[pts].mean(1).values
+            pr, pa = w[ref].loc[pts].mean(axis=1).values, w[alt].loc[pts].mean(axis=1).values
             a_ref, a_alt, delta, se, p = delong_paired(yr, pr, ya, pa)
             bs = []
             for _ in range(a.boot):
@@ -183,7 +183,7 @@ for cut, variants, pairs in [("GMM", VARIANTS, PAIRS_1B), ("PR prevalence-matche
         n, V = len(P), P.shape[1]
         side = (P.ge(0.5).astype(int).values == y.values[:, None])  # True = sides with the molecular label
         per_variant = side.sum(0)
-        cons = int(((P.mean(1) >= 0.5).astype(int) == y).sum())
+        cons = int(((P.mean(axis=1) >= 0.5).astype(int) == y).sum())
         maj = int((side.sum(1) > V / 2).sum())
         ties = int((side.sum(1) == V / 2).sum())
         all_mol, all_ihc = int(side.all(1).sum()), int((~side).all(1).sum())
@@ -209,7 +209,7 @@ for cut, variants, pairs in [("GMM", VARIANTS, PAIRS_1B), ("PR prevalence-matche
             low = L.loc[P.index, "ER_pct_IHC"].astype(str).str.contains("<10%") & (ihc == 1)
             for name, msk in [("IHC+/RNA-", ihc == 1), ("IHC-/RNA+", ihc == 0), ("ER-low (IHC+, <10%)", low)]:
                 msk = msk.values
-                c = int(((P.mean(1) >= 0.5).astype(int) == y).values[msk].sum())
+                c = int(((P.mean(axis=1) >= 0.5).astype(int) == y).values[msk].sum())
                 k = int(msk.sum())
                 rows.append({"cutoff": cut, "pair": f"{pair} | {name}", "n_discordant": k, "n_variants": V,
                              **{f"mol_{v}": int(s) for v, s in zip(P.columns, side[msk].sum(0))},
@@ -217,7 +217,7 @@ for cut, variants, pairs in [("GMM", VARIANTS, PAIRS_1B), ("PR prevalence-matche
                              "frac_calls_mol": side[msk].mean() if k else np.nan})
                 print(f"   {name:20s} n={k:3d} consensus {c}:{k - c}", flush=True)
             pat_rows.append(P.assign(y_molecular=y, n_variants_molecular=side.sum(1),
-                                     consensus_p=P.mean(1)).reset_index().rename(columns={"index": "patient"}))
+                                     consensus_p=P.mean(axis=1)).reset_index().rename(columns={"index": "patient"}))
 pd.DataFrame(rows).to_csv(os.path.join(a.results, "stats_combined_1b.csv"), index=False)
 if pat_rows:
     pd.concat(pat_rows).to_csv(os.path.join(a.results, "stats_combined_1b_patients.csv"), index=False)
