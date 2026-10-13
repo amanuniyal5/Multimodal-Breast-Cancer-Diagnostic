@@ -95,11 +95,11 @@ reference standards). We do **not** propose a new architecture.
 - [x] RNA cut-off sensitivity for ER and PR (GMM / prevalence-matched / confident-only) — U
 - [x] PR prevalence-matched ABMIL re-check (UNI, CONCH): PR preference is a cut-off artefact — U
 - [x] ER discordance breakdown (direction; ER-low vs higher % stained) — U
-- [ ] Rerun all linear baselines on the fixed splits, one environment (Ada job `rerun_linear`) — U *(running)*
-- [ ] Update `docs/baseline_report.md` with the fixed-split numbers; note that ABMIL used the older folds — U
+- [x] Rerun all linear baselines on the fixed splits, one environment (Ada job 19737): all conclusions unchanged — U
+- [x] Update `docs/baseline_report.md` with the fixed-split numbers (Section 5b); ABMIL used the older folds — U
 - [ ] DeLong test (paired AUC) alongside the bootstrap for headline 1a comparisons — S
 - [ ] Combined evidence across encoders for 1b (e.g. pooled binomial / sign consistency), clearly labelled — S
-- [ ] Decide: rerun ABMIL on fixed splits? *(only if the fixed-split linear numbers change any conclusion)* — U/S
+- [x] Decide: rerun ABMIL on fixed splits? **No**: fixed-split linear numbers change no conclusion (revisit only for final tables) — U/S
 
 **Exit gate:** every headline number comes from the fixed splits (or is explicitly flagged), and has n, mean ± SD and a CI or p-value.
 
@@ -107,9 +107,10 @@ reference standards). We do **not** propose a new architecture.
 
 **Goal:** explain why the slide follows RNA for ER (and amplification for HER2).
 
-- [ ] ABMIL attention heatmaps for ER-discordant and ER-low patients plus concordant references (Ada job `attention`) — U *(running)*
-- [ ] Review the heatmaps: does attention sit on tumour regions? Do ER-low cases look like ER-negative morphology? — U/S
-- [ ] Attention statistics by group (entropy, fraction of patches holding 50% of attention) — U
+- [x] ABMIL attention heatmaps for 54 ER-discordant + 10 reference patients (Ada job 19722; `results/attention/`) — U
+- [ ] Overlay heatmaps on slide thumbnails for ~6 example patients (download those DX slides) to confirm attention sits on tumour — U/S
+- [ ] Review the heatmaps: do ER-low cases look like ER-negative morphology? — U/S
+- [x] Attention statistics by group (entropy, fraction of patches holding 50% of attention; report Section 5c) — U
 - [ ] Describe discordant patients: PAM50, ER % stained, grade/histology (from the clinical table) — S
 - [ ] ER-low analysis written up as an exploratory lead (n = 11) — U/S
 
@@ -163,8 +164,8 @@ reference standards). We do **not** propose a new architecture.
 |---|---|---|
 | 0 Foundations | Done except S access items | S Ada access, HF access |
 | 1 Core baselines | Done | — |
-| 2 Robustness | In progress | `rerun_linear` job; DeLong; report update |
-| 3 Interpretation | In progress | `attention` job; heatmap review |
+| 2 Robustness | Nearly done | DeLong test; combined 1b evidence |
+| 3 Interpretation | In progress | Thumbnail overlay; heatmap review; discordant-case description |
 | 4 Frozen slides | Not started | UNI weights on Ada |
 | 5 Consolidation | Not started | Tiers 2–4 |
 | 6 Optional | Not started | Tiers 0–5 |

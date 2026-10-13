@@ -1,0 +1,6 @@
+1a ER: n=989 | AUC ER_IHC=0.884 ESR1_RNApos=0.937 delta=+0.053 95%CI [+0.031, +0.078]
+1a PR: n=986 | AUC PR_IHC=0.805 PGR_RNApos=0.800 delta=-0.006 95%CI [-0.038, +0.025]
+1a HER2: n=568 | AUC HER2_STRICT=0.686 ERBB2_AMP=0.708 delta=+0.022 95%CI [-0.040, +0.082]
+1b all: n=54 sides with RNA 39, IHC 15, p=0.0015
+1b |ESR1-cut|>0.5: n=45 sides with RNA 36, IHC 9, p=6.57e-05
+1b |ESR1-cut|>1.0: n=44 sides with RNA 35, IHC 9, p=0.000106

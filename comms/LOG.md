@@ -56,3 +56,20 @@ StratifiedGroupKFold splits for the same seed.
 frozen-slide pipeline for 1c/1e (needs UNI weights).
 
 **Ask for Srivastava:** read `docs/baseline_report.md`; please take the frozen-slide extraction (1c/1e) on your Ada account.
+
+## 2026-10-13 (evening) · Uniyal (via Claude Code)
+
+**Did:**
+- Fixed, library-independent site-grouped splits `data/splits/folds.csv` (`scripts/make_splits.py`); all scripts
+  read them via `common.site_folds()`; scikit-learn pinned to 1.9.1.
+- Reran every linear baseline on Ada with the fixed splits (job 19737).
+- ABMIL attention maps for 54 ER-discordant + 10 reference patients (job 19722, `results/attention/`).
+- Rewrote `docs/PROJECT_PLAN.md` as a tiered plan with checklists and guardrails. **Please read it; it is now the plan.**
+
+**Results:** fixed splits reproduce every conclusion (TITAN ER Δ +0.058, CI +0.031 to +0.084). Attention model sides
+with RNA in 35/54 discordant and 8/10 ER-low (the 2 exceptions are HER2-enriched); P(ER+) tracks ESR1 (r = 0.52).
+Details: `docs/baseline_report.md` Sections 5b and 5c.
+
+**Next:** Tier 2 (DeLong, combined 1b evidence), Tier 3 (thumbnail overlay), Tier 4 frozen slides.
+
+**Ask for Srivastava:** take Tier 4 (frozen slides, 1c/1e) and the DeLong / combined-evidence items in Tier 2.

@@ -157,16 +157,67 @@ With random (not site-grouped) folds, TITAN scored 0.633 on 0 vs 1+: that appare
 6. **HER2-low is invisible in H&E** under proper evaluation; random cross-validation would have suggested otherwise.
 7. **ABMIL ≈ mean-pool.** Attention pooling does not change the conclusions, which shows the label effect is not tied to the classifier.
 
+## 5b. Fixed-split rerun (13 Oct 2026): S6 resolved
+
+All linear baselines were rerun on Ada in one environment (scikit-learn 1.9.1) using the new **fixed, library-independent,
+site-grouped splits** `data/splits/folds.csv` (`scripts/make_splits.py`; every fold has ≥ 10 patients of each class for
+every task, including HER2-low). Job 19737, 5 seeds. ABMIL results above used the earlier folds and were not rerun,
+because the fixed-split linear results change no conclusion.
+
+| Result | Before (old folds) | Fixed splits |
+|---|---|---|
+| TITAN 1a ER Δ RNA − IHC (n = 801) | +0.055 (CI +0.034, +0.088) | **+0.058** (CI +0.031, +0.084) |
+| TITAN 1a ER Δ, prevalence-matched / confident-only cut-off | +0.051 / +0.054 | **+0.052 / +0.059** |
+| TITAN paired ER (n = 989) | 0.882 → 0.930 | **0.884 → 0.937** (CI +0.031, +0.078) |
+| UNI mean 1a ER Δ | +0.035 | **+0.037** |
+| CONCH mean 1a ER Δ | +0.031 | **+0.030** |
+| PR Δ, prevalence-matched (TITAN / UNI / CONCH mean) | +0.039 / +0.003 / +0.010 | **+0.033 / −0.008 / +0.010** |
+| HER2 Δ amp − clinical (TITAN / UNI / CONCH mean) | +0.041 / +0.052 / +0.085 | **+0.044 / +0.071 / +0.073** |
+| HER2 0 vs 1+ (TITAN / UNI / CONCH mean) | 0.46 / 0.47 / 0.51 | **0.45 / 0.50 / 0.51** |
+| Shuffled control (TITAN / UNI / CONCH mean) | 0.46 / 0.51 / 0.49 | **0.46 / 0.51 / 0.50** |
+| 1b counts (no CV involved) | | **identical** (ER 39/34/35 of 54; PR prevalence-matched 69/61/65 of 133; HER2 35/44/39 of 60) |
+
+Files: `results/extended_titan.csv`, `results/robustness_mean.csv`, `results/baseline_results.csv`,
+`results/paired_ihc_vs_rna.txt`, `results/mil_{uni,conch}_v1_20x_fixedsplits_summary.csv`.
+
+## 5c. ABMIL attention maps for ER-discordant and ER-low patients (exploratory)
+
+`scripts/attention_maps.py`, Ada job 19722 (1 h 42 min). ER ABMIL on UNI features was trained on ER-concordant patients
+(3 seeds), holding out 10 concordant references (5 ER+, 5 ER−). For each of the 54 discordant patients and the 10 references,
+the full set of patches (median ~13,000) was scored and the attention weights averaged over seeds.
+Outputs: `results/attention/summary.csv`, one heatmap per patient (`results/attention/<patient>.png`) and
+`results/attention/overview.png` (ER-low patients first). Colour = attention percentile within the patient.
+
+| Group | n | Mean P(ER+) | Attention entropy (normalised) | Fraction of patches holding 50% of attention |
+|---|---|---|---|---|
+| Reference ER+ (concordant) | 5 | 0.83 | 0.82 | 6.9% |
+| Reference ER− (concordant) | 5 | 0.22 | 0.85 | 7.4% |
+| Discordant IHC+/RNA− | 34 | 0.40 | 0.81 | 7.1% |
+| Discordant IHC−/RNA+ | 20 | 0.69 | 0.79 | 4.7% |
+
+- **References:** 8 of 10 classified correctly (sanity check of the trained model).
+- **Discordant:** sides with RNA in **35 of 54** (IHC+/RNA−: 21 of 34; IHC−/RNA+: 14 of 20), matching the 1b results.
+- **ER-low (IHC+, < 10% stained):** sides with RNA in **8 of 10**. (The robustness table in 4.2 counts 11 because it also includes one IHC-negative
+  patient whose record says < 10%; here ER-low requires IHC-positive.) The two
+  exceptions (TCGA-3C-AALI, TCGA-AR-A0TX) are both PAM50 **HER2-enriched**; all six Basal-like ER-low tumours are called ER−.
+- **P(ER+) tracks ESR1 expression** among discordant patients (r = 0.52): the model's output is graded with the tumour's
+  ESR1 level, not just a binary flip.
+- **Where attention goes:** visually it concentrates on dense, nodular central regions, with low attention on tissue edges
+  and sparse areas. That is consistent with tumour regions, but it is **not yet verified against the H&E images** (the maps show
+  patch positions only). Attention is moderately focused (about 5–7% of patches carry half of the attention) and similar across
+  groups, so the model does not behave differently on discordant cases; it simply reads them as the molecular class.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |
 |---|---|
-| Fold assignment depends on the scikit-learn version (S6) | Generate fixed splits once (`data/splits/`), use everywhere, pin scikit-learn; rerun TITAN with the shared splits |
+| ~~Fold assignment depends on the scikit-learn version (S6)~~ | **Done:** fixed splits in `data/splits/folds.csv`, scikit-learn pinned, linear baselines rerun (Section 5b) |
+| Attention maps show patch positions, not tissue | Overlay on slide thumbnails (download a few DX slides) to confirm attention on tumour |
 | Small discordant groups (ER 54, HER2 60, ER-low 11) | Report exact counts; consider pooling encoders with a combined test; avoid over-claiming subgroups |
 | HER2 significance encoder-dependent | Report all variants; add DeLong tests over seeds |
 | CONCH mean-pool numbers on slide 4 are from the laptop run | Update slides with the Ada values (conclusions unchanged); change the PR bullet to "no reliable preference" |
 | 1c and 1e not yet run | Get UNI weights; encode 1,517 frozen TS/BS slides on Ada (TRIDENT + UNI) |
-| No attention analysis yet | ABMIL attention heatmaps on ER-discordant and ER-low patients |
+| Attention analysis is exploratory (n = 10 ER-low) | Report as a lead; describe discordant cases by PAM50 / grade in the final report |
 
 ## 7. Files and how to reproduce
 
