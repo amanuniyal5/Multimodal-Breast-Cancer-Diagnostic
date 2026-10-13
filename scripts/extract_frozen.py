@@ -17,6 +17,7 @@ Usage: python scripts/extract_frozen.py --manifest data/metadata/frozen_manifest
 import argparse
 import os
 import shutil
+import sys
 import time
 
 import h5py
@@ -156,3 +157,5 @@ if ok:
     tot = pd.DataFrame(ok)[["t_download", "t_segment", "t_patch", "t_encode"]]
     log(f"done: {len(ok)}/{len(rows)} ok; mean seconds per slide " +
         ", ".join(f"{k[2:]} {v:.0f}" for k, v in tot.mean().items()) + f"; total {tot.sum(1).mean():.0f}")
+if rows and not ok:
+    sys.exit("no slide succeeded")  # non-zero exit, so dependent jobs (afterok) do not start
