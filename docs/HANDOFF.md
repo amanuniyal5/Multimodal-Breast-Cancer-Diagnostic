@@ -1,4 +1,4 @@
-# Handoff: full context up to 12 Oct 2026
+# Handoff: full context (last updated 13 Oct 2026)
 
 Written so either of us (and our Claude Code sessions) has the full context from the planning sessions.
 There are no fixed owners: whoever is working picks the next open item in `docs/PROJECT_PLAN.md`.
@@ -37,26 +37,26 @@ Update the "Current state" section whenever you finish something.
 | Avoid Phikon / CTransPath / Kaiko as main encoders | Their pretraining included TCGA slides (leakage) |
 | **Site-grouped CV everywhere** (group = tissue source site, barcode chars 6–7) | Embeddings identify the site 82% of the time; HER2-low signal is site leakage |
 | Strict HER2 label (IHC 3+ or FISH+ = pos; 0/1+ or 2+/FISH− = neg) | TCGA `her2_status_by_ihc = Positive` includes 11 IHC 1+ and 27 IHC 2+ cases |
-| RNA labels = 2-component Gaussian mixture on log2(RSEM+1) | Data-driven cut-off (ESR1 10.17, PGR 8.58, ERBB2 15.14); sensitivity analysis still to do |
+| RNA labels = 2-component Gaussian mixture on log2(RSEM+1) | Data-driven cut-off (ESR1 10.17, PGR 8.58, ERBB2 15.14); every claim must also hold with prevalence-matched and confident-only cut-offs (the PR result did not) |
+| Fixed splits `data/splits/folds.csv` for every experiment; scikit-learn pinned to 1.9.1 | scikit-learn 1.5 vs 1.9 produced different folds from the same seed; fixed splits make runs identical on any machine |
 | Encoder stays **frozen**; we train heads (ABMIL, logistic regression) | Standard for this kind of study; compute fits Ada |
 | Use TRACE precomputed features for DX slides; extract frozen slides ourselves | TRACE covers DX only (verified); avoids downloading 1.16 TB of DX slides |
 | Do **not** re-extract all DX slides for 1c | Instead check our extraction matches TRACE on ~50 DX slides |
 
-## 3. Current state (12 Oct 2026)
+## 3. Current state (13 Oct 2026)
 
-**Done**
-- [x] Metadata pipeline: `scripts/fetch_metadata.py`, `scripts/build_labels.py` (reproduced from a clean run)
-- [x] Dataset study and feasibility check for all five experiments → [`DATASET.md`](DATASET.md)
-- [x] Baselines B0–B6 on TITAN slide embeddings → [`BASELINE_RESULTS.md`](BASELINE_RESULTS.md)
-- [x] Project-update deck (5 Beamer slides) → [`../slides/project_update_slides.tex`](../slides/project_update_slides.tex)
+The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a summary.
 
-**Not started**
-- [ ] UNI / CONCH weight access on Hugging Face (both of us, with IIIT e-mails; Gmail is refused)
-- [ ] Download TRACE UNI v1 20× features (62 GB) to Ada and regroup into per-slide bags
-- [ ] ABMIL training code
-- [ ] Frozen-slide (TS/BS) download + TRIDENT/UNI extraction on Ada (1c, 1e)
+- **Done:** Tier 0 (data, labels, splits, Ada setup, UNI/CONCH features), Tier 1 (1a/1b/1d with TITAN, UNI, CONCH,
+  mean-pool and ABMIL; sanity checks), most of Tier 2 (cut-off robustness, PR re-check, fixed-split rerun), and the
+  attention maps from Tier 3. Results: [`baseline_report.md`](baseline_report.md).
+- **Main findings so far:** ER, the slide tracks RNA over IHC (+0.03 to +0.06 AUC, all models; sides with RNA 34–39/54);
+  HER2, tracks amplification; PR, no preference (earlier result was a cut-off artefact); HER2-low, invisible in H&E.
+- **Open:** Tier 0 access items (both members on Ada + Hugging Face), Tier 2 statistics (DeLong, combined 1b evidence),
+  Tier 3 (thumbnail overlay, discordant-case description), Tier 4 frozen slides (1c, 1e), Tiers 5 and 7.
+- **Slides:** `slides/project_update_slides.tex` still needs the PR bullet changed to "no reliable preference".
 
-## 4. Next actions (see PROJECT_PLAN.md for the full week plan)
+## 4. Next actions
 
 No fixed owners. The authoritative to-do list, with checkboxes and the order to work in, is **`docs/PROJECT_PLAN.md`**
 (tiers 0–7). Before starting an item, mark it `[~] in progress (Name, date)` and push; see section 0.6 of the plan.
