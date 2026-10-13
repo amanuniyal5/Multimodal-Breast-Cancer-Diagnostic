@@ -39,3 +39,20 @@ ran the smoke test `jobs/check_env.sbatch` (job 17358, gnode043). Wrote `docs/AD
 
 **Ask for Srivastava:** your Ada account has its own 40 CPU / 4 GPU quota, so the frozen-slide extraction
 (1c/1e) is probably best run under your account. `docs/ADA.md` has the job template and the key-setup steps.
+
+## 2026-10-13 · Uniyal (via Claude Code)
+
+**Did:** all Ada baseline jobs finished (17536 UNI mean+ABMIL, 17537 CONCH mean+ABMIL, 17660/17661 PR
+prevalence-matched ABMIL). Ran `scripts/sanity_check.py` and wrote **`docs/baseline_report.md`**.
+Cancelled my unrelated DFT jobs and stopped their submit loops on ada-gw1 (so our project has the full quota).
+
+**Results:** ER: RNA label more predictable than IHC in all 5 model variants (+0.03 to +0.06, CI excludes 0) and the
+model sides with RNA on discordant cases (34–39 of 54). HER2: sides with amplification. PR: no preference once the RNA
+cut-off is prevalence-matched (the earlier "sides with IHC" was a GMM-threshold artefact). HER2-low: chance from H&E.
+Sanity checks all pass except one explained item: scikit-learn 1.5.2 (laptop) vs 1.9.1 (Ada) give different
+StratifiedGroupKFold splits for the same seed.
+
+**Next:** fixed split files in `data/splits/` + pinned scikit-learn; update slide 4 (PR bullet, Ada CONCH numbers);
+frozen-slide pipeline for 1c/1e (needs UNI weights).
+
+**Ask for Srivastava:** read `docs/baseline_report.md`; please take the frozen-slide extraction (1c/1e) on your Ada account.

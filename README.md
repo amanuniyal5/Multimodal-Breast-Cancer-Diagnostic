@@ -43,7 +43,7 @@ Novelty type: a **new, stricter evaluation** of existing models (no new architec
 - **Leakage:** HER2 0 vs 1+ looks predictable with random folds (AUC 0.63) but falls to chance with
   site-grouped folds (0.43). The slide embedding identifies the hospital 82% of the time.
 
-Full tables: [`docs/BASELINE_RESULTS.md`](docs/BASELINE_RESULTS.md).
+Full report with all encoders, ABMIL and sanity checks: [`docs/baseline_report.md`](docs/baseline_report.md) (running notes: [`docs/BASELINE_RESULTS.md`](docs/BASELINE_RESULTS.md)).
 
 ## Quick start (laptop, CPU, ~10 minutes)
 
@@ -69,7 +69,8 @@ docs/
   PROJECT_PLAN.md       experiments, pipeline, timeline, owners, compute budget
   DATASET.md            dataset study: sources, label counts, discordance, slides, feasibility
   PIPELINE_AND_MODELS.md  foundation-model choice and step-by-step pipeline (Ada + laptop)
-  BASELINE_RESULTS.md   all baseline numbers and how they were produced
+  baseline_report.md    consolidated baseline report: all encoders, ABMIL, sanity checks, interpretation
+  BASELINE_RESULTS.md   running log of baseline numbers and how they were produced
   NOVELTY_RESEARCH.md   literature audit that led to this project (why the old pitches were dropped)
   archive/              original individual pitches (B1, B2) and the four-proposal research doc
 comms/

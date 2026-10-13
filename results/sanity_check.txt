@@ -1,0 +1,51 @@
+
+========== uni_v1_20x ==========
+summary rows: 30 | oof rows: 35546 | models: ['abmil', 'mean']
+[PASS] S1 uni_v1_20x OOF integrity (blocks=48, dup=False, nan=False, out_of_range=False)
+[PASS] S2 uni_v1_20x AUC recomputed from OOF matches summary (max |diff| = 1.11e-16)
+[PASS] S3 uni_v1_20x 1a paired (same patients across labels) 
+[PASS] S4 uni_v1_20x stored y equals label table (mismatches = 0)
+[PASS] S5 uni_v1_20x shuffled control at chance ({'mean': 0.506, 'abmil': 0.487})
+[PASS] S6 uni_v1_20x mean-pool reproducible across runs (max |diff| = 0.00e+00)
+[PASS] S7 uni_v1_20x 1b counts recomputed from stored probabilities 
+[PASS] S8 uni_v1_20x cohort sizes as expected (1a n: {'ERBB2_AMP': 478, 'ER_IHC': 801, 'ER_RPPApos': 801, 'ESR1_RNApos': 801, 'HER2_RPPApos': 478, 'HER2_STRICT': 478, 'PGR_RNApos': 986, 'PR_IHC': 986}; 1b n: {'ER_IHC vs ER_RPPApos': 63, 'ER_IHC vs ESR1_RNApos': 54, 'HER2_STRICT vs ERBB2_AMP': 60, 'PR_IHC vs PGR_RNApos': 169})
+[PASS] S8 uni_v1_20x PR prevalence-matched run present (models ['abmil'], 1b n=[133], oof rows 6049)
+
+========== conch_v1_20x ==========
+summary rows: 30 | oof rows: 35546 | models: ['abmil', 'mean']
+[PASS] S1 conch_v1_20x OOF integrity (blocks=48, dup=False, nan=False, out_of_range=False)
+[PASS] S2 conch_v1_20x AUC recomputed from OOF matches summary (max |diff| = 1.11e-16)
+[PASS] S3 conch_v1_20x 1a paired (same patients across labels) 
+[PASS] S4 conch_v1_20x stored y equals label table (mismatches = 0)
+[PASS] S5 conch_v1_20x shuffled control at chance ({'mean': 0.49, 'abmil': 0.463})
+[FAIL] S6 conch_v1_20x mean-pool reproducible across runs (max |diff| = 8.28e-02)
+[PASS] S7 conch_v1_20x 1b counts recomputed from stored probabilities 
+[PASS] S8 conch_v1_20x cohort sizes as expected (1a n: {'ERBB2_AMP': 478, 'ER_IHC': 801, 'ER_RPPApos': 801, 'ESR1_RNApos': 801, 'HER2_RPPApos': 478, 'HER2_STRICT': 478, 'PGR_RNApos': 986, 'PR_IHC': 986}; 1b n: {'ER_IHC vs ER_RPPApos': 63, 'ER_IHC vs ESR1_RNApos': 54, 'HER2_STRICT vs ERBB2_AMP': 60, 'PR_IHC vs PGR_RNApos': 169})
+[PASS] S8 conch_v1_20x PR prevalence-matched run present (models ['abmil'], 1b n=[133], oof rows 6049)
+
+Paired bootstrap 95% CIs (seed 0):
+     encoder          run model marker                 comparison   n  delta_seed0  CI_lo  CI_hi  CI_excludes_0
+  uni_v1_20x         main  mean     ER       ESR1_RNApos - ER_IHC 801        0.037  0.011  0.066           True
+  uni_v1_20x         main  mean     ER        ER_RPPApos - ER_IHC 801        0.044  0.015  0.075           True
+  uni_v1_20x         main  mean     PR        PGR_RNApos - PR_IHC 986       -0.064 -0.098 -0.030           True
+  uni_v1_20x         main  mean   HER2    ERBB2_AMP - HER2_STRICT 478        0.047 -0.016  0.114          False
+  uni_v1_20x         main  mean   HER2 HER2_RPPApos - HER2_STRICT 478        0.040 -0.042  0.119          False
+  uni_v1_20x         main abmil     ER       ESR1_RNApos - ER_IHC 801        0.049  0.021  0.079           True
+  uni_v1_20x         main abmil     ER        ER_RPPApos - ER_IHC 801        0.033  0.000  0.066           True
+  uni_v1_20x         main abmil     PR        PGR_RNApos - PR_IHC 986       -0.050 -0.086 -0.013           True
+  uni_v1_20x         main abmil   HER2    ERBB2_AMP - HER2_STRICT 478        0.005 -0.064  0.076          False
+  uni_v1_20x         main abmil   HER2 HER2_RPPApos - HER2_STRICT 478       -0.025 -0.103  0.050          False
+  uni_v1_20x PR prevmatch abmil     PR        PGR_RNApos - PR_IHC 986        0.001 -0.033  0.036          False
+conch_v1_20x         main  mean     ER       ESR1_RNApos - ER_IHC 801        0.032  0.005  0.061           True
+conch_v1_20x         main  mean     ER        ER_RPPApos - ER_IHC 801        0.034  0.004  0.063           True
+conch_v1_20x         main  mean     PR        PGR_RNApos - PR_IHC 986       -0.026 -0.059  0.006          False
+conch_v1_20x         main  mean   HER2    ERBB2_AMP - HER2_STRICT 478        0.095  0.038  0.157           True
+conch_v1_20x         main  mean   HER2 HER2_RPPApos - HER2_STRICT 478        0.052 -0.023  0.129          False
+conch_v1_20x         main abmil     ER       ESR1_RNApos - ER_IHC 801        0.041  0.011  0.071           True
+conch_v1_20x         main abmil     ER        ER_RPPApos - ER_IHC 801        0.018 -0.015  0.052          False
+conch_v1_20x         main abmil     PR        PGR_RNApos - PR_IHC 986        0.010 -0.025  0.043          False
+conch_v1_20x         main abmil   HER2    ERBB2_AMP - HER2_STRICT 478        0.073  0.008  0.143           True
+conch_v1_20x         main abmil   HER2 HER2_RPPApos - HER2_STRICT 478        0.081  0.002  0.163           True
+conch_v1_20x PR prevmatch abmil     PR        PGR_RNApos - PR_IHC 986        0.014 -0.019  0.048          False
+
+1 check(s) failed: ['S6 conch_v1_20x mean-pool reproducible across runs']
