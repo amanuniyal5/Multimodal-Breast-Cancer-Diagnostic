@@ -132,8 +132,8 @@ reference standards). We do **not** propose a new architecture.
 **Goal:** test whether slide location (frozen next to the sequenced tissue vs FFPE block) changes which truth is tracked, and how reproducible single-slide predictions are.
 
 - [ ] UNI weights downloaded on Ada (needs Hugging Face approval)
-- [ ] Build GDC manifest of tumour TS/BS slides (1,517 slides, 430 GB) from `data/metadata/gdc_slides.csv`
-- [ ] Time one TS slide through TRIDENT + UNI on an RTX 2080 Ti; log seconds per slide
+- [~] Build GDC manifest of tumour TS/BS slides (1,517 slides, 430 GB) from `data/metadata/gdc_slides.csv` (Srivastava, 2026-10-14)
+- [~] Time one TS slide through TRIDENT + UNI on an RTX 2080 Ti; log seconds per slide (Srivastava, 2026-10-14)
 - [ ] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions)
 - [ ] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags
 - [ ] Add % tumour cells per frozen slide (biospecimen table) as a covariate
