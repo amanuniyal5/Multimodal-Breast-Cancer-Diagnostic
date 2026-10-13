@@ -6,16 +6,18 @@
 #SBATCH -J trident_setup
 #SBATCH -c 4
 #SBATCH --mem-per-cpu=3G
-#SBATCH --time=00:45:00
+#SBATCH --time=03:00:00
 #SBATCH --output=logs/%j.out
 set -e
 module load u22/python/3.12.4
 source $HOME/venvs/whichtruth/bin/activate
 cd $HOME/project
-pip install --no-cache-dir -q openslide-python openslide-bin timm h5py
+# PyPI reads from compute nodes can stall for long periods (jobs 19985, 20011, 19991): long timeout, many retries
+export PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=20
+python -m pip install --no-cache-dir -q openslide-python openslide-bin timm h5py
 [ -d $HOME/src/TRIDENT ] || git clone -q https://github.com/mahmoodlab/TRIDENT.git $HOME/src/TRIDENT
 cd $HOME/src/TRIDENT && echo "TRIDENT commit $(git rev-parse --short HEAD) $(git log -1 --format=%cd)"
-pip install --no-cache-dir -q -e .
+python -m pip install --no-cache-dir -q -e .
 cd $HOME/project
 python - <<'PY'
 import inspect, trident, openslide, timm, torch
