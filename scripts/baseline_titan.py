@@ -59,15 +59,15 @@ for task in ["ER_IHC", "ESR1_RNApos", "HER2_STRICT"]:
     d = L[[task, "site"]].dropna().join(E[[]], how="inner")
     y = d[task].astype(int).values
     p = cross_val_predict(make_pipeline(OneHotEncoder(handle_unknown="ignore"), LogisticRegression(max_iter=2000)),
-                          d[["site"]], y, cv=StratifiedKFold(5, shuffle=True, random_state=0),
+                          d[["site"]].to_numpy(dtype=str), y, cv=StratifiedKFold(5, shuffle=True, random_state=0),
                           method="predict_proba")[:, 1]
     print(f"site-only (no image) AUC {task}: {roc_auc_score(y, p):.3f}")
 
 top = L.site.value_counts().index[:10]
 d = L[L.site.isin(top)][["site"]].join(E, how="inner")
-pred = cross_val_predict(linear_probe(), d[E.columns].values, d.site.values,
+pred = cross_val_predict(linear_probe(), d[E.columns].values, d.site.to_numpy(dtype=str),
                          cv=StratifiedKFold(5, shuffle=True, random_state=0))
-print(f"site identification (10 largest sites, n={len(d)}): accuracy {(pred == d.site.values).mean():.3f} "
+print(f"site identification (10 largest sites, n={len(d)}): accuracy {(pred == d.site.to_numpy(dtype=str)).mean():.3f} "
       f"vs chance {d.site.value_counts(normalize=True).max():.3f}")
 
 d = L[["ER_IHC", "ESR1_RNApos"]].dropna().join(E, how="inner")
