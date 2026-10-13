@@ -28,7 +28,7 @@ import torch
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--manifest", default="data/metadata/frozen_manifest.csv")
-ap.add_argument("--batch", type=int, default=None)
+ap.add_argument("--batch", default=None, help="manifest batch: 3, a range 0-4, or a list 0,5,7")
 ap.add_argument("--slides", default="", help="comma-separated slide barcodes (overrides --batch)")
 ap.add_argument("--limit", type=int, default=0)
 ap.add_argument("--work", required=True, help="node-local scratch for raw slides and TRIDENT outputs")
@@ -61,7 +61,11 @@ m = pd.read_csv(a.manifest)
 if a.slides:
     m = m[m.slide_barcode.isin(a.slides.split(","))]
 elif a.batch is not None:
-    m = m[m.batch == a.batch]
+    sel = set()
+    for part in str(a.batch).split(","):
+        lo, _, hi = part.partition("-")
+        sel |= set(range(int(lo), int(hi or lo) + 1))
+    m = m[m.batch.isin(sel)]
 if a.limit:
     m = m.head(a.limit)
 todo = m[~m.slide_barcode.apply(lambda s: os.path.exists(os.path.join(a.out, f"{s}.npz")))]
