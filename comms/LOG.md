@@ -162,3 +162,25 @@ writes `data/metadata/idc_slides.csv`; it was interrupted, so that CSV does not 
 5. Extraction-equivalence check: ~50 DX slides from IDC through the same pipeline vs TRACE features (cosine similarity,
    same predictions); IDC rows with `slide_type == DX` are in `idc_slides.csv`. Run with `--slides <DX barcodes>`.
 6. Then 1c (DX vs TS × IHC vs RNA, fixed splits) and 1e (373 TS/BS pairs: ICC, κ, % flipped).
+
+## 2026-10-14 (evening) · Srivastava (via Claude Code) · Tier 4 resumed
+
+**Did:**
+- Hugging Face archive `chadvanderbilt/TCGA_foundation_model_features` (UNI, BRCA) fully listed (job 20710):
+  1,117 DX slides, **0 frozen** → no shortcut for TS/BS features; we extract them ourselves.
+- Built `data/metadata/idc_slides.csv` (`scripts/make_idc_objects.py`): all 1,516 manifest TS/BS slides + 1,133 DX
+  slides are in IDC (13,003 DICOM files; TS 306 GB, BS 152 GB, DX 1,205 GB).
+- `extract_frozen.py` now downloads from IDC via Google Cloud (parallel ranges, prefetch). Cancelled the stuck GDC test 20507.
+- **UNI test on 3 TS slides from IDC passed (job 21299, gnode054):** mpp 0.2525 read from DICOM (40× scans, patches
+  at 20×); 1,258–4,260 patches per slide; per slide download 21–39 s, segmentation 7–23 s, encoding 10–24 s.
+  Feature files OK (1,024-d mean, ≤ 4,096-patch fp16 bag, no NaN).
+
+**Running on Ada:** array 20080 (all 30 batches, 2 tasks at a time; est. 8–12 h); extraction-equivalence check 21300
+(50 single-DX-slide patients from IDC through our pipeline vs TRACE: cosine of slide means vs different-patient baseline,
+ER P(+) agreement; output `results/equivalence_check.csv`).
+
+**Note:** frozen-slide mean features have a larger norm than TRACE DX means (~24–27 vs ~20); the equivalence check will
+show whether that is the pipeline or the tissue (frozen vs FFPE).
+
+**Next open items:** check 20080 / 21300; then 1c (DX vs TS × IHC vs RNA, fixed splits, % tumour cells as covariate)
+and 1e (373 TS/BS pairs); Tier 3 thumbnail overlay + heatmap review; ER-low write-up.

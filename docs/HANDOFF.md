@@ -55,10 +55,11 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
   on the 54 discordant patients the 5-variant consensus sides with RNA 34 : 20 (p = 0.076, suggestive) and the call follows
   the PAM50 subtype (Basal → ER−, LumA → ER+; HER2-enriched is the exception). HER2 tracks amplification (consensus 42 : 18,
   p = 0.003). PR, no preference (cut-off artefact). HER2-low, invisible in H&E.
-- **Tier 4 (paused 14 Oct, Srivastava):** manifest `data/metadata/frozen_manifest.csv` (1,516 TS/BS slides, 373 pairs);
-  `scripts/extract_frozen.py` (download → TRIDENT → UNI → per-slide mean + capped bag). GDC is too slow from Ada
-  (weeks); switching the source to the **IDC copy on Google Cloud** (10 MB/s). Exact resume steps and the state of the
-  Ada jobs: `comms/LOG.md`, entry "2026-10-14 (afternoon)".
+- **Tier 4 (running, Srivastava's Ada account):** manifest `data/metadata/frozen_manifest.csv` (1,516 TS/BS slides,
+  373 pairs); slides come from the **IDC DICOM copy on Google Cloud** (`data/metadata/idc_slides.csv`; GDC is far too
+  slow from Ada). `scripts/extract_frozen.py` (download → TRIDENT → UNI v1 → per-slide mean + 4,096-patch bag in
+  `~/project/data/features/frozen_uni_v1/`, ~1 min per slide). Array job 20080 (6 tasks × 5 batches) and the
+  extraction-equivalence check (job 21300, `scripts/equivalence_check.py`) are running.
 - **Open:** Tier 3 thumbnail overlay + heatmap review (attention `.npz` live on Uniyal's Ada account), ER-low write-up;
   Tier 4 equivalence check, 1c, 1e; Tiers 5 and 7.
 - **Slides:** `slides/project_update_slides.tex` is last week's deck; next week's deck still to write.

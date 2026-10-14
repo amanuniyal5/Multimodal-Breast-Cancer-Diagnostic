@@ -131,11 +131,11 @@ reference standards). We do **not** propose a new architecture.
 
 **Goal:** test whether slide location (frozen next to the sequenced tissue vs FFPE block) changes which truth is tracked, and how reproducible single-slide predictions are.
 
-- [~] UNI weights downloaded on Ada (needs Hugging Face approval) (Srivastava, 2026-10-14: access granted, token on Ada; first download in job 20079)
+- [x] UNI weights downloaded on Ada (needs Hugging Face approval) (Srivastava: loaded in job 21299)
 - [x] Build GDC manifest of tumour TS/BS slides (1,517 slides, 430 GB) from `data/metadata/gdc_slides.csv` (`data/metadata/frozen_manifest.csv`: 1,516 slides, 373 pairs, 30 batches)
-- [~] Time one TS slide through TRIDENT + UNI on an RTX 2080 Ti; log seconds per slide (Srivastava, 2026-10-14)
-- [ ] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions)
-- [~] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags (Srivastava, 2026-10-14: array 20080 queued)
+- [x] Time one TS slide through TRIDENT + UNI on an RTX 2080 Ti; log seconds per slide (job 21299, IDC source: download 30 s, segment 17 s, encode 15 s per slide; download overlaps encoding)
+- [~] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions) (Srivastava, 2026-10-14: `scripts/equivalence_check.py`, job 21300)
+- [~] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags (Srivastava, 2026-10-14: source switched to the IDC copy on Google Cloud, GDC too slow; array 20080 running)
 - [x] Add % tumour cells per frozen slide (biospecimen table) as a covariate (columns in `data/metadata/frozen_manifest.csv`; 1,513 of 1,516 slides)
 - [ ] **1c:** 2 × 2 (DX vs TS × IHC vs RNA) with mean-pool (ABMIL optional), fixed splits, interaction test
 - [ ] **1e:** TS vs BS agreement on 374 pairs: ICC of P(ER+), κ of calls, % flipped
@@ -177,7 +177,7 @@ reference standards). We do **not** propose a new architecture.
 | 1 Core baselines | Done | — |
 | 2 Robustness | Done (14 Oct, report 5d) | — |
 | 3 Interpretation | In progress | Thumbnail overlay + heatmap review (attention `.npz` on Uniyal's Ada account); ER-low write-up |
-| 4 Frozen slides | In progress (Srivastava) | UNI test job 20507 → extraction array 20080 on Ada; then equivalence check, 1c, 1e |
+| 4 Frozen slides | In progress (Srivastava) | Extraction array 20080 + equivalence check 21300 running on Ada; then 1c, 1e |
 | 5 Consolidation | Not started | Tiers 2–4 |
 | 6 Optional | Not started | Tiers 0–5 |
 | 7 Deliverables | Partly (update deck exists) | Final numbers |
