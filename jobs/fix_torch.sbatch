@@ -17,9 +17,12 @@ module load u22/python/3.12.4
 source $HOME/venvs/whichtruth/bin/activate
 cd $HOME/project
 export PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=20
-python -m pip install --no-cache-dir -q --no-deps --force-reinstall torch==2.5.1+cu121 torchvision==0.20.1+cu121 \
-    --index-url https://download.pytorch.org/whl/cu121
-python -m pip install --no-cache-dir -q --no-deps triton==3.1.0
+# torch 2.14 also brought CUDA-13 nvidia-* packages; they share the nvidia/ folders with the CUDA-12 ones and replaced
+# e.g. libcudnn.so.9 (cuDNN 9.24 for CUDA 13 -> CUDNN_STATUS_NOT_INITIALIZED, job 20506). Remove them, then reinstall
+# torch 2.5.1 with all of its own CUDA-12 dependencies (force) from the PyTorch index.
+python -m pip uninstall -y -q nvidia-cublas nvidia-cuda-cupti nvidia-cuda-nvrtc nvidia-cuda-runtime nvidia-cudnn-cu13     nvidia-cufft nvidia-cufile nvidia-curand nvidia-cusolver nvidia-cusparse nvidia-cusparselt-cu13 nvidia-nccl-cu13     nvidia-nvjitlink nvidia-nvshmem-cu13 nvidia-nvtx || true
+python -m pip install --no-cache-dir -q --force-reinstall torch==2.5.1+cu121 torchvision==0.20.1+cu121     --index-url https://download.pytorch.org/whl/cu121 --extra-index-url https://pypi.org/simple
+python -m pip list 2>/dev/null | grep -iE "^(torch|torchvision|triton|nvidia-cudnn|numpy|pillow) "
 python - <<'PY'
 import torch, torchvision, timm, trident
 print("torch", torch.__version__, "| torchvision", torchvision.__version__, "| timm", timm.__version__)
