@@ -1,0 +1,257 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{Madrid}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+\setbeamerfont{block title}{size=\small}
+\setbeamertemplate{itemize items}[circle]
+\setlength{\tabcolsep}{5pt}
+
+% Numbers: docs/baseline_report.md (Sections 4, 5b-5d) and results/stats_*.csv. Update the frozen-slide frame
+% when the Tier 4 jobs on Ada finish.
+
+\title{Which Truth Does the Slide See?}
+\subtitle{Progress Update 2: robustness, statistics and frozen slides}
+\author{Aman Uniyal \and Aman Srivastava}
+\institute{Topics in AI for Healthcare, IIIT Hyderabad}
+\date{\today}
+
+\begin{document}
+
+%===================================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Recap and what changed since last week}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{alertblock}{Question}
+When IHC, RNA and protein disagree on ER/PR/HER2, which one does an H\&E foundation-model classifier follow,
+and does it change between FFPE and frozen slides?
+\end{alertblock}
+\begin{block}{Setup (unchanged)}
+\begin{itemize}
+  \item TCGA-BRCA, 1,055 patients with DX slides; frozen encoders TITAN, UNI v1, CONCH v1.
+  \item Heads: logistic regression (slide / mean of patches) and ABMIL.
+  \item \textbf{Fixed site-grouped splits} (5 folds, seeds 0--4), shared by every script.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{New this week}
+\begin{itemize}
+  \item ABMIL for UNI and CONCH (3 seeds) $\rightarrow$ 5 model variants.
+  \item Fixed splits: all linear baselines rerun, conclusions unchanged.
+  \item PR re-check: the ``sides with IHC'' result was a \textbf{cut-off artefact}.
+  \item DeLong tests (1a) and \textbf{patient-level combined evidence} (1b).
+  \item Who are the discordant patients? (PAM50, ER\,\%, histology)
+  \item ABMIL attention maps on 54 discordant + 10 reference patients.
+  \item Frozen-slide pipeline (1c, 1e) running on Ada.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{1a: which label is more predictable? (DeLong, $n$ = 801 / 986 / 478)}
+\footnotesize
+\centering
+\scriptsize
+\begin{tabular}{lccccc}
+\toprule
+$\Delta$AUC (molecular $-$ IHC) & TITAN & UNI mean & CONCH mean & UNI ABMIL & CONCH ABMIL \\
+\midrule
+\textbf{ER: RNA $-$ IHC} & \textbf{+0.057}*** & \textbf{+0.036}* & \textbf{+0.030}* & \textbf{+0.034}* & \textbf{+0.049}** \\
+ER: RPPA $-$ IHC & +0.026 & +0.041** & +0.033* & +0.023 & +0.019 \\
+PR: RNA $-$ IHC (prevalence-matched) & +0.033* & -- & -- & $-$0.006 & +0.006 \\
+HER2: amplif. $-$ strict & +0.044 & +0.071* & +0.074* & +0.024 & +0.060 \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+{\tiny DeLong test generalised to two reference labels on the same patients (equals classic DeLong when labels coincide);
+seed-averaged out-of-fold probabilities; * $p<0.05$, ** $p<0.01$, *** $p<0.001$. DeLong and paired-bootstrap CIs agree
+within 0.005. ABMIL on the earlier folds.}
+
+\vspace{6pt}
+\raggedright
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{block}{Robust (all 5 variants)}
+\textbf{ER: the RNA label is more predictable than IHC}, CI excludes 0 in every variant (19 of 21 single seeds).
+Holds under 3 RNA cut-off schemes.
+\end{block}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{alertblock}{Not robust (encoder-dependent)}
+ER vs protein, HER2 amplification and PR: significant in some variants only, so reported as not robust.
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{1b: which side on discordant patients? Combined over 5 variants}
+\footnotesize
+\centering
+\scriptsize
+\begin{tabular}{lrccc}
+\toprule
+Discordant pair & $n$ & Per variant (molecular side) & \textbf{Consensus} mol\,:\,IHC & Calls siding molecular \\
+\midrule
+ER: IHC vs RNA & 54 & 39 / 34 / 35 / 34 / 36 & \textbf{34\,:\,20} ($p$ = 0.076) & 66\% (54--76\%) \\
+ER: IHC vs RPPA & 63 & 33 / 35 / 32 / 34 / 30 & 33\,:\,30 ($p$ = 0.80) & 52\% \\
+PR: IHC vs RNA (prev.-matched) & 133 & 69 / -- / -- / 61 / 63 & 64\,:\,69 ($p$ = 0.73) & 48\% \\
+HER2: strict vs amplif. & 60 & 35 / 44 / 39 / 47 / 34 & \textbf{42\,:\,18} ($p$ = 0.003) & 66\% (58--75\%) \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+{\tiny Variants: TITAN / UNI mean / CONCH mean / UNI ABMIL / CONCH ABMIL. Models trained on concordant patients only.
+The variants score the same patients, so counts are not summed: consensus = one call per patient from the mean probability;
+binomial test vs 50:50; CI = cluster bootstrap over patients.}
+
+\vspace{6pt}
+\raggedright
+\begin{itemize}
+  \item \textbf{ER:} every variant leans to RNA, but the honest pooled estimate is \textbf{suggestive} (p = 0.076);
+        TITAN alone (39:15, p = 0.0015) overstates it.
+  \item \textbf{HER2:} sides with DNA amplification (p = 0.003). \textbf{PR:} no preference.
+\end{itemize}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Why? The slide reads the intrinsic subtype}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\centering
+\scriptsize
+\begin{tabular}{llcc}
+\toprule
+ER discordance & PAM50 & Called with RNA & with IHC \\
+\midrule
+IHC+ / RNA$-$ (34) & Basal-like & \textbf{15} & 0 \\
+ & HER2-enriched & 3 & \textbf{8} \\
+ & other & 3 & 5 \\
+\midrule
+IHC$-$ / RNA+ (20) & Luminal A & \textbf{9} & 0 \\
+ & other & 4 & 7 \\
+\bottomrule
+\end{tabular}
+
+\vspace{4pt}
+{\tiny Consensus call of the 5 variants. Reference: 72\% of concordant ER$-$ are Basal-like, 68\% of concordant ER+ are LumA.}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{block}{Reading}
+\begin{itemize}
+  \item Basal-looking tumours are called ER$-$ whatever IHC says; LumA-looking tumours ER+.
+  \item \textbf{Exception: HER2-enriched} IHC+/RNA$-$ tumours are called ER+ (8/11).
+  \item Disagreements with RNA sit near the ESR1 cut-off (median $-$1.1 vs $-$2.6 log$_2$).
+  \item ER-low (IHC+, $<$10\%): sides with RNA in 8 of 10.
+\end{itemize}
+\end{block}
+\begin{alertblock}{Attention maps (ABMIL, 64 patients)}
+Attention is focused (5--7\% of patches hold half) and similar across groups: discordant cases are not ``hard'',
+they are read as their molecular class.
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Frozen slides (1c, 1e): pipeline and status}
+\footnotesize
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, fill=blue!6, align=center, font=\footnotesize,
+              text width=2.3cm, minimum height=0.9cm},
+  arr/.style={-{Stealth[length=2mm]}, thick}, node distance=0.45cm]
+  \node[box] (m) {Manifest\\1,516 TS/BS slides};
+  \node[box, right=of m] (d) {GDC download\\to node /scratch};
+  \node[box, right=of d] (t) {TRIDENT: tissue\\seg.\ + 256\,px @ 20$\times$};
+  \node[box, right=of t] (u) {UNI v1\\(frozen)};
+  \node[box, right=of u] (f) {Mean + 4,096\\patch bag; delete slide};
+  \draw[arr] (m) -- (d); \draw[arr] (d) -- (t); \draw[arr] (t) -- (u); \draw[arr] (u) -- (f);
+\end{tikzpicture}
+
+\vspace{6pt}
+\raggedright
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{block}{Data}
+\begin{itemize}
+  \item 1,045 top (TS) + 471 bottom (BS) frozen slides, 429\,GB, 1,089 patients.
+  \item 373 TS+BS pairs from the same tissue portion (1e).
+  \item \% tumour cells per slide (median 80\% TS, 75\% BS) as a covariate.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{block}{Status (fill in before presenting)}
+\begin{itemize}
+  \item UNI access + Ada pipeline ready; extraction running (30 batches).
+  \item Seconds per slide: \textbf{TBD}.
+  \item Check: our TRIDENT + UNI on $\sim$50 DX slides vs the TRACE features.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Plan for the next week}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.32\textwidth}
+\begin{block}{1c: FFPE vs frozen}
+\begin{itemize}
+  \item Same patients, same folds: DX vs TS $\times$ IHC vs RNA label.
+  \item Interaction test with bootstrap CI.
+  \item Covariate: \% tumour cells.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{1e: two frozen slides}
+\begin{itemize}
+  \item 373 TS/BS pairs.
+  \item ICC of P(ER+), Cohen's $\kappa$ of calls, \% flipped calls.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{Interpretation \& write-up}
+\begin{itemize}
+  \item Heatmaps on slide thumbnails (does attention sit on tumour?).
+  \item HER2-enriched exception.
+  \item Final tables + multiple-testing note.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{10pt}
+\centering
+\begin{tabular}{lr}
+\toprule
+Primary claims & Status \\
+\midrule
+ER: RNA label more predictable than IHC (1a) & robust, all 5 variants \\
+ER: model sides with RNA on discordant cases (1b) & suggestive (consensus p = 0.076) \\
+HER2 tracks amplification (1b) & p = 0.003 (1a encoder-dependent) \\
+PR: no preference; HER2-low invisible & robust nulls \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\end{document}
