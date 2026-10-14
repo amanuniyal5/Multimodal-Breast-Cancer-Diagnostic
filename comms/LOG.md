@@ -205,3 +205,16 @@ ER P(+) from a TRACE-trained probe r = 1.000, same call 46/46. Independently com
 tissue, not pipelines. The higher feature norm of frozen slides (~24–27 vs ~20) is a tissue difference.
 
 **Running:** extraction array 20080 (frozen slides), expected done ~06:00–08:00 on 15 Oct. Next: 1c and 1e scripts.
+
+## 2026-10-14 (21:00) · Srivastava (via Claude Code) · 1c / 1e scripts ready
+
+- `scripts/frozen_1c.py`: same patients and fixed folds; linear probe on DX (TRACE) vs primary TS (ours) features ×
+  IHC vs molecular label (ER RNA, ER RPPA, PR prevalence-matched, HER2 amplification); interaction
+  (TS Δ − DX Δ) with paired bootstrap; split by % tumour cells; 1b on TS vs DX for the same discordant patients.
+- `scripts/frozen_1e.py`: ER probe trained on primary TS of out-of-fold patients, applied to both slides of each TS+BS
+  pair; ICC(2,1) of logit P, r, κ, % flipped, AUC TS vs BS, |ΔP| vs |Δ tumour %|, feature cosine.
+- `jobs/frozen_analysis.sbatch` runs both (CPU, < 1 min). Smoke test on the 258 slides extracted so far (job 21482,
+  output in `results/partial_test/` on Ada only): runs end to end. **Numbers not meaningful yet** (partial, non-random set).
+
+**To do when extraction 20080 is complete:** `sbatch jobs/frozen_analysis.sbatch`, copy `results/frozen_1c*.csv*`
+and `results/frozen_1e*.csv` to the repo, write up 1c/1e.

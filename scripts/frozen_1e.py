@@ -125,4 +125,4 @@ print(f"feature cosine TS vs BS: same tumour median {np.median(cos):.3f}, other 
 os.makedirs(a.out, exist_ok=True)
 pd.DataFrame(rows).to_csv(os.path.join(a.out, "frozen_1e.csv"), index=False)
 pd.concat(per_pair).to_csv(os.path.join(a.out, "frozen_1e_pairs.csv"), index=False)
-print("saved results/frozen_1e.csv, results/frozen_1e_pairs.csv")
+print("saved", os.path.join(a.out, "frozen_1e.csv"), os.path.join(a.out, "frozen_1e_pairs.csv"))
