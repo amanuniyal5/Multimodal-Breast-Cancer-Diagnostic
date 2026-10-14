@@ -192,3 +192,16 @@ and 1e (373 TS/BS pairs); Tier 3 thumbnail overlay + heatmap review; ER-low writ
   are JPEG 2000 (YBR_FULL_422), which OpenSlide's DICOM reader cannot open: one of the 50 equivalence-check slides
   (TCGA-AO-A1KO-01Z-00-DX1) failed for that reason, so the check will use 49. Only matters if DX ever has to be
   re-extracted ourselves (then take those 48 from GDC).
+
+## 2026-10-14 (20:30) · Srivastava (via Claude Code) · Extraction-equivalence check passed
+
+**Result (Ada job 21300, `scripts/equivalence_check.py`, `results/equivalence_check.csv`):** 50 single-DX-slide patients
+re-extracted from IDC with our TRIDENT + UNI v1 pipeline; 46 succeeded (4 JPEG-2000 slides, all site AC, unreadable).
+Our slide means are **numerically the same as TRACE**: cosine 1.0000 (min 1.0000) vs median 0.33 for different patients;
+max absolute difference per feature 0.00004–0.0018 (fp16 rounding); identical patch counts in 39/46 (others ±1);
+ER P(+) from a TRACE-trained probe r = 1.000, same call 46/46. Independently computed (bag mean vs stored mean 0.9997).
+
+**Meaning:** TRACE DX features and our frozen-slide features come from the same pipeline, so 1c (DX vs TS) compares
+tissue, not pipelines. The higher feature norm of frozen slides (~24–27 vs ~20) is a tissue difference.
+
+**Running:** extraction array 20080 (frozen slides), expected done ~06:00–08:00 on 15 Oct. Next: 1c and 1e scripts.
