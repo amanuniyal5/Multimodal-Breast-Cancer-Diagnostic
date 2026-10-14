@@ -134,4 +134,4 @@ for ihc, mol in [("ER_IHC", "ESR1_RNApos"), ("HER2_STRICT", "ERBB2_AMP"), ("PR_I
 os.makedirs(a.out, exist_ok=True)
 pd.DataFrame(rows).to_csv(os.path.join(a.out, "frozen_1c.csv"), index=False)
 pd.concat(preds).to_csv(os.path.join(a.out, "frozen_1c_oof.csv.gz"), index=False)
-print("saved results/frozen_1c.csv, results/frozen_1c_oof.csv.gz")
+print("saved", os.path.join(a.out, "frozen_1c.csv"), os.path.join(a.out, "frozen_1c_oof.csv.gz"))
