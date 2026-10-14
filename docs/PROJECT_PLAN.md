@@ -137,8 +137,8 @@ reference standards). We do **not** propose a new architecture.
 - [x] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions) (job 21300: 46 slides, cosine 1.0000 vs 0.33 for other patients, max |diff| ≤ 0.002, ER P(+) r = 1.000, 46/46 same call; 4 JPEG-2000 slides unreadable; `results/equivalence_check.csv`)
 - [~] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags (Srivastava, 2026-10-14: source switched to the IDC copy on Google Cloud, GDC too slow; array 20080 running)
 - [x] Add % tumour cells per frozen slide (biospecimen table) as a covariate (columns in `data/metadata/frozen_manifest.csv`; 1,513 of 1,516 slides)
-- [ ] **1c:** 2 × 2 (DX vs TS × IHC vs RNA) with mean-pool (ABMIL optional), fixed splits, interaction test
-- [ ] **1e:** TS vs BS agreement on 374 pairs: ICC of P(ER+), κ of calls, % flipped
+- [~] **1c:** 2 × 2 (DX vs TS × IHC vs RNA) with mean-pool (ABMIL optional), fixed splits, interaction test (Srivastava, 2026-10-14)
+- [~] **1e:** TS vs BS agreement on 374 pairs: ICC of P(ER+), κ of calls, % flipped (Srivastava, 2026-10-14)
 
 **Exit gate:** 1c interaction estimate with CI and 1e agreement metrics, both with sanity checks like S1–S8.
 
