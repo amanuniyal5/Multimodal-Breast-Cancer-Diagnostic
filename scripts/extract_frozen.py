@@ -51,6 +51,9 @@ ap.add_argument("--patch-size", type=int, default=256)
 ap.add_argument("--cap", type=int, default=4096)
 ap.add_argument("--batch-limit", type=int, default=256, help="patches per GPU batch")
 ap.add_argument("--keep-h5", action="store_true", help="also keep TRIDENT's full feature .h5 (large)")
+ap.add_argument("--source", default="idc", choices=["idc", "gdc"],
+                help="idc: DICOM copy in the Imaging Data Commons via Google Cloud (fast from Ada); gdc: original .svs")
+ap.add_argument("--idc-objects", default="data/metadata/idc_slides.csv", help="from scripts/make_idc_objects.py")
 ap.add_argument("--dl-workers", type=int, default=24, help="parallel HTTP range requests per slide (GDC throttles each "
                 "connection to ~0.02-0.3 MB/s from Ada; 16 in parallel gave 1.65 MB/s)")
 ap.add_argument("--chunk-mb", type=int, default=16)
@@ -127,14 +130,14 @@ def fetch_range(url, fd, start, end):
             time.sleep(min(60, 5 * 2 ** attempt))
 
 
-def download(file_id, path, size):
+def download(url, path, size):
     """parallel ranged download; the file size is checked (GDC downloads can truncate silently)"""
     step = a.chunk_mb << 20
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
     try:
         os.ftruncate(fd, size)
         with ThreadPoolExecutor(a.dl_workers) as ex:
-            futs = [ex.submit(fetch_range, GDC + file_id, fd, b, min(b + step, size) - 1) for b in range(0, size, step)]
+            futs = [ex.submit(fetch_range, url, fd, b, min(b + step, size) - 1) for b in range(0, size, step)]
             for f in futs:
                 f.result()
     finally:
@@ -143,18 +146,36 @@ def download(file_id, path, size):
         raise IOError(f"size mismatch: {os.path.getsize(path)} of {size} bytes")
 
 
+IDC = pd.read_csv(a.idc_objects) if a.source == "idc" else None
+
+
+def fetch_slide(s_, wdir_):
+    """download one slide into wdir_; returns the path OpenSlide should open"""
+    if a.source == "gdc":
+        path = os.path.join(wdir_, s_.file_name)
+        download(GDC + s_.file_id, path, int(s_["size"]))
+        return path
+    objs = IDC[IDC.slide_barcode == s_.slide_barcode]  # DICOM-WSI: one file per pyramid level (+ label/overview)
+    if objs.empty:
+        raise IOError("slide not in IDC listing")
+    ddir = os.path.join(wdir_, "dicom")
+    os.makedirs(ddir, exist_ok=True)
+    for o in objs.itertuples():
+        download("https://storage.googleapis.com/idc-open-data/" + o.object,
+                 os.path.join(ddir, os.path.basename(o.object)), int(o.size))
+    return os.path.join(ddir, os.path.basename(objs.sort_values("size").object.iloc[-1]))  # OpenSlide finds the rest
+
+
 def prefetcher(rows_, q):
     """download slides in order, a.prefetch ahead of the encoder; puts (slide row, path, seconds or exception)"""
     for _, s_ in rows_.iterrows():
         wdir_ = os.path.join(a.work, s_.slide_barcode)
         os.makedirs(wdir_, exist_ok=True)
-        svs_ = os.path.join(wdir_, s_.file_name)
         t0 = time.time()
         try:
-            download(s_.file_id, svs_, int(s_["size"]))
-            q.put((s_, svs_, time.time() - t0))
+            q.put((s_, fetch_slide(s_, wdir_), time.time() - t0))
         except Exception as e:  # noqa: BLE001
-            q.put((s_, svs_, e))
+            q.put((s_, os.path.join(wdir_, "missing"), e))
     q.put(None)
 
 
@@ -164,8 +185,8 @@ q = queue.Queue(maxsize=max(1, a.prefetch))
 threading.Thread(target=prefetcher, args=(todo, q), daemon=True).start()
 while (item := q.get()) is not None:
     s, svs, dl = item
-    wdir = os.path.dirname(svs)
-    row = {"slide_barcode": s.slide_barcode, "size_GB": s["size"] / 1e9, "node": os.uname().nodename}
+    wdir = os.path.join(a.work, s.slide_barcode)
+    row = {"slide_barcode": s.slide_barcode, "size_GB": s["size"] / 1e9, "source": a.source, "node": os.uname().nodename}
     try:
         if isinstance(dl, Exception):
             raise dl

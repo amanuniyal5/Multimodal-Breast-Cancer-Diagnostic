@@ -124,3 +124,41 @@ Overnight chain: `jobs/requeue_frozen.sh` → TRIDENT setup 20078 → UNI test o
 
 **Next open items:** check 20078–20080 and the seconds per slide; extraction-equivalence check vs TRACE on ~50 DX slides;
 write the Tier 2/3 numbers into `docs/baseline_report.md`; Tier 3 thumbnail overlay (needs Uniyal's attention `.npz`).
+
+## 2026-10-14 (afternoon) · Srivastava (via Claude Code) · Tier 4 PAUSED, resume steps below
+
+**Found:** downloading frozen slides from **GDC is not feasible from Ada**: 0.02 MB/s per connection on a compute node,
+0.29 MB/s on the gateway, 0.3–1.6 MB/s with 16–32 parallel connections (429 GB → weeks). The **NCI Imaging Data
+Commons (IDC)** has every TCGA-BRCA slide as DICOM-WSI (readable by OpenSlide 4.0) in public cloud buckets; from a
+compute node **Google Cloud Storage gives 1.8 MB/s per connection, 10 MB/s with 16** (gateway: 15 MB/s single).
+All 1,516 manifest slides are in IDC (458 GB). AWS S3 copy of IDC is as slow as GDC: use `storage.googleapis.com`.
+Hugging Face `chadvanderbilt/TCGA_foundation_model_features` (UNI BRCA, 53.7 GB) looks DX-only (first 82 entries all DX).
+
+**Also fixed today:** TRIDENT's install pulled torch 2.14+cu130 (too new for the Ada driver) and CUDA-13 nvidia
+libraries that overwrote cuDNN 9.1. torch is back to 2.5.1+cu121; cuDNN/CUDA come from Ada modules
+(`u22/cuda/12.1 u22/cudnn/9.1.0-cuda-12`; `extract_frozen.py` re-execs with them on `LD_LIBRARY_PATH`). Verified conv
+fp32/fp16 + UNI load on a 2080 Ti. TRIDENT DataLoaders capped to the job's CPUs.
+
+**State of Ada jobs when paused (Srivastava's account):**
+- 20507 `uni_test` RUNNING but useless (old single-connection GDC code, stuck on slide 1). Cancel approved, but the
+  `scancel` did not go through (VPN dropped). **First thing on resume: `scancel 20507 20080`.**
+- 20080 `extract_frozen` array (6 × 5 batches) PENDING on 20507; would run the GDC path from the current Ada checkout. Cancel it too.
+- 20710 `list_hf_archive` RUNNING (lists the HF archive into `results/hf_archive_listing.txt`; harmless; check TS/BS counts at the end of `logs/20710.out`).
+- 20061, 20076, 20077 held (superseded); can be cancelled.
+- Done: 19993 DX UNI features in `~/project/data/features/uni_v1_20x_*` (my account).
+
+**Code state:** `scripts/extract_frozen.py` now has `--source idc` (default) and parallel ranged downloads with prefetch;
+**the IDC path is not yet tested**. `scripts/make_idc_objects.py` (needs `pip install idc-index`, run on the laptop)
+writes `data/metadata/idc_slides.csv`; it was interrupted, so that CSV does not exist yet.
+
+**Resume steps (Tier 4):**
+1. `ssh ada "scancel 20507 20080"` (and optionally `scancel 20061 20076 20077`).
+2. Laptop: `pip install idc-index` (in a short path venv; Windows long-path limit), `python scripts/make_idc_objects.py`,
+   commit `data/metadata/idc_slides.csv`, push; `ssh ada "cd ~/project && git pull"`.
+3. Test 3 slides from IDC: `sbatch -J uni_test --export=ALL,ENCODER=uni_v1,LIMIT=3,BATCH=0 jobs/extract_frozen.sbatch`;
+   check `logs/uni_test_<id>_*.out` for "N patches … download/segment/patch/encode s" and that TRIDENT reads the
+   DICOM mpp (column `mpp` in `data/features/frozen_uni_v1/timing_<id>.csv`).
+4. If OK: `sbatch --array=0-5%2 --dependency=afterok:<test id> jobs/extract_frozen.sbatch` (QoS: max 20 submitted jobs).
+5. Extraction-equivalence check: ~50 DX slides from IDC through the same pipeline vs TRACE features (cosine similarity,
+   same predictions); IDC rows with `slide_type == DX` are in `idc_slides.csv`. Run with `--slides <DX barcodes>`.
+6. Then 1c (DX vs TS × IHC vs RNA, fixed splits) and 1e (373 TS/BS pairs: ICC, κ, % flipped).

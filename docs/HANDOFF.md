@@ -55,9 +55,10 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
   on the 54 discordant patients the 5-variant consensus sides with RNA 34 : 20 (p = 0.076, suggestive) and the call follows
   the PAM50 subtype (Basal → ER−, LumA → ER+; HER2-enriched is the exception). HER2 tracks amplification (consensus 42 : 18,
   p = 0.003). PR, no preference (cut-off artefact). HER2-low, invisible in H&E.
-- **In progress:** Tier 4 frozen slides on Srivastava's Ada account: manifest `data/metadata/frozen_manifest.csv`
-  (1,516 TS/BS slides, 373 pairs); `scripts/extract_frozen.py` (GDC → TRIDENT → UNI, per-slide mean + capped bag in
-  `~/project/data/features/frozen_uni_v1/`); UNI test job 20507 then array 20080. DX UNI features rebuilt there too (job 19993).
+- **Tier 4 (paused 14 Oct, Srivastava):** manifest `data/metadata/frozen_manifest.csv` (1,516 TS/BS slides, 373 pairs);
+  `scripts/extract_frozen.py` (download → TRIDENT → UNI → per-slide mean + capped bag). GDC is too slow from Ada
+  (weeks); switching the source to the **IDC copy on Google Cloud** (10 MB/s). Exact resume steps and the state of the
+  Ada jobs: `comms/LOG.md`, entry "2026-10-14 (afternoon)".
 - **Open:** Tier 3 thumbnail overlay + heatmap review (attention `.npz` live on Uniyal's Ada account), ER-low write-up;
   Tier 4 equivalence check, 1c, 1e; Tiers 5 and 7.
 - **Slides:** `slides/project_update_slides.tex` is last week's deck; next week's deck still to write.
@@ -83,6 +84,8 @@ No fixed owners. The authoritative to-do list, with checkboxes and the order to 
 - **Ada pip:** PyPI downloads from compute nodes can stall for an hour; use `PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=20` and
   long job limits. **Pin torch** (`torch==2.5.1+cu121`) whenever installing other packages: TRIDENT's install pulled
   torch 2.14+cu130, which the Ada driver (CUDA ≤ 12.8) cannot use, and everything silently ran on CPU (`jobs/fix_torch.sbatch`).
+- **Slide downloads:** GDC is throttled per connection (0.02–0.3 MB/s from Ada). Use the IDC DICOM copy via
+  `storage.googleapis.com/idc-open-data` (S3 copy is as slow as GDC); OpenSlide 4.0 opens DICOM-WSI directly.
 - **TRIDENT** sizes its DataLoaders from `os.cpu_count()` (40 per node), not the job's CPUs: pass `max_workers`.
 - **Ada QoS** allows 20 submitted jobs per user and each array task counts: group batches per task.
 - **Hugging Face:** UNI and UNI2-h are separate gated repos; access to one does not give the other. The Ada gateway has no
