@@ -18,6 +18,9 @@
 #SBATCH --output=logs/%x_%A_%a.out
 set -e
 module load u22/python/3.12.4
+# cuDNN/CUDA libraries from Ada modules (exactly the versions torch 2.5.1+cu121 expects); the pip copies in the venv
+# were damaged by a CUDA-13 upgrade and re-downloading them from compute nodes is very slow (see docs/HANDOFF.md)
+module load u22/cuda/12.1 u22/cudnn/9.1.0-cuda-12
 source $HOME/venvs/whichtruth/bin/activate
 cd $HOME/project
 ENCODER=${ENCODER:-uni_v1}
