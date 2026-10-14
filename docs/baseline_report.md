@@ -1,6 +1,6 @@
 # Baseline report: Option 1 "Which truth does the slide see?"
 
-*Status as of 13 Oct 2026. All baseline runs are complete and have passed the sanity checks. Every number below can be regenerated
+*Status as of 14 Oct 2026 (Section 5d added: DeLong tests, combined 1b evidence, discordant-case description). All baseline runs are complete and have passed the sanity checks. Every number below can be regenerated
 with the scripts listed in Section 7.*
 
 ## 1. Summary
@@ -12,11 +12,13 @@ an apparent IHC preference disappears once the RNA cut-off is chosen fairly. HER
 | Question | Result | Robust? |
 |---|---|---|
 | 1a ER: is the RNA label more predictable than IHC? | **Yes, +0.03 to +0.06 AUC** in all 5 model variants | Paired 95% CI excludes 0 for all 4 patch-feature models and for TITAN; survives 3 RNA cut-off schemes |
-| 1b ER: which side on IHC ≠ RNA patients (n = 54)? | **RNA, 34–39 of 54** in all 5 variants | Significant (p < 0.05) in 3 of 5; UNI p = 0.076 |
+| 1b ER: which side on IHC ≠ RNA patients (n = 54)? | **RNA, 34–39 of 54** in all 5 variants | Significant (p < 0.05) in 3 of 5; **patient-level consensus of all 5: 34 : 20, p = 0.076 (suggestive)**; 66% of calls side with RNA (CI 54–76%) |
+| 1a ER under DeLong | RNA − IHC CI excludes 0 in all 5 variants (p ≤ 0.038) | DeLong and bootstrap CIs agree (5d) |
+| Who are the ER-discordant patients? | Call follows the intrinsic subtype: 15/15 Basal IHC+/RNA− called ER−, 9/9 LumA IHC−/RNA+ called ER+; HER2-enriched IHC+/RNA− mostly called ER+ (8/11) | Descriptive (n = 54) |
 | 1a/1b ER vs RPPA protein | RPPA sits between IHC and RNA; no side preference (30–35 of 63) | Consistent |
 | 1a/1b PR | GMM cut-off: RNA *harder*, model sides with IHC. **Prevalence-matched cut-off: no difference, no side** | The GMM result is a cut-off artefact (all 5 variants) |
 | 1a HER2: amplification vs clinical label | Amplification more predictable in all variants (+0.02 to +0.09) | CI excludes 0 for CONCH (mean, ABMIL); not for UNI |
-| 1b HER2: side on discordant (n = 60) | **Amplification, 34–47 of 60** in all 5 variants | Significant in 3 of 5 |
+| 1b HER2: side on discordant (n = 60) | **Amplification, 34–47 of 60** in all 5 variants | Significant in 3 of 5; consensus 42 : 18, p = 0.003 |
 | 1d HER2 0 vs 1+ / 0 vs low | **Chance (0.40–0.55)**; ERBB2 mRNA alone 0.65 / 0.69 | All variants |
 | Negative control (shuffled ER) | 0.46–0.51 | All variants |
 
@@ -207,17 +209,81 @@ Outputs: `results/attention/summary.csv`, one heatmap per patient (`results/atte
   patch positions only). Attention is moderately focused (about 5–7% of patches carry half of the attention) and similar across
   groups, so the model does not behave differently on discordant cases; it simply reads them as the molecular class.
 
+## 5d. DeLong tests (1a), combined evidence across encoders (1b), who the discordant patients are (14 Oct 2026)
+
+`scripts/titan_oof.py` + `scripts/stats_delong_1b.py`, Ada job 19989 (`jobs/stats_tier2.sbatch`); no new training except TITAN
+out-of-fold predictions on the fixed splits. TITAN and mean-pool use the fixed splits; ABMIL predictions are from the earlier
+folds (flagged "old"). Probabilities are averaged over seeds per patient (each seed's prediction is out-of-fold).
+
+**DeLong.** The two AUCs in 1a use *different reference labels on the same patients*, so the covariance is computed from
+per-patient DeLong influence terms; with identical labels this reproduces the classic DeLong test exactly (`--selftest`).
+In every row below the DeLong 95% CI agrees with the paired bootstrap CI to within ±0.005.
+
+| ΔAUC (molecular − IHC), seed-averaged | n | TITAN | UNI mean | CONCH mean | UNI ABMIL (old) | CONCH ABMIL (old) |
+|---|---|---|---|---|---|---|
+| **ER: RNA − IHC** | 801 | **+0.057** (+0.030, +0.084) p < 0.001 | **+0.036** (+0.007, +0.065) p = 0.014 | **+0.030** (+0.002, +0.058) p = 0.038 | **+0.034** (+0.007, +0.061) p = 0.014 | **+0.049** (+0.020, +0.077) p = 0.001 |
+| ER: RPPA − IHC | 801 | +0.026, p = 0.12 | **+0.041**, p = 0.009 | **+0.033**, p = 0.023 | +0.023, p = 0.15 | +0.019, p = 0.29 |
+| PR: RNA − IHC (GMM cut-off) | 986 | −0.006, p = 0.70 | **−0.048**, p = 0.007 | −0.027, p = 0.10 | **−0.064**, p < 0.001 | −0.032, p = 0.056 |
+| PR: RNA − IHC (prevalence-matched) | 986 | **+0.033**, p = 0.032 | — | — | −0.006, p = 0.73 | +0.006, p = 0.72 |
+| HER2: amplification − strict | 478 | +0.044, p = 0.17 | **+0.071**, p = 0.029 | **+0.074**, p = 0.015 | +0.024, p = 0.44 | +0.060, p = 0.067 |
+| HER2: RPPA − strict | 478 | +0.010, p = 0.80 | +0.045, p = 0.26 | +0.044, p = 0.25 | −0.023, p = 0.53 | +0.064, p = 0.11 |
+
+- **ER (primary claim): holds under DeLong in all 5 variants**, CIs excluding 0 (p ≤ 0.038; significant in 19 of 21 individual seeds).
+- ER RPPA, PR (either cut-off) and HER2 are encoder-dependent: **not robust** under the decision rule (0.5). The single
+  significant prevalence-matched PR result (TITAN, +0.033) is not replicated by UNI or CONCH ABMIL.
+
+**Combined 1b.** The same discordant patients are scored by every variant, so the five counts are not independent and must
+not be summed into one binomial test. Instead, one consensus call per patient (mean P over the 5 variants):
+
+| Discordant pair | n | Per variant (TITAN / UNI m / CONCH m / UNI A / CONCH A) | Consensus molecular : IHC | Unanimous (mol / IHC) | Calls siding molecular (cluster-bootstrap CI) |
+|---|---|---|---|---|---|
+| **ER: IHC vs RNA** | 54 | 39 / 34 / 35 / 34 / 36 | **34 : 20** (p = 0.076) | 29 / 11 | **66%** (54–76%) |
+| ER: IHC vs RPPA | 63 | 33 / 35 / 32 / 34 / 30 | 33 : 30 (p = 0.80) | 29 / 24 | 52% (41–64%) |
+| PR: IHC vs RNA, GMM | 169 | 69 / 55 / 61 / 51 / 70 | 53 : 116 (p < 0.001) | 34 / 71 | 36% (30–42%) |
+| PR: IHC vs RNA, prevalence-matched (3 variants) | 133 | 69 / – / – / 61 / 63 | 64 : 69 (p = 0.73) | 52 / 56 | 48% (41–56%) |
+| **HER2: strict vs amplification** | 60 | 35 / 44 / 39 / 47 / 34 | **42 : 18** (p = 0.003) | 23 / 7 | **66%** (58–75%) |
+
+- ER: every variant puts the majority on the RNA side, but pooled per patient the evidence is **suggestive, not significant**
+  (34 : 20, p = 0.076). TITAN alone (39 : 15, p = 0.0015) is the most extreme variant; **report the consensus, not TITAN**.
+  The fraction of calls siding with RNA (66%, CI excludes 50%) supports the same direction.
+- HER2 combined: the model sides with amplification (42 : 18, p = 0.003), stronger than the 1a ΔAUC suggests.
+- PR: no preference once the cut-off is prevalence-matched (confirms Section 4.2).
+
+**Who the 54 ER-discordant patients are** (`scripts/describe_discordant.py` → `results/er_discordant_summary.txt`,
+`results/er_discordant_cases.csv`; descriptive, n small):
+
+| Direction | PAM50 | Consensus sides with RNA | sides with IHC |
+|---|---|---|---|
+| IHC+/RNA− (n = 34) | Basal-like | **15** | 0 |
+| | HER2-enriched | 3 | **8** |
+| | Normal-like / LumA / NA | 3 | 5 |
+| IHC−/RNA+ (n = 20) | Luminal A | **9** | 0 |
+| | LumB / Basal / HER2 / Normal / NA | 4 | 7 |
+
+- The model's call follows the **intrinsic subtype**: every Basal-like IHC+/RNA− tumour is called ER− and every Luminal A
+  IHC−/RNA+ tumour is called ER+. For reference, 72% of concordant ER− tumours are Basal-like and 68% of concordant ER+ are LumA.
+- **HER2-enriched IHC+/RNA− tumours are the exception**: 8 of 11 are called ER+ (with IHC). The two ER-low exceptions in
+  Section 5c are also HER2-enriched. A plausible reading is that HER2-enriched morphology is not "basal-looking" enough to
+  be called ER−; to check with the heatmaps.
+- Called-with-IHC discordant cases sit closer to the ESR1 cut-off (median ESR1 − cut-off −1.1 vs −2.6 log2 for IHC+/RNA−),
+  i.e. the model disagrees with RNA mainly where RNA itself is borderline.
+- ER-low (IHC+, < 10%): 10 patients (6 Basal, 3 HER2-enriched, 1 NA); consensus sides with RNA in 8.
+- Histology and stage show no clear pattern (ductal 27 / lobular 4 / other 3 among IHC+/RNA−).
+
+Interpretation for the report: on H&E, "ER status" is largely read through the tumour's intrinsic-subtype morphology
+(basal vs luminal), which RNA reflects more faithfully than IHC in these discordant cases.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |
 |---|---|
 | ~~Fold assignment depends on the scikit-learn version (S6)~~ | **Done:** fixed splits in `data/splits/folds.csv`, scikit-learn pinned, linear baselines rerun (Section 5b) |
 | Attention maps show patch positions, not tissue | Overlay on slide thumbnails (download a few DX slides) to confirm attention on tumour |
-| Small discordant groups (ER 54, HER2 60, ER-low 11) | Report exact counts; consider pooling encoders with a combined test; avoid over-claiming subgroups |
-| HER2 significance encoder-dependent | Report all variants; add DeLong tests over seeds |
+| Small discordant groups (ER 54, HER2 60, ER-low 11) | **Done (5d):** patient-level consensus across 5 variants; ER 34 : 20 (p = 0.076) is suggestive only, report it as such |
+| HER2 significance encoder-dependent | **Done (5d):** DeLong per variant; HER2 1a not robust across encoders, but combined 1b 42 : 18 (p = 0.003) |
 | CONCH mean-pool numbers on slide 4 are from the laptop run | Update slides with the Ada values (conclusions unchanged); change the PR bullet to "no reliable preference" |
-| 1c and 1e not yet run | Get UNI weights; encode 1,517 frozen TS/BS slides on Ada (TRIDENT + UNI) |
-| Attention analysis is exploratory (n = 10 ER-low) | Report as a lead; describe discordant cases by PAM50 / grade in the final report |
+| 1c and 1e not yet run | UNI access granted (Srivastava); manifest of 1,516 TS/BS slides built; extraction queued on Ada (Section 7) |
+| Attention analysis is exploratory (n = 10 ER-low) | Report as a lead. **Done (5d):** discordant cases described by PAM50 / ER % / histology; check HER2-enriched exceptions in the heatmaps |
 
 ## 7. Files and how to reproduce
 
@@ -229,4 +295,8 @@ Outputs: `results/attention/summary.csv`, one heatmap per patient (`results/atte
 | UNI / CONCH mean + ABMIL | `results/mil_{uni,conch}_v1_20x_summary.csv`, `*_oof.csv.gz` | `jobs/train_mil.sbatch` → `scripts/train_mil.py` (Ada jobs 17536, 17537) |
 | PR prevalence-matched ABMIL | `results/mil_{uni,conch}_v1_20x_prprev_summary.csv` | `train_mil.py --only pr --pr-cut prevmatch` (jobs 17660, 17661) |
 | Sanity checks + paired CIs | `results/sanity_check.txt`, `results/paired_ci_patch.csv` | `scripts/sanity_check.py` |
+| DeLong 1a, combined 1b | `results/stats_delong_1a.csv`, `results/stats_combined_1b.csv`, `results/stats_combined_1b_patients.csv` | `jobs/stats_tier2.sbatch` → `scripts/titan_oof.py`, `scripts/stats_delong_1b.py` (Ada job 19989) |
+| TITAN out-of-fold predictions (fixed splits) | `results/titan_linear_{fixedsplits,prprev}_oof.csv.gz` | `scripts/titan_oof.py` |
+| ER-discordant case description | `results/er_discordant_summary.txt`, `results/er_discordant_cases.csv` | `scripts/describe_discordant.py` |
+| Frozen-slide manifest (1c, 1e) | `data/metadata/frozen_manifest.csv` | `scripts/make_frozen_manifest.py` |
 | Job logs | `results/logs/17536.out` … `17661.out` | Ada |

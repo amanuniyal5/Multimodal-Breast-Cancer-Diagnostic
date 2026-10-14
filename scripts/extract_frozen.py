@@ -50,6 +50,7 @@ os.makedirs(a.work, exist_ok=True)
 os.makedirs(a.out, exist_ok=True)
 dev = "cuda:0" if torch.cuda.is_available() else "cpu"
 job = os.environ.get("SLURM_JOB_ID", "local")
+NCPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 4))
 if a.encoder == "uni_v1" and dev == "cpu":
     sys.exit("no usable GPU (check the torch build vs the driver): refusing to run UNI on CPU")
 t_start = time.time()
@@ -119,10 +120,11 @@ for _, s in todo.iterrows():
         row["t_download"] = time.time() - t
 
         t = time.time()
-        slide = OpenSlideWSI(slide_path=svs, lazy_init=False)
+        # TRIDENT sizes its DataLoaders from os.cpu_count() (40 on a node), not the job allocation: cap them
+        slide = OpenSlideWSI(slide_path=svs, lazy_init=False, max_workers=NCPU)
         row["mpp"] = getattr(slide, "mpp", np.nan)
         slide.segment_tissue(segmentation_model=seg_model, target_mag=10, job_dir=wdir, device=dev,
-                             num_workers=int(os.environ.get("SLURM_CPUS_PER_TASK", 4)))
+                             num_workers=NCPU)
         row["t_segment"] = time.time() - t
 
         t = time.time()
