@@ -42,3 +42,17 @@ def bootstrap_auc_ci(y, p, n=1000, seed=0):
             continue
         aucs.append(roc_auc_score(y[i], p[i]))
     return np.percentile(aucs, [2.5, 97.5])
+
+
+def load_frozen_means(feat_dir, manifest):
+    """Per-slide mean UNI features from scripts/extract_frozen.py (<feat_dir>/<slide_barcode>.npz) for the manifest rows
+    that have been extracted. Returns the manifest columns plus feature columns 0..D-1 (integers)."""
+    import os
+    rows, X = [], []
+    for r in manifest.itertuples(index=False):
+        f = os.path.join(feat_dir, f"{r.slide_barcode}.npz")
+        if os.path.exists(f):
+            rows.append(r)
+            X.append(np.load(f)["mean"])
+    meta = pd.DataFrame(rows, columns=manifest.columns).reset_index(drop=True)
+    return pd.concat([meta, pd.DataFrame(np.stack(X))], axis=1) if X else meta
