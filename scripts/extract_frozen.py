@@ -20,6 +20,14 @@ import shutil
 import sys
 import time
 
+# On Ada, use the system cuDNN 9.1 / CUDA 12.1 libraries (the versions torch 2.5.1+cu121 expects): the pip copies in our
+# venv were damaged by a CUDA-13 upgrade. LD_LIBRARY_PATH must be set before the process starts, so re-exec once.
+_ADA_LIBS = ["/data3/u22/cuDNN/9.1.0.70-cuda-12/lib", "/data3/u22/cuda-12.1/lib64"]
+_ld = os.environ.get("LD_LIBRARY_PATH", "")
+if all(os.path.isdir(d) for d in _ADA_LIBS) and not all(d in _ld.split(":") for d in _ADA_LIBS):
+    os.environ["LD_LIBRARY_PATH"] = ":".join(_ADA_LIBS + ([_ld] if _ld else []))
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
 import h5py
 import numpy as np
 import pandas as pd
