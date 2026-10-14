@@ -16,9 +16,12 @@ Usage: python scripts/extract_frozen.py --manifest data/metadata/frozen_manifest
 """
 import argparse
 import os
+import queue
 import shutil
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 # On Ada, use the system cuDNN 9.1 / CUDA 12.1 libraries (the versions torch 2.5.1+cu121 expects): the pip copies in our
 # venv were damaged by a CUDA-13 upgrade. LD_LIBRARY_PATH must be set before the process starts, so re-exec once.
@@ -48,6 +51,10 @@ ap.add_argument("--patch-size", type=int, default=256)
 ap.add_argument("--cap", type=int, default=4096)
 ap.add_argument("--batch-limit", type=int, default=256, help="patches per GPU batch")
 ap.add_argument("--keep-h5", action="store_true", help="also keep TRIDENT's full feature .h5 (large)")
+ap.add_argument("--dl-workers", type=int, default=24, help="parallel HTTP range requests per slide (GDC throttles each "
+                "connection to ~0.02-0.3 MB/s from Ada; 16 in parallel gave 1.65 MB/s)")
+ap.add_argument("--chunk-mb", type=int, default=16)
+ap.add_argument("--prefetch", type=int, default=2, help="slides downloaded ahead while the GPU encodes")
 a = ap.parse_args()
 
 from trident import OpenSlideWSI  # noqa: E402  (after argparse so --help works without TRIDENT)
@@ -97,35 +104,72 @@ else:  # timing surrogate: UNI v1 is timm vit_large_patch16_224 (init_values=1e-
 log("encoder ready:", a.encoder)
 
 
+GDC = "https://api.gdc.cancer.gov/data/"
+
+
+def fetch_range(url, fd, start, end):
+    """one byte range, written at its offset; retried with back-off (GDC connections stall)"""
+    for attempt in range(8):
+        try:
+            with requests.get(url, headers={"Range": f"bytes={start}-{end}"}, stream=True, timeout=(30, 120)) as r:
+                if r.status_code != 206:
+                    raise IOError(f"HTTP {r.status_code}")
+                pos = start
+                for chunk in r.iter_content(chunk_size=1 << 20):
+                    os.pwrite(fd, chunk, pos)
+                    pos += len(chunk)
+            if pos != end + 1:
+                raise IOError(f"short range {pos - start} of {end - start + 1} bytes")
+            return
+        except Exception:  # noqa: BLE001
+            if attempt == 7:
+                raise
+            time.sleep(min(60, 5 * 2 ** attempt))
+
+
 def download(file_id, path, size):
-    with requests.get(f"https://api.gdc.cancer.gov/data/{file_id}", stream=True, timeout=600) as r:
-        r.raise_for_status()
-        with open(path, "wb") as f:
-            for chunk in r.iter_content(chunk_size=1 << 22):
-                f.write(chunk)
-    got = os.path.getsize(path)
-    if got != size:  # GDC downloads can truncate silently (see HANDOFF gotchas)
-        raise IOError(f"truncated download: {got} of {size} bytes")
+    """parallel ranged download; the file size is checked (GDC downloads can truncate silently)"""
+    step = a.chunk_mb << 20
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
+    try:
+        os.ftruncate(fd, size)
+        with ThreadPoolExecutor(a.dl_workers) as ex:
+            futs = [ex.submit(fetch_range, GDC + file_id, fd, b, min(b + step, size) - 1) for b in range(0, size, step)]
+            for f in futs:
+                f.result()
+    finally:
+        os.close(fd)
+    if os.path.getsize(path) != size:
+        raise IOError(f"size mismatch: {os.path.getsize(path)} of {size} bytes")
+
+
+def prefetcher(rows_, q):
+    """download slides in order, a.prefetch ahead of the encoder; puts (slide row, path, seconds or exception)"""
+    for _, s_ in rows_.iterrows():
+        wdir_ = os.path.join(a.work, s_.slide_barcode)
+        os.makedirs(wdir_, exist_ok=True)
+        svs_ = os.path.join(wdir_, s_.file_name)
+        t0 = time.time()
+        try:
+            download(s_.file_id, svs_, int(s_["size"]))
+            q.put((s_, svs_, time.time() - t0))
+        except Exception as e:  # noqa: BLE001
+            q.put((s_, svs_, e))
+    q.put(None)
 
 
 rows = []
 timing_csv = os.path.join(a.out, f"timing_{job}.csv")
-for _, s in todo.iterrows():
-    wdir = os.path.join(a.work, s.slide_barcode)
-    os.makedirs(wdir, exist_ok=True)
-    svs = os.path.join(wdir, s.file_name)
+q = queue.Queue(maxsize=max(1, a.prefetch))
+threading.Thread(target=prefetcher, args=(todo, q), daemon=True).start()
+while (item := q.get()) is not None:
+    s, svs, dl = item
+    wdir = os.path.dirname(svs)
     row = {"slide_barcode": s.slide_barcode, "size_GB": s["size"] / 1e9, "node": os.uname().nodename}
     try:
-        t = time.time()
-        for attempt in range(3):
-            try:
-                download(s.file_id, svs, int(s["size"]))
-                break
-            except Exception as e:  # noqa: BLE001
-                log(f"  download attempt {attempt + 1} failed: {e}")
-                if attempt == 2:
-                    raise
-        row["t_download"] = time.time() - t
+        if isinstance(dl, Exception):
+            raise dl
+        row["t_download"] = dl  # overlaps with encoding of the previous slide
 
         t = time.time()
         # TRIDENT sizes its DataLoaders from os.cpu_count() (40 on a node), not the job allocation: cap them
