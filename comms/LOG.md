@@ -218,3 +218,7 @@ tissue, not pipelines. The higher feature norm of frozen slides (~24–27 vs ~20
 
 **To do when extraction 20080 is complete:** `sbatch jobs/frozen_analysis.sbatch`, copy `results/frozen_1c*.csv*`
 and `results/frozen_1e*.csv` to the repo, write up 1c/1e.
+- 21:10: extraction at ~73 s/slide per task (download-bound), 260 done, 0 failures. Raised array throttle to 4
+  (`scontrol update JobId=20080 ArrayTaskThrottle=4`); only 3 fit: Ada caps memory at 1.5 GB/CPU, so `-c 6
+  --mem-per-cpu=3G` becomes 12 CPUs × 1.5 GB, and 4 × 12 > the 40-CPU user limit. Peak RSS: 11 GB (frozen), 17.5 GB (DX).
+  Expected completion ~06:00 on 15 Oct.
