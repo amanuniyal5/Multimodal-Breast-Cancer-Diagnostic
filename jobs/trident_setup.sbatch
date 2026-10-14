@@ -17,7 +17,10 @@ export PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=20
 python -m pip install --no-cache-dir -q openslide-python openslide-bin timm h5py
 [ -d $HOME/src/TRIDENT ] || git clone -q https://github.com/mahmoodlab/TRIDENT.git $HOME/src/TRIDENT
 cd $HOME/src/TRIDENT && echo "TRIDENT commit $(git rev-parse --short HEAD) $(git log -1 --format=%cd)"
-python -m pip install --no-cache-dir -q -e .
+# pin torch: an unpinned install pulls the newest CUDA build, which the Ada driver cannot run (job 20078)
+echo torch==2.5.1+cu121 > /tmp/torch_pin_$$.txt
+echo torchvision==0.20.1+cu121 >> /tmp/torch_pin_$$.txt
+python -m pip install --no-cache-dir -q -e . -c /tmp/torch_pin_$$.txt --extra-index-url https://download.pytorch.org/whl/cu121
 cd $HOME/project
 python - <<'PY'
 import inspect, trident, openslide, timm, torch
