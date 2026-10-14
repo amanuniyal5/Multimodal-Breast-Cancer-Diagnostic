@@ -184,3 +184,11 @@ show whether that is the pipeline or the tissue (frozen vs FFPE).
 
 **Next open items:** check 20080 / 21300; then 1c (DX vs TS × IHC vs RNA, fixed splits, % tumour cells as covariate)
 and 1e (373 TS/BS pairs); Tier 3 thumbnail overlay + heatmap review; ER-low write-up.
+
+## 2026-10-14 (19:15) · Srivastava (via Claude Code) · Tier 4 progress note
+
+- Extraction array 20080: tasks 0 and 1 at ~1 slide/min each, 71 slides done, 0 failures; all 1,516 expected ~06:00–08:00 on 15 Oct.
+- IDC codec check (idc-index `sm_instance_index`): **all TS and BS slides are JPEG baseline** (fine). 48 of 1,132 DX slides
+  are JPEG 2000 (YBR_FULL_422), which OpenSlide's DICOM reader cannot open: one of the 50 equivalence-check slides
+  (TCGA-AO-A1KO-01Z-00-DX1) failed for that reason, so the check will use 49. Only matters if DX ever has to be
+  re-extracted ourselves (then take those 48 from GDC).
