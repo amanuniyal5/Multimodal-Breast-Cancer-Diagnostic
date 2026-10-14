@@ -1,4 +1,4 @@
-# Handoff: full context (last updated 13 Oct 2026)
+# Handoff: full context (last updated 14 Oct 2026)
 
 Written so either of us (and our Claude Code sessions) has the full context from the planning sessions.
 There are no fixed owners: whoever is working picks the next open item in `docs/PROJECT_PLAN.md`.
@@ -43,18 +43,24 @@ Update the "Current state" section whenever you finish something.
 | Use TRACE precomputed features for DX slides; extract frozen slides ourselves | TRACE covers DX only (verified); avoids downloading 1.16 TB of DX slides |
 | Do **not** re-extract all DX slides for 1c | Instead check our extraction matches TRACE on ~50 DX slides |
 
-## 3. Current state (13 Oct 2026)
+## 3. Current state (14 Oct 2026)
 
 The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a summary.
 
-- **Done:** Tier 0 (data, labels, splits, Ada setup, UNI/CONCH features), Tier 1 (1a/1b/1d with TITAN, UNI, CONCH,
-  mean-pool and ABMIL; sanity checks), most of Tier 2 (cut-off robustness, PR re-check, fixed-split rerun), and the
-  attention maps from Tier 3. Results: [`baseline_report.md`](baseline_report.md).
-- **Main findings so far:** ER, the slide tracks RNA over IHC (+0.03 to +0.06 AUC, all models; sides with RNA 34–39/54);
-  HER2, tracks amplification; PR, no preference (earlier result was a cut-off artefact); HER2-low, invisible in H&E.
-- **Open:** Tier 0 access items (both members on Ada + Hugging Face), Tier 2 statistics (DeLong, combined 1b evidence),
-  Tier 3 (thumbnail overlay, discordant-case description), Tier 4 frozen slides (1c, 1e), Tiers 5 and 7.
-- **Slides:** `slides/project_update_slides.tex` still needs the PR bullet changed to "no reliable preference".
+- **Done:** Tier 0 (data, labels, splits, Ada setup for both, UNI/CONCH features), Tier 1 (1a/1b/1d with TITAN, UNI, CONCH,
+  mean-pool and ABMIL; sanity checks), Tier 2 (cut-off robustness, PR re-check, fixed-split rerun, DeLong tests, combined
+  1b evidence), and from Tier 3 the attention maps and the discordant-case description. Results:
+  [`baseline_report.md`](baseline_report.md) (Section 5d is the newest).
+- **Main findings so far:** ER, the slide tracks RNA over IHC (+0.03 to +0.06 AUC; DeLong CI excludes 0 in all 5 variants);
+  on the 54 discordant patients the 5-variant consensus sides with RNA 34 : 20 (p = 0.076, suggestive) and the call follows
+  the PAM50 subtype (Basal → ER−, LumA → ER+; HER2-enriched is the exception). HER2 tracks amplification (consensus 42 : 18,
+  p = 0.003). PR, no preference (cut-off artefact). HER2-low, invisible in H&E.
+- **In progress:** Tier 4 frozen slides on Srivastava's Ada account: manifest `data/metadata/frozen_manifest.csv`
+  (1,516 TS/BS slides, 373 pairs); `scripts/extract_frozen.py` (GDC → TRIDENT → UNI, per-slide mean + capped bag in
+  `~/project/data/features/frozen_uni_v1/`); UNI test job 20507 then array 20080. DX UNI features rebuilt there too (job 19993).
+- **Open:** Tier 3 thumbnail overlay + heatmap review (attention `.npz` live on Uniyal's Ada account), ER-low write-up;
+  Tier 4 equivalence check, 1c, 1e; Tiers 5 and 7.
+- **Slides:** `slides/project_update_slides.tex` is last week's deck; next week's deck still to write.
 
 ## 4. Next actions
 
@@ -74,6 +80,13 @@ No fixed owners. The authoritative to-do list, with checkboxes and the order to 
 - The shuffled-label control gives AUC slightly below 0.5 (0.43–0.46) with single-seed CV: a known
   fold-prevalence artefact. Repeated CV should bring it to 0.50.
 - On Windows, set `LOKY_MAX_CPU_COUNT=4` to silence a harmless joblib warning.
+- **Ada pip:** PyPI downloads from compute nodes can stall for an hour; use `PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=20` and
+  long job limits. **Pin torch** (`torch==2.5.1+cu121`) whenever installing other packages: TRIDENT's install pulled
+  torch 2.14+cu130, which the Ada driver (CUDA ≤ 12.8) cannot use, and everything silently ran on CPU (`jobs/fix_torch.sbatch`).
+- **TRIDENT** sizes its DataLoaders from `os.cpu_count()` (40 per node), not the job's CPUs: pass `max_workers`.
+- **Ada QoS** allows 20 submitted jobs per user and each array task counts: group batches per task.
+- **Hugging Face:** UNI and UNI2-h are separate gated repos; access to one does not give the other. The Ada gateway has no
+  usable Python, so put the token in `~/.cache/huggingface/token` (chmod 600) directly.
 
 ## 6. Where else context lives
 

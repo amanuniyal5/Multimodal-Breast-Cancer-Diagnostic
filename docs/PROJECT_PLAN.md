@@ -99,7 +99,7 @@ reference standards). We do **not** propose a new architecture.
 
 **Exit gate (met):** consistent ER result across 5 model variants; all sanity checks pass or are explained.
 
-## Tier 2: Robustness and consistency 🔄
+## Tier 2: Robustness and consistency ✅
 
 **Goal:** make every Tier 1 claim reproducible and robust before interpreting it.
 
@@ -122,7 +122,7 @@ reference standards). We do **not** propose a new architecture.
 - [ ] Overlay heatmaps on slide thumbnails for ~6 example patients (download those DX slides) to confirm attention sits on tumour
 - [ ] Review the heatmaps: do ER-low cases look like ER-negative morphology?
 - [x] Attention statistics by group (entropy, fraction of patches holding 50% of attention; report Section 5c)
-- [~] Describe discordant patients: PAM50, ER % stained, grade/histology (from the clinical table) (Srivastava, 2026-10-14)
+- [x] Describe discordant patients: PAM50, ER % stained, grade/histology (from the clinical table) (`scripts/describe_discordant.py`, report 5d: call follows intrinsic subtype; HER2-enriched IHC+/RNA− are the exception)
 - [ ] ER-low analysis written up as an exploratory lead (n = 11)
 
 **Exit gate:** a short, evidence-backed explanation section in the report, with 3–4 example heatmaps.
@@ -136,7 +136,7 @@ reference standards). We do **not** propose a new architecture.
 - [~] Time one TS slide through TRIDENT + UNI on an RTX 2080 Ti; log seconds per slide (Srivastava, 2026-10-14)
 - [ ] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions)
 - [~] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags (Srivastava, 2026-10-14: array 20080 queued)
-- [ ] Add % tumour cells per frozen slide (biospecimen table) as a covariate
+- [x] Add % tumour cells per frozen slide (biospecimen table) as a covariate (columns in `data/metadata/frozen_manifest.csv`; 1,513 of 1,516 slides)
 - [ ] **1c:** 2 × 2 (DX vs TS × IHC vs RNA) with mean-pool (ABMIL optional), fixed splits, interaction test
 - [ ] **1e:** TS vs BS agreement on 374 pairs: ICC of P(ER+), κ of calls, % flipped
 
@@ -173,11 +173,11 @@ reference standards). We do **not** propose a new architecture.
 
 | Tier | Status | Blocking item |
 |---|---|---|
-| 0 Foundations | Done except S access items | S Ada access, HF access |
+| 0 Foundations | Done except Uniyal HF/CONCH item | Srivastava: Ada + UNI done, CONCH access pending |
 | 1 Core baselines | Done | — |
-| 2 Robustness | Nearly done | DeLong test; combined 1b evidence |
-| 3 Interpretation | In progress | Thumbnail overlay; heatmap review; discordant-case description |
-| 4 Frozen slides | Not started | UNI weights on Ada |
+| 2 Robustness | Done (14 Oct, report 5d) | — |
+| 3 Interpretation | In progress | Thumbnail overlay + heatmap review (attention `.npz` on Uniyal's Ada account); ER-low write-up |
+| 4 Frozen slides | In progress (Srivastava) | UNI test job 20507 → extraction array 20080 on Ada; then equivalence check, 1c, 1e |
 | 5 Consolidation | Not started | Tiers 2–4 |
 | 6 Optional | Not started | Tiers 0–5 |
 | 7 Deliverables | Partly (update deck exists) | Final numbers |
