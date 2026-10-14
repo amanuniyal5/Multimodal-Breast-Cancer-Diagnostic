@@ -80,7 +80,13 @@ def log(*x):
 
 m = pd.read_csv(a.manifest)
 if a.slides:
-    m = m[m.slide_barcode.isin(a.slides.split(","))]
+    want = a.slides.split(",")
+    extra = [b for b in want if b not in set(m.slide_barcode)]
+    if extra and a.source == "idc":  # e.g. DX slides for the extraction-equivalence check (not in the frozen manifest)
+        x = pd.read_csv(a.idc_objects)
+        x = x[x.slide_barcode.isin(extra)].groupby("slide_barcode", as_index=False)["size"].sum()
+        m = pd.concat([m, x.assign(patient=x.slide_barcode.str[:12])], ignore_index=True)
+    m = m[m.slide_barcode.isin(want)]
 elif a.batch is not None:
     sel = set()
     for part in str(a.batch).split(","):
