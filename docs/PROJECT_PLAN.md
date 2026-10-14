@@ -134,7 +134,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] UNI weights downloaded on Ada (needs Hugging Face approval) (Srivastava: loaded in job 21299)
 - [x] Build GDC manifest of tumour TS/BS slides (1,517 slides, 430 GB) from `data/metadata/gdc_slides.csv` (`data/metadata/frozen_manifest.csv`: 1,516 slides, 373 pairs, 30 batches)
 - [x] Time one TS slide through TRIDENT + UNI on an RTX 2080 Ti; log seconds per slide (job 21299, IDC source: download 30 s, segment 17 s, encode 15 s per slide; download overlaps encoding)
-- [~] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions) (Srivastava, 2026-10-14: `scripts/equivalence_check.py`, job 21300)
+- [x] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions) (job 21300: 46 slides, cosine 1.0000 vs 0.33 for other patients, max |diff| ≤ 0.002, ER P(+) r = 1.000, 46/46 same call; 4 JPEG-2000 slides unreadable; `results/equivalence_check.csv`)
 - [~] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags (Srivastava, 2026-10-14: source switched to the IDC copy on Google Cloud, GDC too slow; array 20080 running)
 - [x] Add % tumour cells per frozen slide (biospecimen table) as a covariate (columns in `data/metadata/frozen_manifest.csv`; 1,513 of 1,516 slides)
 - [ ] **1c:** 2 × 2 (DX vs TS × IHC vs RNA) with mean-pool (ABMIL optional), fixed splits, interaction test
