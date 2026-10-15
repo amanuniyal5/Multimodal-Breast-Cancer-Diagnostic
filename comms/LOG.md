@@ -258,3 +258,20 @@ note, extend `sanity_check.py` to 1c/1e); Tier 7 (compile and finalise the deck,
 **Running / queued on Ada (Srivastava):** attention rerun 22533 → overlay 22542; ABMIL on fixed splits: UNI 22534,
 UNI PR-prevmatch 22535, CONCH features 22536 → CONCH 22537, CONCH PR-prevmatch 22538; 1c rerun 22552;
 final tables + sanity 22560 (after all of these).
+
+## 2026-10-15 (20:00) · Srivastava (via Claude Code) · Tiers 3 and 5 done
+
+**Results (all Ada jobs finished, 13:36–19:36):**
+- ABMIL rerun on the fixed splits (UNI 22534/22535, CONCH 22537/22538). Final tables T1–T5 in `docs/FINAL_RESULTS.md`
+  (job 22560, `scripts/final_tables.py`). **Change vs old folds:** UNI ABMIL ER ΔAUC +0.018 (CI −0.008, +0.044; was
+  +0.034); CONCH ABMIL +0.045. ER RNA-over-IHC: positive in all 5 variants, CI excludes 0 in 4 of 5. HER2 amplification
+  ΔAUC significant in 3 of 5. 1b counts unchanged.
+- Primary claims (Holm, 3 tests, UNI mean-pool): P1 ER 1a supported (adj. p = 0.042); P2 ER 1b suggestive (0.152);
+  P3 1c "no change" supported (interaction CI ±0.024).
+- Sanity checks S1–S15 (job 22560): all pass except the known S6-CONCH item (old laptop run vs Ada).
+- Attention overlays on real DX slides (attention rerun 22533 → overlay 22542, report 5c-2): attention sits on tumour;
+  ER-low Basal cases resemble the ER− reference; the HER2-enriched exceptions attend to luminal/apocrine-like cells.
+  9 of 10 images in the repo; TCGA-LL-A5YP.png still on Ada (copy was truncated by a VPN drop).
+- ER-low write-up (report 5f).
+
+**Next open items:** Tier 7 (compile the deck, final report, rehearsal, repo clean-up); optional Tier 6.

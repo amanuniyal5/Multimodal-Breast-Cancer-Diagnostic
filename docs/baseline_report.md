@@ -211,6 +211,34 @@ Outputs: `results/attention/summary.csv`, one heatmap per patient (`results/atte
   patch positions only). Attention is moderately focused (about 5–7% of patches carry half of the attention) and similar across
   groups, so the model does not behave differently on discordant cases; it simply reads them as the molecular class.
 
+### 5c-2. Attention on the real slides: overlay review (15 Oct 2026)
+
+`scripts/attention_overlay.py` (Ada job 22542): the ABMIL attention maps were regenerated on Srivastava's account (job
+22533; same model and outcome as 5c: sides with RNA 35/54, ER-low 8/10) and drawn on the actual DX slides, downloaded from
+the IDC copy, with the 6 highest- and 6 lowest-attention 20x patches per slide. 10 patients; images in
+`results/attention_overlay/` (one, TCGA-LL-A5YP, still to be re-copied from Ada). Coordinates map correctly (attention
+follows the tissue outline; patch side 508-521 px at level 0 = 256 px at 20x). Review of six slides covering every group
+(non-expert reading; a pathologist should confirm the morphology terms):
+
+| Patient | Group | Call | Where attention sits / top patches |
+|---|---|---|---|
+| TCGA-AN-A0FS | Reference ER+ (LumA) | ER+ | Dense tumour nests; top patches: cohesive, fairly uniform tumour cells |
+| TCGA-E2-A1LL | Reference ER− (Basal) | ER− | The tumour mass (not the adjacent fat/stroma); top patches: large pleomorphic cells, prominent nucleoli |
+| TCGA-A2-A4S1 | ER-low, Basal, IHC+/RNA− | ER− (RNA) | Central tumour; 4 of 6 top patches high-grade pleomorphic tumour like the ER− reference; **2 of 6 are blood/haemorrhage** |
+| TCGA-AR-A0TX | ER-low, HER2-enriched, IHC+/RNA− | ER+ (IHC) | Tumour nests at the periphery; top patches: cohesive cells with round, uniform nuclei ("luminal-looking"); one stroma patch |
+| TCGA-E2-A152 | HER2-enriched, IHC+/RNA− | ER+ (IHC) | Central tumour; top patches: large cells with abundant pink cytoplasm and prominent nucleoli (apocrine-like?) |
+| TCGA-A1-A0SH | LumA, IHC−/RNA+ | ER+ (RNA) | Gland-forming tumour and cords of low-grade cells inside the inked area; ink and fat get the lowest attention |
+
+- **Attention sits on tumour.** In every reviewed slide the high-attention region is the tumour; fat, empty space and
+  ink are consistently the lowest-attention patches. This answers the open caveat of Section 5c.
+- **ER-low Basal tumours look like ER-negative tumours to the model:** their top patches resemble the ER− reference
+  (high-grade, pleomorphic), which is why they are called ER− in agreement with RNA.
+- **The HER2-enriched exceptions look different:** the model attends to cohesive or apocrine-like cells and calls them
+  ER+. A plausible (untested) explanation is that HER2-enriched/apocrine morphology is not "basal-looking", so the model
+  places it on the luminal side even though ESR1 RNA is low.
+- **Caveat:** some attention goes to non-tumour content (blood in TCGA-A2-A4S1, stroma in TCGA-AR-A0TX). Six slides are
+  an illustration, not a quantitative test.
+
 ## 5d. DeLong tests (1a), combined evidence across encoders (1b), who the discordant patients are (14 Oct 2026)
 
 `scripts/titan_oof.py` + `scripts/stats_delong_1b.py`, Ada job 19989 (`jobs/stats_tier2.sbatch`); no new training except TITAN
@@ -373,7 +401,7 @@ numbers in `FINAL_RESULTS.md` are the ones to report.**
 | Caveat | Next step |
 |---|---|
 | ~~Fold assignment depends on the scikit-learn version (S6)~~ | **Done:** fixed splits in `data/splits/folds.csv`, scikit-learn pinned, linear baselines rerun (Section 5b) |
-| Attention maps show patch positions, not tissue | Overlay on slide thumbnails (download a few DX slides) to confirm attention on tumour |
+| ~~Attention maps show patch positions, not tissue~~ | **Done (5c-2):** overlays on the real slides; attention sits on tumour |
 | Small discordant groups (ER 54, HER2 60, ER-low 11) | **Done (5d):** patient-level consensus across 5 variants; ER 34 : 20 (p = 0.076) is suggestive only, report it as such |
 | HER2 significance encoder-dependent | **Done (5d):** DeLong per variant; HER2 1a not robust across encoders, but combined 1b 42 : 18 (p = 0.003) |
 | CONCH mean-pool numbers on slide 4 are from the laptop run | Update slides with the Ada values (conclusions unchanged); change the PR bullet to "no reliable preference" |

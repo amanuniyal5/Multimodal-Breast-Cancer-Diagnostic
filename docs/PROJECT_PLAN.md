@@ -114,16 +114,16 @@ reference standards). We do **not** propose a new architecture.
 
 **Exit gate:** every headline number comes from the fixed splits (or is explicitly flagged), and has n, mean ± SD and a CI or p-value.
 
-## Tier 3: Interpretation of the FFPE results 🔄
+## Tier 3: Interpretation of the FFPE results ✅
 
 **Goal:** explain why the slide follows RNA for ER (and amplification for HER2).
 
 - [x] ABMIL attention heatmaps for 54 ER-discordant + 10 reference patients (Ada job 19722; `results/attention/`)
-- [~] Overlay heatmaps on slide thumbnails for ~6 example patients (download those DX slides) to confirm attention sits on tumour (Srivastava, 2026-10-15)
-- [~] Review the heatmaps: do ER-low cases look like ER-negative morphology? (Srivastava, 2026-10-15)
+- [x] Overlay heatmaps on slide thumbnails for ~6 example patients (download those DX slides) to confirm attention sits on tumour (10 patients, `results/attention_overlay/`, report 5c-2)
+- [x] Review the heatmaps: do ER-low cases look like ER-negative morphology? (report 5c-2: attention on tumour; ER-low Basal resemble the ER− reference; HER2-enriched exceptions look luminal/apocrine-like)
 - [x] Attention statistics by group (entropy, fraction of patches holding 50% of attention; report Section 5c)
 - [x] Describe discordant patients: PAM50, ER % stained, grade/histology (from the clinical table) (`scripts/describe_discordant.py`, report 5d: call follows intrinsic subtype; HER2-enriched IHC+/RNA− are the exception)
-- [~] ER-low analysis written up as an exploratory lead (n = 11) (Srivastava, 2026-10-15)
+- [x] ER-low analysis written up as an exploratory lead (n = 11) (report 5f: n = 10 IHC+/RNA−; 8/10 FFPE, 7/10 frozen called ER−)
 
 **Exit gate:** a short, evidence-backed explanation section in the report, with 3–4 example heatmaps.
 
@@ -142,14 +142,14 @@ reference standards). We do **not** propose a new architecture.
 
 **Exit gate:** 1c interaction estimate with CI and 1e agreement metrics, both with sanity checks like S1–S8.
 
-## Tier 5: Statistics, consolidation and robustness of the whole story ⬜
+## Tier 5: Statistics, consolidation and robustness of the whole story ✅
 
 **Goal:** one consistent set of final tables.
 
-- [~] Final tables for 1a–1e from one environment and the fixed splits (Srivastava, 2026-10-15)
-- [~] Multiple-testing note (how many tests, which are primary) (Srivastava, 2026-10-15)
-- [~] Primary vs secondary claims written down (primary: ER 1a/1b; secondary: HER2, PR null, HER2-low, ER-low) (Srivastava, 2026-10-15)
-- [~] Re-run `sanity_check.py` (extend it to the frozen-slide outputs) (Srivastava, 2026-10-15)
+- [x] Final tables for 1a–1e from one environment and the fixed splits (`docs/FINAL_RESULTS.md` T1–T5, Ada job 22560; ABMIL rerun on fixed splits)
+- [x] Multiple-testing note (how many tests, which are primary) (`docs/FINAL_RESULTS.md` Section 2: ~80 tests, Holm on 3 primary)
+- [x] Primary vs secondary claims written down (primary: ER 1a/1b; secondary: HER2, PR null, HER2-low, ER-low) (`docs/FINAL_RESULTS.md` Section 1: P1–P3, S1–S7)
+- [x] Re-run `sanity_check.py` (extend it to the frozen-slide outputs) (S9–S15 added; job 22560: all pass except the known S6-CONCH laptop-vs-Ada item)
 
 **Exit gate:** final results tables frozen; no number in the report lacks a script and file that produce it.
 
@@ -176,11 +176,11 @@ reference standards). We do **not** propose a new architecture.
 | 0 Foundations | Done except Uniyal HF/CONCH item | Srivastava: Ada + UNI done, CONCH access pending |
 | 1 Core baselines | Done | — |
 | 2 Robustness | Done (14 Oct, report 5d) | — |
-| 3 Interpretation | In progress | Thumbnail overlay + heatmap review (attention `.npz` on Uniyal's Ada account); ER-low write-up |
+| 3 Interpretation | Done (15 Oct, report 5c-2, 5d, 5f) | — |
 | 4 Frozen slides | Done (15 Oct, report 5e) | Sanity checks for frozen outputs moved to Tier 5 |
-| 5 Consolidation | Not started (unblocked) | Final tables; multiple-testing note; extend `sanity_check.py` to 1c/1e |
+| 5 Consolidation | Done (15 Oct, `docs/FINAL_RESULTS.md`) | — |
 | 6 Optional | Not started | Tiers 0–5 |
-| 7 Deliverables | Partly (update deck exists) | Final numbers |
+| 7 Deliverables | Deck drafted (`slides/progress_update_2.tex`, not compiled) | Final report, final deck |
 
 ## Key files
 
