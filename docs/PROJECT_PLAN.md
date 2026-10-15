@@ -155,17 +155,17 @@ reference standards). We do **not** propose a new architecture.
 
 ## Tier 6: Optional extensions (only after Tiers 0–5 pass their gates) ⬜
 
-- [ ] External check on CPTAC-BRCA (134 patients: H&E, RNA, protein; no survival) for 1a/1b
-- [ ] 1f: LoRA fine-tuning of UNI on IHC vs RNA labels (does adaptation change which truth is learned? ~30–60 GPU-h)
-- [ ] Kamineni hospital data as an external test, if provided
+- [ ] External check on CPTAC-BRCA (134 patients: H&E, RNA, protein; no survival) for 1a/1b (decided 15 Oct: after Tier 7; IDC has 653 slides / 198 patients, 385 standard-JPEG first; ~1 working day)
+- [ ] ~~1f: LoRA fine-tuning~~ (dropped 15 Oct) of UNI on IHC vs RNA labels (does adaptation change which truth is learned? ~30–60 GPU-h)
+- [ ] ~~Kamineni hospital data as an external test~~ (dropped 15 Oct unless data arrive)
 
 ## Tier 7: Deliverables ⬜
 
-- [ ] Slides: fix PR bullet ("no reliable preference"), Ada CONCH numbers, remove/keep "attention maps" consistently
-- [ ] Project guide / docs kept in sync with the final numbers
-- [ ] Final report (problem, data, methods, results 1a–1e, robustness, interpretation, limitations)
-- [ ] Final presentation and rehearsal; Q&A sheet (see the project guide)
-- [ ] Repo clean-up: README up to date, every result reproducible from `scripts/` + `jobs/`
+- [~] Slides: fix PR bullet ("no reliable preference"), Ada CONCH numbers, remove/keep "attention maps" consistently (Srivastava, 2026-10-15)
+- [~] Project guide / docs kept in sync with the final numbers (Srivastava, 2026-10-15)
+- [~] Final report (problem, data, methods, results 1a–1e, robustness, interpretation, limitations) (Srivastava, 2026-10-15)
+- [~] Final presentation and rehearsal; Q&A sheet (see the project guide) (Srivastava, 2026-10-15)
+- [~] Repo clean-up: README up to date, every result reproducible from `scripts/` + `jobs/` (Srivastava, 2026-10-15)
 
 ---
 
