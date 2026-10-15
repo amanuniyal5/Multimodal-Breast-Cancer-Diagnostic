@@ -216,7 +216,7 @@ Outputs: `results/attention/summary.csv`, one heatmap per patient (`results/atte
 `scripts/attention_overlay.py` (Ada job 22542): the ABMIL attention maps were regenerated on Srivastava's account (job
 22533; same model and outcome as 5c: sides with RNA 35/54, ER-low 8/10) and drawn on the actual DX slides, downloaded from
 the IDC copy, with the 6 highest- and 6 lowest-attention 20x patches per slide. 10 patients; images in
-`results/attention_overlay/` (one, TCGA-LL-A5YP, still to be re-copied from Ada). Coordinates map correctly (attention
+`results/attention_overlay/` (all 10). Coordinates map correctly (attention
 follows the tissue outline; patch side 508-521 px at level 0 = 256 px at 20x). Review of six slides covering every group
 (non-expert reading; a pathologist should confirm the morphology terms):
 

@@ -63,7 +63,7 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
 - **Frozen features:** 1,515 TS/BS slides from the IDC copy (Google Cloud), TRIDENT + UNI v1, in
   `~/project/data/features/frozen_uni_v1/` on Srivastava's Ada account; pipeline verified to reproduce TRACE exactly.
 - **Open:** Tier 7 deliverables (compile/finalise `slides/progress_update_2.tex`, final report, rehearsal, repo clean-up);
-  optional Tier 6. One overlay image (TCGA-LL-A5YP) still to be copied from Ada (`results/attention_overlay/` there).
+  optional Tier 6 (CPTAC on hold).
 - **Slides:** `slides/progress_update_2.tex` (draft for the next update, includes 1c/1e); not compiled yet.
 
 ## 4. Next actions
