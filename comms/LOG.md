@@ -222,3 +222,24 @@ and `results/frozen_1e*.csv` to the repo, write up 1c/1e.
   (`scontrol update JobId=20080 ArrayTaskThrottle=4`); only 3 fit: Ada caps memory at 1.5 GB/CPU, so `-c 6
   --mem-per-cpu=3G` becomes 12 CPUs × 1.5 GB, and 4 × 12 > the 40-CPU user limit. Peak RSS: 11 GB (frozen), 17.5 GB (DX).
   Expected completion ~06:00 on 15 Oct.
+
+## 2026-10-15 · Srivastava (via Claude Code) · Tier 4 done: 1c and 1e results
+
+**Extraction:** all 1,515 unique frozen slides encoded (array 20080, six tasks, 3.5–6.7 h each). The one "failure"
+(TCGA-A8-A06U-01A-01-TS1) was a duplicate barcode (two GDC scans, one IDC copy) processed twice in the same work folder;
+fixed (`load_frozen_means` and `extract_frozen.py` de-duplicate by barcode). Analysis job 21786 crashed on that duplicate;
+rerun as job 22323 (22 min).
+
+**1c (n = 947 patients with DX and primary TS, fixed folds, 5 seeds, 2,000 bootstraps):**
+- ER RNA vs IHC: DX Δ +0.032 (+0.007, +0.058), TS Δ +0.032 (+0.011, +0.055), **interaction 0.000 (−0.024, +0.024)**;
+  same in both halves of % tumour cells. Frozen slides slightly more predictive (ER-IHC 0.899 vs 0.881).
+- ER RPPA vs IHC: interaction −0.035 (−0.066, −0.001), p = 0.045 (exploratory). PR, HER2: no interaction.
+- 1b on the same discordant patients: ER DX 34 : 18 (p = 0.037), **TS 39 : 13 (p = 0.0004)**; HER2 TS 36 : 20.
+
+**1e (373 TS+BS pairs):** ER IHC-trained model ICC 0.871, κ 0.725, 10.9% calls flipped; RNA-trained ICC 0.892, κ 0.806,
+7.6% flipped; |ΔP| weakly related to the tumour-% difference (ρ = 0.14). Feature cosine same tumour 0.92 vs 0.71.
+
+Files: `results/frozen_1c*.csv*`, `results/frozen_1e*.csv`; report Section 5e; deck frame updated.
+
+**Next open items:** Tier 3 (thumbnail overlay + heatmap review, ER-low write-up); Tier 5 (final tables, multiple-testing
+note, extend `sanity_check.py` to 1c/1e); Tier 7 (compile and finalise the deck, report).

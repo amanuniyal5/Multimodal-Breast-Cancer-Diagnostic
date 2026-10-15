@@ -43,26 +43,26 @@ Update the "Current state" section whenever you finish something.
 | Use TRACE precomputed features for DX slides; extract frozen slides ourselves | TRACE covers DX only (verified); avoids downloading 1.16 TB of DX slides |
 | Do **not** re-extract all DX slides for 1c | Instead check our extraction matches TRACE on ~50 DX slides |
 
-## 3. Current state (14 Oct 2026)
+## 3. Current state (15 Oct 2026)
 
 The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a summary.
 
-- **Done:** Tier 0 (data, labels, splits, Ada setup for both, UNI/CONCH features), Tier 1 (1a/1b/1d with TITAN, UNI, CONCH,
-  mean-pool and ABMIL; sanity checks), Tier 2 (cut-off robustness, PR re-check, fixed-split rerun, DeLong tests, combined
-  1b evidence), and from Tier 3 the attention maps and the discordant-case description. Results:
-  [`baseline_report.md`](baseline_report.md) (Section 5d is the newest).
-- **Main findings so far:** ER, the slide tracks RNA over IHC (+0.03 to +0.06 AUC; DeLong CI excludes 0 in all 5 variants);
-  on the 54 discordant patients the 5-variant consensus sides with RNA 34 : 20 (p = 0.076, suggestive) and the call follows
-  the PAM50 subtype (Basal → ER−, LumA → ER+; HER2-enriched is the exception). HER2 tracks amplification (consensus 42 : 18,
-  p = 0.003). PR, no preference (cut-off artefact). HER2-low, invisible in H&E.
-- **Tier 4 (running, Srivastava's Ada account):** manifest `data/metadata/frozen_manifest.csv` (1,516 TS/BS slides,
-  373 pairs); slides come from the **IDC DICOM copy on Google Cloud** (`data/metadata/idc_slides.csv`; GDC is far too
-  slow from Ada). `scripts/extract_frozen.py` (download → TRIDENT → UNI v1 → per-slide mean + 4,096-patch bag in
-  `~/project/data/features/frozen_uni_v1/`, ~1 min per slide). Array job 20080 (6 tasks × 5 batches) and the
-  extraction-equivalence check (job 21300, `scripts/equivalence_check.py`) are running.
-- **Open:** Tier 3 thumbnail overlay + heatmap review (attention `.npz` live on Uniyal's Ada account), ER-low write-up;
-  Tier 4 equivalence check, 1c, 1e; Tiers 5 and 7.
-- **Slides:** `slides/project_update_slides.tex` is last week's deck; next week's deck still to write.
+- **Done:** Tiers 0-2 and 4 (all five experiments 1a-1e have results), and from Tier 3 the attention maps and the
+  discordant-case description. Results: [`baseline_report.md`](baseline_report.md) (Sections 5d and 5e are the newest).
+- **Main findings:**
+  - ER: the slide tracks RNA over IHC (+0.03 to +0.06 AUC; DeLong CI excludes 0 in all 5 variants); the 5-variant
+    consensus sides with RNA on 34 : 20 discordant patients (p = 0.076, suggestive); calls follow the PAM50 subtype
+    (Basal -> ER-, LumA -> ER+; HER2-enriched is the exception).
+  - **1c:** the RNA-over-IHC advantage is identical on the FFPE (DX) and the frozen (TS) slide next to the sequenced
+    tissue (+0.032 each, interaction 0.000 [-0.024, +0.024], n = 947); frozen slides side with RNA on ER-discordant
+    patients 39 : 13 (p = 0.0004). So the preference is not caused by sampling a different piece of tumour.
+  - **1e:** two frozen sections of one tumour agree well (ICC 0.87-0.89) but 8-11% of binary ER calls flip.
+  - HER2 tracks amplification (consensus 42 : 18, p = 0.003); PR no preference; HER2-low invisible in H&E.
+- **Frozen features:** 1,515 TS/BS slides from the IDC copy (Google Cloud), TRIDENT + UNI v1, in
+  `~/project/data/features/frozen_uni_v1/` on Srivastava's Ada account; pipeline verified to reproduce TRACE exactly.
+- **Open:** Tier 3 thumbnail overlay + heatmap review (attention `.npz` on Uniyal's Ada account) and ER-low write-up;
+  Tier 5 consolidation (final tables, multiple-testing note, extend `sanity_check.py` to 1c/1e); Tier 7 deliverables.
+- **Slides:** `slides/progress_update_2.tex` (draft for the next update, includes 1c/1e); not compiled yet.
 
 ## 4. Next actions
 

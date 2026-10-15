@@ -127,7 +127,7 @@ reference standards). We do **not** propose a new architecture.
 
 **Exit gate:** a short, evidence-backed explanation section in the report, with 3–4 example heatmaps.
 
-## Tier 4: Frozen slides (experiments 1c and 1e) ⬜
+## Tier 4: Frozen slides (experiments 1c and 1e) ✅
 
 **Goal:** test whether slide location (frozen next to the sequenced tissue vs FFPE block) changes which truth is tracked, and how reproducible single-slide predictions are.
 
@@ -135,10 +135,10 @@ reference standards). We do **not** propose a new architecture.
 - [x] Build GDC manifest of tumour TS/BS slides (1,517 slides, 430 GB) from `data/metadata/gdc_slides.csv` (`data/metadata/frozen_manifest.csv`: 1,516 slides, 373 pairs, 30 batches)
 - [x] Time one TS slide through TRIDENT + UNI on an RTX 2080 Ti; log seconds per slide (job 21299, IDC source: download 30 s, segment 17 s, encode 15 s per slide; download overlaps encoding)
 - [x] Extraction-equivalence check: our TRIDENT + UNI on ~50 DX slides vs TRACE features (cosine similarity, same predictions) (job 21300: 46 slides, cosine 1.0000 vs 0.33 for other patients, max |diff| ≤ 0.002, ER P(+) r = 1.000, 46/46 same call; 4 JPEG-2000 slides unreadable; `results/equivalence_check.csv`)
-- [~] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags (Srivastava, 2026-10-14: source switched to the IDC copy on Google Cloud, GDC too slow; array 20080 running)
+- [x] Batch download + encode all TS/BS slides (job array, delete raw slides after each batch); keep mean + capped bags (array 20080: 1,515 slides from the IDC copy; `~/project/data/features/frozen_uni_v1/` on Srivastava's Ada account)
 - [x] Add % tumour cells per frozen slide (biospecimen table) as a covariate (columns in `data/metadata/frozen_manifest.csv`; 1,513 of 1,516 slides)
-- [~] **1c:** 2 × 2 (DX vs TS × IHC vs RNA) with mean-pool (ABMIL optional), fixed splits, interaction test (Srivastava, 2026-10-14)
-- [~] **1e:** TS vs BS agreement on 374 pairs: ICC of P(ER+), κ of calls, % flipped (Srivastava, 2026-10-14)
+- [x] **1c:** 2 x 2 (DX vs TS x IHC vs RNA) with mean-pool (ABMIL optional), fixed splits, interaction test (job 22323, report 5e: ER interaction 0.000 [-0.024, +0.024], n = 947)
+- [x] **1e:** TS vs BS agreement on 374 pairs: ICC of P(ER+), kappa of calls, % flipped (373 pairs: ICC 0.87-0.89, kappa 0.73/0.81, 8-11% flipped; report 5e)
 
 **Exit gate:** 1c interaction estimate with CI and 1e agreement metrics, both with sanity checks like S1–S8.
 
@@ -177,8 +177,8 @@ reference standards). We do **not** propose a new architecture.
 | 1 Core baselines | Done | — |
 | 2 Robustness | Done (14 Oct, report 5d) | — |
 | 3 Interpretation | In progress | Thumbnail overlay + heatmap review (attention `.npz` on Uniyal's Ada account); ER-low write-up |
-| 4 Frozen slides | In progress (Srivastava) | Extraction array 20080 + equivalence check 21300 running on Ada; then 1c, 1e |
-| 5 Consolidation | Not started | Tiers 2–4 |
+| 4 Frozen slides | Done (15 Oct, report 5e) | Sanity checks for frozen outputs moved to Tier 5 |
+| 5 Consolidation | Not started (unblocked) | Final tables; multiple-testing note; extend `sanity_check.py` to 1c/1e |
 | 6 Optional | Not started | Tiers 0–5 |
 | 7 Deliverables | Partly (update deck exists) | Final numbers |
 
