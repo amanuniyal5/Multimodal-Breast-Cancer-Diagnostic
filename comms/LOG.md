@@ -243,3 +243,18 @@ Files: `results/frozen_1c*.csv*`, `results/frozen_1e*.csv`; report Section 5e; d
 
 **Next open items:** Tier 3 (thumbnail overlay + heatmap review, ER-low write-up); Tier 5 (final tables, multiple-testing
 note, extend `sanity_check.py` to 1c/1e); Tier 7 (compile and finalise the deck, report).
+
+## 2026-10-15 (13:50) · Srivastava (via Claude Code) · Tier 3 + Tier 5 under way
+
+**Did:**
+- Cancelled the superseded Ada jobs 20061, 20076, 20077 (and a stale 1c rerun 22551).
+- Tier 3: ER-low write-up (report 5f; FFPE 8/10 ER-low called ER−, frozen 7/10); `scripts/attention_overlay.py`
+  (attention on the real DX slides from IDC + top/bottom-attention patches) queued after the attention rerun.
+- Tier 5: `docs/FINAL_RESULTS.md` (primary claims P1–P3 with Holm correction, secondary S1–S7, multiple-testing note);
+  `scripts/final_tables.py` (T1–T5 from fixed-split runs only); `stats_delong_1b.py --abmil fixed --tag _final`;
+  `sanity_check.py` extended with S9–S15 (frozen slides). S1–S9, S11, S13–S15 pass; S10/S12 needed the 1c OOF to record
+  the comparison (fixed, 1c rerun 22552); S6-CONCH is the known laptop-vs-Ada item (superseded by fixed splits).
+
+**Running / queued on Ada (Srivastava):** attention rerun 22533 → overlay 22542; ABMIL on fixed splits: UNI 22534,
+UNI PR-prevmatch 22535, CONCH features 22536 → CONCH 22537, CONCH PR-prevmatch 22538; 1c rerun 22552;
+final tables + sanity 22560 (after all of these).
