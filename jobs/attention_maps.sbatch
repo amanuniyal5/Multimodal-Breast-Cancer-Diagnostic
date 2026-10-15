@@ -13,14 +13,14 @@
 #SBATCH --output=logs/%j.out
 set -e
 module load u22/python/3.12.4
+module load u22/cuda/12.1 u22/cudnn/9.1.0-cuda-12  # venv CUDA libs were damaged (docs/HANDOFF.md)
 source $HOME/venvs/whichtruth/bin/activate
 cd $HOME/project
-pip install -q -r requirements.txt
 W=/scratch/$USER/trace_att_$SLURM_JOB_ID
 mkdir -p $W
 t0=$(date +%s)
 python -c "from huggingface_hub import snapshot_download as s; s('IUCompPath/TRACE', repo_type='dataset', allow_patterns=['data/TCGA-BRCA/uni_v1/20x/*'], local_dir='$W', max_workers=8)"
 echo "download done in $(( $(date +%s) - t0 ))s"
-python -u scripts/attention_maps.py --parquet-dir $W/data/TCGA-BRCA/uni_v1/20x --out results/attention
+python -u scripts/attention_maps.py --parquet-dir $W/data/TCGA-BRCA/uni_v1/20x --out ${OUT:-results/attention}
 rm -rf $W
 echo ATTENTION_OK
