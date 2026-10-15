@@ -119,11 +119,11 @@ reference standards). We do **not** propose a new architecture.
 **Goal:** explain why the slide follows RNA for ER (and amplification for HER2).
 
 - [x] ABMIL attention heatmaps for 54 ER-discordant + 10 reference patients (Ada job 19722; `results/attention/`)
-- [ ] Overlay heatmaps on slide thumbnails for ~6 example patients (download those DX slides) to confirm attention sits on tumour
-- [ ] Review the heatmaps: do ER-low cases look like ER-negative morphology?
+- [~] Overlay heatmaps on slide thumbnails for ~6 example patients (download those DX slides) to confirm attention sits on tumour (Srivastava, 2026-10-15)
+- [~] Review the heatmaps: do ER-low cases look like ER-negative morphology? (Srivastava, 2026-10-15)
 - [x] Attention statistics by group (entropy, fraction of patches holding 50% of attention; report Section 5c)
 - [x] Describe discordant patients: PAM50, ER % stained, grade/histology (from the clinical table) (`scripts/describe_discordant.py`, report 5d: call follows intrinsic subtype; HER2-enriched IHC+/RNA− are the exception)
-- [ ] ER-low analysis written up as an exploratory lead (n = 11)
+- [~] ER-low analysis written up as an exploratory lead (n = 11) (Srivastava, 2026-10-15)
 
 **Exit gate:** a short, evidence-backed explanation section in the report, with 3–4 example heatmaps.
 
@@ -146,10 +146,10 @@ reference standards). We do **not** propose a new architecture.
 
 **Goal:** one consistent set of final tables.
 
-- [ ] Final tables for 1a–1e from one environment and the fixed splits
-- [ ] Multiple-testing note (how many tests, which are primary)
-- [ ] Primary vs secondary claims written down (primary: ER 1a/1b; secondary: HER2, PR null, HER2-low, ER-low)
-- [ ] Re-run `sanity_check.py` (extend it to the frozen-slide outputs)
+- [~] Final tables for 1a–1e from one environment and the fixed splits (Srivastava, 2026-10-15)
+- [~] Multiple-testing note (how many tests, which are primary) (Srivastava, 2026-10-15)
+- [~] Primary vs secondary claims written down (primary: ER 1a/1b; secondary: HER2, PR null, HER2-low, ER-low) (Srivastava, 2026-10-15)
+- [~] Re-run `sanity_check.py` (extend it to the frozen-slide outputs) (Srivastava, 2026-10-15)
 
 **Exit gate:** final results tables frozen; no number in the report lacks a script and file that produce it.
 
