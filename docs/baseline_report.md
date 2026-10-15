@@ -327,6 +327,38 @@ vial + portion; ER probe trained on primary TS slides of out-of-fold patients (f
 
 Files: `results/frozen_1c.csv`, `results/frozen_1c_oof.csv.gz`, `results/frozen_1e.csv`, `results/frozen_1e_pairs.csv`.
 
+## 5f. ER-low tumours: an exploratory lead (n = 10; 15 Oct 2026)
+
+ER-low = IHC-positive with < 10% of tumour cells stained (the ASCO/CAP "ER-low positive" category). In TCGA-BRCA,
+17 patients are ER-low by IHC: 7 are RNA-positive (concordant) and **10 are RNA-negative** (discordant). **Small n:
+everything here is descriptive and must be reported as a lead, not a conclusion** (decision rule 0.5).
+
+| ER-low discordant patient | PAM50 | ESR1 log2 | FFPE: 5-variant consensus P(ER+) side | FFPE UNI mean P(ER+) | Frozen TS UNI mean P(ER+) |
+|---|---|---|---|---|---|
+| TCGA-A2-A0YJ | Basal | 4.4 | RNA | 0.06 | 0.00 |
+| TCGA-AC-A62X | Basal | 5.3 | RNA | 0.01 | 0.00 |
+| TCGA-LL-A5YP | Basal | 5.1 | RNA | 0.05 | 0.03 |
+| TCGA-A2-A4S1 | Basal | 6.7 | RNA | 0.43 | 0.04 |
+| TCGA-AR-A0TP | Basal | 2.8 | RNA | 0.03 | 0.50 |
+| TCGA-AR-A24Q | Basal | 8.1 | RNA | 0.03 | 0.90 |
+| TCGA-A2-A4RX | (n/a) | 7.4 | RNA | 0.09 | 0.07 |
+| TCGA-A2-A3XV | HER2-enriched | 2.3 | RNA | 0.31 | 0.11 |
+| TCGA-3C-AALI | HER2-enriched | 6.1 | **IHC** | 0.85 | 0.93 |
+| TCGA-AR-A0TX | HER2-enriched | 7.5 | **IHC** | 0.76 | 0.39 |
+
+(FFPE consensus: `results/er_discordant_cases.csv`; UNI mean-pool probabilities from the 1b models of 1c, trained on
+concordant patients: `results/frozen_1c_oof.csv.gz`.)
+
+- On the FFPE slide the model calls **8 of 10 ER-low tumours ER-negative**, i.e. it agrees with RNA, not with the
+  (weakly positive) IHC. All six Basal-like ER-low tumours are called ER-negative; the two exceptions are HER2-enriched
+  (as in the ABMIL attention analysis, Section 5c, which gave the same 8/10).
+- On the frozen TS slide the call is ER-negative for 7 of 10: two Basal tumours move towards ER+ (one at 0.50, i.e. a
+  coin flip), and one HER2-enriched tumour moves to ER-negative. With n = 10 this is consistent with the 1e finding that
+  ~1 in 10 calls flips between sections, and should not be over-read.
+- Reading: ER-low tumours that are RNA-negative are mostly Basal-like, and the H&E model sees them as such. This agrees
+  with clinical literature that many ER-low tumours behave like ER-negative (triple-negative-like) disease; here that is
+  a **hypothesis suggested by 10 cases**, which would need an external cohort (e.g. CPTAC, Tier 6) to test.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |
