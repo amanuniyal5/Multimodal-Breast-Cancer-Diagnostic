@@ -32,6 +32,9 @@ ap.add_argument("--results", default="results")
 ap.add_argument("--labels", default="data/metadata/labels_patient.csv")
 ap.add_argument("--boot", type=int, default=2000)
 ap.add_argument("--selftest", action="store_true")
+ap.add_argument("--abmil", default="old", choices=["old", "fixed"],
+                help="old: ABMIL from the pre-fixed-split runs; fixed: the fixed-split reruns (Tier 5 final tables)")
+ap.add_argument("--tag", default="", help="suffix for the output files, e.g. _final")
 a = ap.parse_args()
 
 # (variant, file, model column value, folds). ABMIL predictions come from the pre-fixed-split folds (flagged).
@@ -48,6 +51,13 @@ VARIANTS_PRPREV = [
     ("UNI ABMIL", "mil_uni_v1_20x_prprev_oof.csv.gz", "abmil", "old"),
     ("CONCH ABMIL", "mil_conch_v1_20x_prprev_oof.csv.gz", "abmil", "old"),
 ]
+if a.abmil == "fixed":  # outputs of train_mil.py --tag _fixedsplits_abmil / _fixedsplits_prprev (Tier 5 reruns)
+    FIXED = {"mil_uni_v1_20x_oof.csv.gz": "mil_uni_v1_20x_fixedsplits_abmil_oof.csv.gz",
+             "mil_conch_v1_20x_oof.csv.gz": "mil_conch_v1_20x_fixedsplits_abmil_oof.csv.gz",
+             "mil_uni_v1_20x_prprev_oof.csv.gz": "mil_uni_v1_20x_fixedsplits_prprev_oof.csv.gz",
+             "mil_conch_v1_20x_prprev_oof.csv.gz": "mil_conch_v1_20x_fixedsplits_prprev_oof.csv.gz"}
+    VARIANTS = [(v, FIXED.get(f, f), m, "fixed") for v, f, m, _ in VARIANTS]
+    VARIANTS_PRPREV = [(v, FIXED.get(f, f), m, "fixed") for v, f, m, _ in VARIANTS_PRPREV]
 COMPARISONS = [("ER", "ER_IHC", "ESR1_RNApos"), ("ER", "ER_IHC", "ER_RPPApos"), ("PR", "PR_IHC", "PGR_RNApos"),
                ("HER2", "HER2_STRICT", "ERBB2_AMP"), ("HER2", "HER2_STRICT", "HER2_RPPApos")]
 PAIRS_1B = ["ER_IHC vs ESR1_RNApos", "ER_IHC vs ER_RPPApos", "PR_IHC vs PGR_RNApos", "HER2_STRICT vs ERBB2_AMP"]
@@ -160,7 +170,7 @@ for cut, variants, comps in [("GMM", VARIANTS, COMPARISONS),
                   f"boot CI [{row['boot_CI_lo']:+.3f}, {row['boot_CI_hi']:+.3f}] | "
                   f"per-seed dAUC {row['delta_seed_mean']:+.3f}+-{row['delta_seed_sd']:.3f}, "
                   f"p<0.05 in {row['seeds_p_lt_0.05']}/{len(seeds)} seeds", flush=True)
-pd.DataFrame(rows).to_csv(os.path.join(a.results, "stats_delong_1a.csv"), index=False)
+pd.DataFrame(rows).to_csv(os.path.join(a.results, f"stats_delong_1a{a.tag}.csv"), index=False)
 
 # ---------------------------------------------------------------- 1b: combined evidence over model variants
 L = pd.read_csv(a.labels, index_col=0)
@@ -218,7 +228,7 @@ for cut, variants, pairs in [("GMM", VARIANTS, PAIRS_1B), ("PR prevalence-matche
                 print(f"   {name:20s} n={k:3d} consensus {c}:{k - c}", flush=True)
             pat_rows.append(P.assign(y_molecular=y, n_variants_molecular=side.sum(1),
                                      consensus_p=P.mean(axis=1)).reset_index().rename(columns={"index": "patient"}))
-pd.DataFrame(rows).to_csv(os.path.join(a.results, "stats_combined_1b.csv"), index=False)
+pd.DataFrame(rows).to_csv(os.path.join(a.results, f"stats_combined_1b{a.tag}.csv"), index=False)
 if pat_rows:
-    pd.concat(pat_rows).to_csv(os.path.join(a.results, "stats_combined_1b_patients.csv"), index=False)
+    pd.concat(pat_rows).to_csv(os.path.join(a.results, f"stats_combined_1b_patients{a.tag}.csv"), index=False)
 print("saved stats_delong_1a.csv, stats_combined_1b.csv, stats_combined_1b_patients.csv")
