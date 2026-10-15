@@ -95,6 +95,7 @@ elif a.batch is not None:
     m = m[m.batch.isin(sel)]
 if a.limit:
     m = m.head(a.limit)
+m = m.drop_duplicates("slide_barcode")  # duplicate barcodes would share a work folder (one was deleted mid-download)
 todo = m[~m.slide_barcode.apply(lambda s: os.path.exists(os.path.join(a.out, f"{s}.npz")))]
 log(f"{len(m)} slides selected, {len(todo)} to do ({todo['size'].sum() / 1e9:.1f} GB); device {dev} "
     f"{torch.cuda.get_device_name(0) if dev != 'cpu' else ''}")
