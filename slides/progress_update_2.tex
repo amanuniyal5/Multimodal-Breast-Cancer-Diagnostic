@@ -47,12 +47,12 @@ and does it change between FFPE and frozen slides?
 \begin{column}{0.48\textwidth}
 \begin{block}{New this week}
 \begin{itemize}
-  \item ABMIL for UNI and CONCH (3 seeds) $\rightarrow$ 5 model variants.
+  \item ABMIL for UNI and CONCH (3 seeds) $\rightarrow$ 5 model variants; all rerun on the fixed splits.
   \item Fixed splits: all linear baselines rerun, conclusions unchanged.
   \item PR re-check: the ``sides with IHC'' result was a \textbf{cut-off artefact}.
   \item DeLong tests (1a) and \textbf{patient-level combined evidence} (1b).
   \item Who are the discordant patients? (PAM50, ER\,\%, histology)
-  \item ABMIL attention maps on 54 discordant + 10 reference patients.
+  \item ABMIL attention on 54 discordant + 10 reference patients, overlaid on the real slides.
   \item \textbf{Frozen slides: 1c and 1e done} (1,515 slides).
 \end{itemize}
 \end{block}
@@ -61,7 +61,7 @@ and does it change between FFPE and frozen slides?
 \end{frame}
 
 %===================================================================
-\begin{frame}[t]{1a: which label is more predictable? (DeLong, $n$ = 801 / 986 / 478)}
+\begin{frame}[t]{1a: which label is more predictable? (DeLong, $n$ = 801 / 986 / 478; final, fixed splits)}
 \footnotesize
 \centering
 \scriptsize
@@ -69,25 +69,25 @@ and does it change between FFPE and frozen slides?
 \toprule
 $\Delta$AUC (molecular $-$ IHC) & TITAN & UNI mean & CONCH mean & UNI ABMIL & CONCH ABMIL \\
 \midrule
-\textbf{ER: RNA $-$ IHC} & \textbf{+0.057}*** & \textbf{+0.036}* & \textbf{+0.030}* & \textbf{+0.034}* & \textbf{+0.049}** \\
-ER: RPPA $-$ IHC & +0.026 & +0.041** & +0.033* & +0.023 & +0.019 \\
-PR: RNA $-$ IHC (prevalence-matched) & +0.033* & -- & -- & $-$0.006 & +0.006 \\
-HER2: amplif. $-$ strict & +0.044 & +0.071* & +0.074* & +0.024 & +0.060 \\
+\textbf{ER: RNA $-$ IHC} & \textbf{+0.057}*** & \textbf{+0.036}* & \textbf{+0.030}* & +0.018 & \textbf{+0.045}*** \\
+ER: RPPA $-$ IHC & +0.026 & +0.041** & +0.033* & +0.000 & +0.000 \\
+PR: RNA $-$ IHC (prevalence-matched) & +0.033* & -- & -- & $-$0.002 & +0.007 \\
+HER2: amplif. $-$ strict & +0.044 & +0.071* & +0.074* & +0.032 & +0.080* \\
 \bottomrule
 \end{tabular}
 
 \vspace{2pt}
 {\tiny DeLong test generalised to two reference labels on the same patients (equals classic DeLong when labels coincide);
 seed-averaged out-of-fold probabilities; * $p<0.05$, ** $p<0.01$, *** $p<0.001$. DeLong and paired-bootstrap CIs agree
-within 0.005. ABMIL on the earlier folds.}
+within 0.005. All on the fixed site-grouped splits (ABMIL rerun this week).}
 
 \vspace{6pt}
 \raggedright
 \begin{columns}[T]
 \begin{column}{0.49\textwidth}
-\begin{block}{Robust (all 5 variants)}
-\textbf{ER: the RNA label is more predictable than IHC}, CI excludes 0 in every variant (19 of 21 single seeds).
-Holds under 3 RNA cut-off schemes.
+\begin{block}{Robust (same direction in all 5 variants)}
+\textbf{ER: the RNA label is more predictable than IHC}: CI excludes 0 in 4 of 5 (UNI ABMIL +0.018, n.s.);
+17 of 21 single seeds significant. Holds under 3 RNA cut-off schemes. Primary model (UNI mean): Holm-adjusted $p$ = 0.042.
 \end{block}
 \end{column}
 \begin{column}{0.49\textwidth}
@@ -169,6 +169,31 @@ they are read as their molecular class.
 \end{frame}
 
 %===================================================================
+\begin{frame}[t]{Where does the model look? Attention on the real slides}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{../results/attention_overlay/TCGA-A2-A4S1.png}\\[-1pt]
+{\tiny ER-low (IHC+, $<$10\%), RNA$-$, Basal $\rightarrow$ called ER$-$ (with RNA)}
+\end{column}
+\begin{column}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{../results/attention_overlay/TCGA-E2-A152.png}\\[-1pt]
+{\tiny IHC+, RNA$-$, HER2-enriched $\rightarrow$ called ER+ (with IHC)}
+\end{column}
+\end{columns}
+\vspace{4pt}
+\begin{itemize}
+  \item 10 patients, slides from the IDC copy; top/bottom rows = 6 highest / lowest attention patches at 20$\times$.
+  \item \textbf{Attention sits on tumour} in every slide reviewed; fat, glass and ink get the least.
+  \item ER-low Basal tumours look like the ER$-$ reference (high-grade, pleomorphic) $\rightarrow$ called ER$-$.
+  \item HER2-enriched exceptions: attention on cohesive / apocrine-like cells $\rightarrow$ called ER+ (to confirm with a pathologist).
+  \item Caveat: some attention on blood or stroma; six slides illustrate, they do not test.
+\end{itemize}
+\end{frame}
+
+%===================================================================
 \begin{frame}[t]{Frozen slides: 1c (FFPE vs frozen) and 1e (two frozen sections)}
 \footnotesize
 \textbf{Data:} 1,515 frozen slides (1,044 top TS, 471 bottom BS) from the IDC copy, TRIDENT + UNI v1 at 20$\times$.
@@ -221,19 +246,19 @@ more reproducible.
 \footnotesize
 \begin{columns}[T]
 \begin{column}{0.32\textwidth}
-\begin{block}{Consolidation}
+\begin{block}{Done this week}
 \begin{itemize}
-  \item Final tables for 1a--1e, one environment.
-  \item Multiple-testing note; primary vs secondary claims.
-  \item Sanity checks extended to 1c/1e.
+  \item Final tables for 1a--1e (fixed splits, one environment).
+  \item Primary vs secondary claims; multiple-testing note.
+  \item Sanity checks S1--S15 incl.\ frozen slides.
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.32\textwidth}
-\begin{block}{Follow-ups on 1c/1e}
+\begin{block}{Next}
 \begin{itemize}
-  \item ER-RPPA interaction (borderline): check with ABMIL.
-  \item Which tumours flip between sections (PAM50, ER-low)?
+  \item External check on CPTAC-BRCA (IDC slides; 1a/1b).
+  \item Final report and presentation.
 \end{itemize}
 \end{block}
 \end{column}
@@ -254,8 +279,8 @@ more reproducible.
 \toprule
 Primary claims & Status \\
 \midrule
-ER: RNA label more predictable than IHC (1a) & robust, all 5 variants \\
-ER: model sides with RNA on discordant cases (1b) & suggestive (consensus p = 0.076); frozen 39\,:\,13 \\
+ER: RNA label more predictable than IHC (1a) & supported (Holm-adj.\ p = 0.042; 4 of 5 variants) \\
+ER: model sides with RNA on discordant cases (1b) & suggestive (Holm-adj.\ p = 0.15); frozen 39\,:\,13 \\
 ER: same answer on FFPE and frozen slides (1c) & interaction 0.000 ($-$0.024, +0.024) \\
 HER2 tracks amplification (1b) & p = 0.003 (1a encoder-dependent) \\
 PR: no preference; HER2-low invisible & robust nulls \\
