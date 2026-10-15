@@ -275,3 +275,11 @@ final tables + sanity 22560 (after all of these).
 - ER-low write-up (report 5f).
 
 **Next open items:** Tier 7 (compile the deck, final report, rehearsal, repo clean-up); optional Tier 6.
+
+## 2026-10-15 (20:40) · Srivastava (via Claude Code) · Tier 7 mostly done; CPTAC on hold
+
+- Final report `docs/FINAL_REPORT.md` (+ `.docx` via pandoc), Q&A sheet `docs/QA_SHEET.md`, README rewritten with final
+  results and a result → file → script → job map; both decks updated to the final fixed-split numbers (not compiled:
+  no LaTeX on the laptop or Ada; compile on Overleaf).
+- **CPTAC external check (Tier 6) is on hold** by decision of Srivastava's team side; LoRA (1f) and Kamineni dropped.
+- Open: compile decks, rehearsal; Uniyal's Hugging Face / CONCH access item (Tier 0).
