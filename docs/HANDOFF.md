@@ -47,10 +47,12 @@ Update the "Current state" section whenever you finish something.
 
 The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a summary.
 
-- **Done:** Tiers 0-2 and 4 (all five experiments 1a-1e have results), and from Tier 3 the attention maps and the
-  discordant-case description. Results: [`baseline_report.md`](baseline_report.md) (Sections 5d and 5e are the newest).
+- **Done:** Tiers 0-5 (all five experiments, interpretation, consolidation). **Final numbers, claims and the
+  multiple-testing note: [`FINAL_RESULTS.md`](FINAL_RESULTS.md)** (fixed splits only). Details: [`baseline_report.md`](baseline_report.md)
+  (5c-2 overlay review, 5d-5g newest).
 - **Main findings:**
-  - ER: the slide tracks RNA over IHC (+0.03 to +0.06 AUC; DeLong CI excludes 0 in all 5 variants); the 5-variant
+  - ER: the slide tracks RNA over IHC (+0.02 to +0.06 AUC; positive in all 5 variants, DeLong CI excludes 0 in 4 of 5 on
+    the fixed splits; Holm-adjusted p = 0.042 for the primary UNI mean-pool model); the 5-variant
     consensus sides with RNA on 34 : 20 discordant patients (p = 0.076, suggestive); calls follow the PAM50 subtype
     (Basal -> ER-, LumA -> ER+; HER2-enriched is the exception).
   - **1c:** the RNA-over-IHC advantage is identical on the FFPE (DX) and the frozen (TS) slide next to the sequenced
@@ -60,8 +62,8 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
   - HER2 tracks amplification (consensus 42 : 18, p = 0.003); PR no preference; HER2-low invisible in H&E.
 - **Frozen features:** 1,515 TS/BS slides from the IDC copy (Google Cloud), TRIDENT + UNI v1, in
   `~/project/data/features/frozen_uni_v1/` on Srivastava's Ada account; pipeline verified to reproduce TRACE exactly.
-- **Open:** Tier 3 thumbnail overlay + heatmap review (attention `.npz` on Uniyal's Ada account) and ER-low write-up;
-  Tier 5 consolidation (final tables, multiple-testing note, extend `sanity_check.py` to 1c/1e); Tier 7 deliverables.
+- **Open:** Tier 7 deliverables (compile/finalise `slides/progress_update_2.tex`, final report, rehearsal, repo clean-up);
+  optional Tier 6. One overlay image (TCGA-LL-A5YP) still to be copied from Ada (`results/attention_overlay/` there).
 - **Slides:** `slides/progress_update_2.tex` (draft for the next update, includes 1c/1e); not compiled yet.
 
 ## 4. Next actions
