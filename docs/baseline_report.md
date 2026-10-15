@@ -1,6 +1,6 @@
 # Baseline report: Option 1 "Which truth does the slide see?"
 
-*Status as of 14 Oct 2026 (Section 5d added: DeLong tests, combined 1b evidence, discordant-case description). All baseline runs are complete and have passed the sanity checks. Every number below can be regenerated
+*Status as of 15 Oct 2026 (Section 5e added: frozen slides, experiments 1c and 1e; 5d: DeLong, combined 1b, discordant cases). All baseline runs are complete and have passed the sanity checks. Every number below can be regenerated
 with the scripts listed in Section 7.*
 
 ## 1. Summary
@@ -21,6 +21,8 @@ an apparent IHC preference disappears once the RNA cut-off is chosen fairly. HER
 | 1b HER2: side on discordant (n = 60) | **Amplification, 34–47 of 60** in all 5 variants | Significant in 3 of 5; consensus 42 : 18, p = 0.003 |
 | 1d HER2 0 vs 1+ / 0 vs low | **Chance (0.40–0.55)**; ERBB2 mRNA alone 0.65 / 0.69 | All variants |
 | Negative control (shuffled ER) | 0.46–0.51 | All variants |
+| **1c: FFPE vs frozen slide** | ER RNA-over-IHC advantage identical on DX and TS (+0.032 each); interaction 0.000 (-0.024, +0.024), n = 947 | No interaction for ER, PR, HER2; ER-RPPA borderline (p = 0.045) |
+| **1e: two frozen slides of one tumour** | ICC 0.87-0.89, kappa 0.73 (IHC model) / 0.81 (RNA model); 8-11% of ER calls flip, 373 pairs | Bootstrap CIs; descriptive |
 
 ## 2. Setup
 
@@ -273,6 +275,58 @@ not be summed into one binomial test. Instead, one consensus call per patient (m
 Interpretation for the report: on H&E, "ER status" is largely read through the tumour's intrinsic-subtype morphology
 (basal vs luminal), which RNA reflects more faithfully than IHC in these discordant cases.
 
+## 5e. Frozen slides: experiments 1c and 1e (15 Oct 2026)
+
+**Features.** 1,515 frozen slides (1,044 TS, 471 BS; 1,516 manifest rows, one barcode has two GDC scans) downloaded from
+the NCI Imaging Data Commons copy (Google Cloud; GDC was too slow from Ada) and encoded with TRIDENT + UNI v1 at 20x,
+256 px patches (`scripts/extract_frozen.py`, Ada array job 20080, ~75 s per slide, no real failures). **Extraction
+equivalence:** the same pipeline on 46 DX slides reproduces the TRACE features exactly (cosine 1.0000 vs 0.33 for other
+patients; max per-feature difference <= 0.002; ER P(+) r = 1.000, 46/46 same call; `results/equivalence_check.csv`,
+job 21300), so DX (TRACE) and TS (ours) features differ only in the tissue. Four JPEG-2000 DX slides (site AC) cannot be
+read from IDC; no frozen slide is affected.
+
+**1c: does the answer change between FFPE (DX) and frozen (TS) slides?** (`scripts/frozen_1c.py`, job 22323.) Same
+patients (both slide types), fixed site-grouped folds, mean-pooled UNI + logistic probe, probabilities averaged over 5
+seeds; interaction = (TS delta) - (DX delta), paired bootstrap over patients (2,000).
+
+| Label pair | n | DX AUC IHC -> mol | DX delta (95% CI) | TS AUC IHC -> mol | TS delta (95% CI) | Interaction (95% CI), p |
+|---|---|---|---|---|---|---|
+| **ER: RNA vs IHC** | 947 | 0.881 -> 0.913 | +0.032 (+0.007, +0.058) | 0.899 -> 0.931 | +0.032 (+0.011, +0.055) | **0.000 (-0.024, +0.024)**, p = 0.98 |
+| ER: RPPA vs IHC | 777 | 0.863 -> 0.905 | +0.041 (+0.009, +0.073) | 0.882 -> 0.888 | +0.007 (-0.024, +0.039) | -0.035 (-0.066, -0.001), p = 0.045 |
+| PR: RNA (prevalence-matched) vs IHC | 944 | 0.791 -> 0.788 | -0.003 (-0.039, +0.031) | 0.803 -> 0.829 | +0.026 (-0.006, +0.058) | +0.029 (-0.007, +0.066), p = 0.12 |
+| HER2: amplification vs strict | 537 | 0.606 -> 0.651 | +0.045 (-0.019, +0.111) | 0.652 -> 0.666 | +0.014 (-0.048, +0.079) | -0.030 (-0.110, +0.046), p = 0.44 |
+
+- **ER (primary): no interaction.** The frozen slide cut next to the sequenced tissue prefers the RNA label by exactly
+  as much as the FFPE diagnostic slide (+0.032 each). The RNA preference is therefore **not** explained by the FFPE block
+  being a different piece of tumour from the sequenced one. It holds in both halves of % tumour cells on the TS slide
+  (interaction +0.007 below / -0.008 above the median of 80%).
+- Frozen slides are slightly *more* predictive overall (ER-IHC 0.899 vs 0.881 on the same patients).
+- ER RPPA: borderline interaction (p = 0.045, one of four comparisons, no correction): exploratory lead only.
+- PR and HER2: no interaction (PR still shows no reliable preference on either slide type).
+
+**1b on frozen slides** (same discordant patients, model trained on concordant patients' TS vs DX features):
+
+| Discordant pair | n | DX: molecular : IHC | TS: molecular : IHC |
+|---|---|---|---|
+| ER: IHC vs RNA | 52 | 34 : 18 (p = 0.037) | **39 : 13 (p = 0.0004)** |
+| HER2: strict vs amplification | 56 | 38 : 18 (p = 0.011) | 36 : 20 (p = 0.044) |
+| PR: IHC vs RNA (prevalence-matched) | 127 | 60 : 67 (p = 0.60) | 73 : 54 (p = 0.11) |
+
+**1e: do two frozen slides of one tumour agree?** (`scripts/frozen_1e.py`, job 22323.) 373 TS+BS pairs from the same
+vial + portion; ER probe trained on primary TS slides of out-of-fold patients (fixed folds, 5 seeds), applied to both slides.
+
+| ER model trained on | Pairs | ICC(2,1) of logit P | Pearson r of P | Cohen's kappa (calls) | Calls flipped | AUC TS / BS |
+|---|---|---|---|---|---|---|
+| IHC label | 368 | 0.871 (0.841, 0.896) | 0.881 | 0.725 (0.643, 0.803) | 10.9% (7.9, 14.1) | 0.891 / 0.877 |
+| RNA label | 367 | 0.892 (0.868, 0.913) | 0.915 | 0.806 (0.739, 0.872) | 7.6% (4.9, 10.4) | 0.939 / 0.940 |
+
+- Two sections of one tumour look alike (feature cosine median 0.921 vs 0.711 for different patients), and predictions
+  agree well (ICC 0.87-0.89), but **about 1 in 10 binary ER calls flips** between the top and bottom section.
+- The RNA-trained model is somewhat more reproducible than the IHC-trained one (kappa 0.81 vs 0.73; CIs overlap).
+- Disagreement grows slightly with the difference in % tumour cells between the two sections (Spearman rho = 0.14, p < 0.01).
+
+Files: `results/frozen_1c.csv`, `results/frozen_1c_oof.csv.gz`, `results/frozen_1e.csv`, `results/frozen_1e_pairs.csv`.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |
@@ -282,7 +336,8 @@ Interpretation for the report: on H&E, "ER status" is largely read through the t
 | Small discordant groups (ER 54, HER2 60, ER-low 11) | **Done (5d):** patient-level consensus across 5 variants; ER 34 : 20 (p = 0.076) is suggestive only, report it as such |
 | HER2 significance encoder-dependent | **Done (5d):** DeLong per variant; HER2 1a not robust across encoders, but combined 1b 42 : 18 (p = 0.003) |
 | CONCH mean-pool numbers on slide 4 are from the laptop run | Update slides with the Ada values (conclusions unchanged); change the PR bullet to "no reliable preference" |
-| 1c and 1e not yet run | UNI access granted (Srivastava); manifest of 1,516 TS/BS slides built; extraction queued on Ada (Section 7) |
+| ~~1c and 1e not yet run~~ | **Done (5e):** 1,515 frozen slides extracted (IDC), equivalence with TRACE verified, 1c and 1e run |
+| Frozen-slide outputs not yet in `sanity_check.py` | Extend the sanity checks to 1c/1e (Tier 5) |
 | Attention analysis is exploratory (n = 10 ER-low) | Report as a lead. **Done (5d):** discordant cases described by PAM50 / ER % / histology; check HER2-enriched exceptions in the heatmaps |
 
 ## 7. Files and how to reproduce
@@ -298,5 +353,8 @@ Interpretation for the report: on H&E, "ER status" is largely read through the t
 | DeLong 1a, combined 1b | `results/stats_delong_1a.csv`, `results/stats_combined_1b.csv`, `results/stats_combined_1b_patients.csv` | `jobs/stats_tier2.sbatch` → `scripts/titan_oof.py`, `scripts/stats_delong_1b.py` (Ada job 19989) |
 | TITAN out-of-fold predictions (fixed splits) | `results/titan_linear_{fixedsplits,prprev}_oof.csv.gz` | `scripts/titan_oof.py` |
 | ER-discordant case description | `results/er_discordant_summary.txt`, `results/er_discordant_cases.csv` | `scripts/describe_discordant.py` |
-| Frozen-slide manifest (1c, 1e) | `data/metadata/frozen_manifest.csv` | `scripts/make_frozen_manifest.py` |
+| Frozen-slide manifest (1c, 1e) | `data/metadata/frozen_manifest.csv`, `data/metadata/idc_slides.csv` | `scripts/make_frozen_manifest.py`, `scripts/make_idc_objects.py` |
+| Frozen-slide features | `~/project/data/features/frozen_uni_v1/` on Ada (Srivastava) | `jobs/extract_frozen.sbatch` -> `scripts/extract_frozen.py` (job 20080) |
+| Extraction equivalence | `results/equivalence_check.csv` | `jobs/equivalence_check.sbatch` (job 21300) |
+| 1c, 1e | `results/frozen_1c*.csv*`, `results/frozen_1e*.csv` | `jobs/frozen_analysis.sbatch` -> `scripts/frozen_1c.py`, `scripts/frozen_1e.py` (job 22323) |
 | Job logs | `results/logs/17536.out` … `17661.out` | Ada |
