@@ -283,3 +283,6 @@ final tables + sanity 22560 (after all of these).
   no LaTeX on the laptop or Ada; compile on Overleaf).
 - **CPTAC external check (Tier 6) is on hold** by decision of Srivastava's team side; LoRA (1f) and Kamineni dropped.
 - Open: compile decks, rehearsal; Uniyal's Hugging Face / CONCH access item (Tier 0).
+- 15 Oct (later): Srivastava's Hugging Face account now has **CONCH approved** as well as UNI (token check on Ada pending,
+  VPN down). Tier 0 HF item closed as not required. **@Uniyal:** if you got UNI/CONCH access, note it here; it only
+  matters if you will encode new slides yourself (e.g. if CPTAC is resumed).

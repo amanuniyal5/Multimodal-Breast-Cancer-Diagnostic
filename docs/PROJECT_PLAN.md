@@ -82,7 +82,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] UNI v1 and CONCH v1 patch features for 1,055 patients (`data/features/` on Ada)
 - [x] Fixed site-grouped splits `data/splits/folds.csv`; scikit-learn pinned
 - [x] Both members have Ada key access and can run `jobs/check_env.sbatch` under their own account (Srivastava: job 19986)
-- [ ] Both members have UNI/CONCH access on Hugging Face (IIIT e-mail)
+- [x] Both members have UNI/CONCH access on Hugging Face (IIIT e-mail) (closed 15 Oct as not required: Srivastava has UNI (used in jobs 21299/20080/21300) and CONCH (approved 15 Oct, token check on Ada pending); Uniyal last recorded as "blocked" on 12 Oct, status unknown, but every experiment is done and Uniyal's runs used the public TRACE features; reopen only if Uniyal needs to encode new slides, e.g. CPTAC)
 
 **Exit gate:** labels, features and splits exist and are documented; both members can run jobs on Ada.
 
@@ -173,7 +173,7 @@ reference standards). We do **not** propose a new architecture.
 
 | Tier | Status | Blocking item |
 |---|---|---|
-| 0 Foundations | Done except Uniyal HF/CONCH item | Srivastava: Ada + UNI done, CONCH access pending |
+| 0 Foundations | Done (HF item closed as not required, 15 Oct) | — |
 | 1 Core baselines | Done | — |
 | 2 Robustness | Done (14 Oct, report 5d) | — |
 | 3 Interpretation | Done (15 Oct, report 5c-2, 5d, 5f) | — |
