@@ -13,7 +13,7 @@ an apparent IHC preference disappears once the RNA cut-off is chosen fairly. HER
 |---|---|---|
 | 1a ER: is the RNA label more predictable than IHC? | **Yes, +0.03 to +0.06 AUC** in all 5 model variants | Paired 95% CI excludes 0 for all 4 patch-feature models and for TITAN; survives 3 RNA cut-off schemes |
 | 1b ER: which side on IHC ≠ RNA patients (n = 54)? | **RNA, 34–39 of 54** in all 5 variants | Significant (p < 0.05) in 3 of 5; **patient-level consensus of all 5: 34 : 20, p = 0.076 (suggestive)**; 66% of calls side with RNA (CI 54–76%) |
-| 1a ER under DeLong | RNA − IHC CI excludes 0 in all 5 variants (p ≤ 0.038) | DeLong and bootstrap CIs agree (5d) |
+| 1a ER under DeLong | RNA − IHC positive in all 5 variants; CI excludes 0 in 4 of 5 on the fixed splits (UNI ABMIL +0.018, CI −0.008 to +0.044) | DeLong and bootstrap CIs agree (5d); final tables in `docs/FINAL_RESULTS.md` |
 | Who are the ER-discordant patients? | Call follows the intrinsic subtype: 15/15 Basal IHC+/RNA− called ER−, 9/9 LumA IHC−/RNA+ called ER+; HER2-enriched IHC+/RNA− mostly called ER+ (8/11) | Descriptive (n = 54) |
 | 1a/1b ER vs RPPA protein | RPPA sits between IHC and RNA; no side preference (30–35 of 63) | Consistent |
 | 1a/1b PR | GMM cut-off: RNA *harder*, model sides with IHC. **Prevalence-matched cut-off: no difference, no side** | The GMM result is a cut-off artefact (all 5 variants) |
@@ -358,6 +358,15 @@ concordant patients: `results/frozen_1c_oof.csv.gz`.)
 - Reading: ER-low tumours that are RNA-negative are mostly Basal-like, and the H&E model sees them as such. This agrees
   with clinical literature that many ER-low tumours behave like ER-negative (triple-negative-like) disease; here that is
   a **hypothesis suggested by 10 cases**, which would need an external cohort (e.g. CPTAC, Tier 6) to test.
+
+## 5g. Final tables (fixed splits, 15 Oct 2026)
+
+The ABMIL heads were rerun on the fixed splits (Ada jobs 22534/22535 UNI, 22537/22538 CONCH). The final tables
+T1-T5, built only from fixed-split runs, are in [`FINAL_RESULTS.md`](FINAL_RESULTS.md), together with the primary vs
+secondary claims and the multiple-testing note. Changes against the earlier-fold ABMIL numbers in Sections 4 and 5d:
+UNI ABMIL ER ΔAUC +0.018 (CI −0.008, +0.044; was +0.034), CONCH ABMIL +0.045 (was +0.049); HER2 amplification ΔAUC now
+significant for CONCH ABMIL (+0.080); 1b counts unchanged (no folds involved). **Where the two differ, the fixed-split
+numbers in `FINAL_RESULTS.md` are the ones to report.**
 
 ## 6. Caveats and next steps
 
