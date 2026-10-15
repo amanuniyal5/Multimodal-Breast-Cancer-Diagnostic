@@ -137,22 +137,22 @@ embedding (TITAN) or on the mean of all patches (UNI, CONCH); 5-fold \textbf{sit
 \toprule
  & Task & TITAN & UNI v1 & CONCH v1 \\
 \midrule
-\textbf{1a} & ER: IHC $\rightarrow$ RNA label ($n$=801) & 0.87 $\rightarrow$ \textbf{0.92} & 0.87 $\rightarrow$ \textbf{0.91} & 0.84 $\rightarrow$ \textbf{0.87} \\
-AUC & PR: IHC $\rightarrow$ RNA label ($n$=986) & 0.80 $\rightarrow$ 0.79 & 0.80 $\rightarrow$ 0.73 & 0.78 $\rightarrow$ 0.75 \\
- & HER2: clinical $\rightarrow$ amplif. ($n$=478) & 0.68 $\rightarrow$ 0.72 & 0.63 $\rightarrow$ 0.68 & 0.62 $\rightarrow$ 0.68 \\
+\textbf{1a} & ER: IHC $\rightarrow$ RNA label ($n$=801) & 0.87 $\rightarrow$ \textbf{0.92} & 0.87 $\rightarrow$ \textbf{0.91} & 0.85 $\rightarrow$ \textbf{0.88} \\
+AUC & PR: IHC $\rightarrow$ RNA label ($n$=986) & 0.80 $\rightarrow$ 0.79 & 0.79 $\rightarrow$ 0.75 & 0.78 $\rightarrow$ 0.75 \\
+ & HER2: clinical $\rightarrow$ amplif. ($n$=478) & 0.68 $\rightarrow$ 0.72 & 0.63 $\rightarrow$ 0.70 & 0.61 $\rightarrow$ 0.69 \\
 \midrule
 \textbf{1b} & ER discordant ($n$=54) & \textbf{RNA} 39:15** & RNA 34:20 & \textbf{RNA} 35:19* \\
 side & PR discordant ($n$=169) & \textbf{IHC} 100:69* & \textbf{IHC} 114:55*** & \textbf{IHC} 108:61*** \\
  & HER2 discordant ($n$=60) & 35:25 & \textbf{amplif.} 44:16*** & \textbf{amplif.} 39:21* \\
 \midrule
-Ctrl & Shuffled ER labels & 0.46 & 0.51 & 0.46 \\
- & HER2 0 vs low (mRNA alone 0.69) & 0.40 & 0.50 & 0.43 \\
+Ctrl & Shuffled ER labels & 0.46 & 0.51 & 0.50 \\
+ & HER2 0 vs low (mRNA alone 0.69) & 0.42 & 0.49 & 0.49 \\
 \bottomrule
 \end{tabular}
 
 \vspace{1pt}
 {\tiny 1b: discordant cases where the model sides with the winning label : the other. Binomial * $p<0.05$, ** $p<0.01$, *** $p<0.001$.
-TITAN 5 seeds, UNI/CONCH 3 seeds. ABMIL on UNI patches running on Ada (first seed: ER IHC 0.86 vs RNA 0.91).}
+TITAN, UNI, CONCH: 5 seeds each, fixed site-grouped splits, Ada (numbers updated 15 Oct; PR with the GMM cut-off, see right).}
 
 \vspace{3pt}
 \raggedright
@@ -161,7 +161,7 @@ TITAN 5 seeds, UNI/CONCH 3 seeds. ABMIL on UNI patches running on Ada (first see
 \begin{block}{Consistent across all three encoders}
 \begin{itemize}
   \item \textbf{ER and HER2:} H\&E tracks the \textbf{molecular} label (mRNA / DNA amplification) more than clinical IHC.
-  \item \textbf{PR:} the opposite, the model sides with \textbf{IHC}.
+  \item \textbf{PR:} no reliable preference: the apparent IHC preference disappears with a prevalence-matched RNA cut-off.
 \end{itemize}
 \end{block}
 \end{column}

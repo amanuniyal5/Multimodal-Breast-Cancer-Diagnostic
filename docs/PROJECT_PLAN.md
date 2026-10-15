@@ -156,7 +156,7 @@ reference standards). We do **not** propose a new architecture.
 ## Tier 6: Optional extensions (only after Tiers 0–5 pass their gates) ⬜
 
 - [ ] External check on CPTAC-BRCA (134 patients: H&E, RNA, protein; no survival) for 1a/1b (decided 15 Oct: after Tier 7; IDC has 653 slides / 198 patients, 385 standard-JPEG first; ~1 working day)
-- [ ] ~~1f: LoRA fine-tuning~~ (dropped 15 Oct) of UNI on IHC vs RNA labels (does adaptation change which truth is learned? ~30–60 GPU-h)
+- [ ] ~~1f: LoRA fine-tuning of UNI on IHC vs RNA labels (~30–60 GPU-h)~~ (dropped 15 Oct)
 - [ ] ~~Kamineni hospital data as an external test~~ (dropped 15 Oct unless data arrive)
 
 ## Tier 7: Deliverables ⬜
