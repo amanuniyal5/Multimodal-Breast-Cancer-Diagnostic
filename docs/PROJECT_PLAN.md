@@ -161,11 +161,11 @@ reference standards). We do **not** propose a new architecture.
 
 ## Tier 7: Deliverables ⬜
 
-- [~] Slides: fix PR bullet ("no reliable preference"), Ada CONCH numbers, remove/keep "attention maps" consistently (Srivastava, 2026-10-15)
-- [~] Project guide / docs kept in sync with the final numbers (Srivastava, 2026-10-15)
-- [~] Final report (problem, data, methods, results 1a–1e, robustness, interpretation, limitations) (Srivastava, 2026-10-15)
-- [~] Final presentation and rehearsal; Q&A sheet (see the project guide) (Srivastava, 2026-10-15)
-- [~] Repo clean-up: README up to date, every result reproducible from `scripts/` + `jobs/` (Srivastava, 2026-10-15)
+- [~] Slides: fix PR bullet ("no reliable preference"), Ada CONCH numbers, remove/keep "attention maps" consistently (done in both decks; compile pending: no LaTeX locally or on Ada)
+- [x] Project guide / docs kept in sync with the final numbers (README, HANDOFF, report 5g, `docs/FINAL_RESULTS.md`)
+- [x] Final report (problem, data, methods, results 1a–1e, robustness, interpretation, limitations) (`docs/FINAL_REPORT.md` + `.docx`)
+- [~] Final presentation and rehearsal; Q&A sheet (see the project guide) (Q&A sheet done: `docs/QA_SHEET.md`; deck needs compiling; rehearsal: team)
+- [x] Repo clean-up: README up to date, every result reproducible from `scripts/` + `jobs/` (README table: result → file → script → job)
 
 ---
 

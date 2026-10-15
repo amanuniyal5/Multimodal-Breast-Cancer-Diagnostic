@@ -350,6 +350,7 @@ vial + portion; ER probe trained on primary TS slides of out-of-fold patients (f
 
 - Two sections of one tumour look alike (feature cosine median 0.921 vs 0.711 for different patients), and predictions
   agree well (ICC 0.87-0.89), but **about 1 in 10 binary ER calls flips** between the top and bottom section.
+  Flipped pairs sit at the threshold (median |mean P − 0.5| 0.06 vs 0.42 for agreeing pairs).
 - The RNA-trained model is somewhat more reproducible than the IHC-trained one (kappa 0.81 vs 0.73; CIs overlap).
 - Disagreement grows slightly with the difference in % tumour cells between the two sections (Spearman rho = 0.14, p < 0.01).
 
