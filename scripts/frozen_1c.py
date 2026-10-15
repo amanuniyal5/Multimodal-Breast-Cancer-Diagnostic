@@ -75,7 +75,7 @@ for marker, ihc, mol in COMPARISONS:
                 for tr, te in site_folds(pts, s):
                     pr[te] += linear_probe().fit(X[tr], y[tr]).predict_proba(X[te])[:, 1] / a.seeds
             P[src, lab] = pr
-            preds.append(pd.DataFrame({"marker": marker, "slide": src, "label": lab, "patient": pts, "y": y, "p": pr}))
+            preds.append(pd.DataFrame({"marker": marker, "comparison": f"{mol} vs {ihc}", "slide": src, "label": lab, "patient": pts, "y": y, "p": pr}))
     Y = {lab: d[lab].astype(int).values for lab in (ihc, mol)}
 
     def aucs(i):
@@ -125,7 +125,7 @@ for ihc, mol in [("ER_IHC", "ESR1_RNApos"), ("HER2_STRICT", "ERBB2_AMP"), ("PR_I
         p = linear_probe().fit(F.loc[conc.index].values, conc[ihc].astype(int)).predict_proba(F.loc[disc.index].values)[:, 1]
         k = int(((p >= 0.5).astype(int) == disc[mol].astype(int).values).sum())
         out.update({f"side_mol_{src}": k, f"side_ihc_{src}": len(disc) - k, f"p_{src}": binomtest(k, len(disc)).pvalue})
-        preds.append(pd.DataFrame({"marker": out["marker"], "slide": src, "label": f"1b {ihc} vs {mol}",
+        preds.append(pd.DataFrame({"marker": out["marker"], "comparison": out["comparison"], "slide": src, "label": f"1b {ihc} vs {mol}",
                                    "patient": disc.index, "y": disc[mol].values, "p": p}))
     rows.append(out)
     print(f"1b {ihc} vs {mol}: n={len(disc)} | DX molecular {out['side_mol_DX']}:{out['side_ihc_DX']} "

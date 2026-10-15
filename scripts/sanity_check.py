@@ -6,9 +6,12 @@ Checks (each prints PASS/FAIL):
   S3  1a is paired: within a group and seed, all labels are predicted for exactly the same patients
   S4  the y stored in the OOF file equals the label table (no label mix-up), except the shuffled control
   S5  negative control (shuffled ER) AUC within 0.40-0.60 for every model
-  S6  determinism: mean-pool rows of the full run == the earlier mean-only run
+  S6  determinism: mean-pool rows of the full run == the earlier mean-only run (CONCH: the mean-only run was made on
+      the laptop with scikit-learn 1.5, so its folds differ; known and superseded by the fixed-split rerun, report 5b)
   S7  1b side counts recomputed from the stored discordant-case probabilities == the summary
   S8  n per experiment matches the expected cohort sizes
+  S9-S15  frozen slides (1c, 1e): site-grouped splits, OOF pairing, labels, recomputed AUCs/interaction, 1b counts,
+          1e pairs and agreement, extraction equivalence and cohort sizes
 Also writes results/paired_ci_patch.csv: paired bootstrap 95% CI of AUC(molecular) - AUC(IHC), per model, seed 0.
 
 Usage: python scripts/sanity_check.py [--results results] [--labels data/metadata/labels_patient.csv]
@@ -140,4 +143,75 @@ CI = pd.DataFrame(rows)
 CI.to_csv(os.path.join(R, "paired_ci_patch.csv"), index=False)
 print("\nPaired bootstrap 95% CIs (seed 0):")
 print(CI.round(3).to_string(index=False))
+# ================= frozen slides (experiments 1c, 1e; scripts/frozen_1c.py, frozen_1e.py) =================
+print("\n========== frozen slides (1c, 1e) ==========")
+F = pd.read_csv("data/splits/folds.csv", index_col="patient")
+# S9: the fixed splits are site-grouped (no tissue source site in two folds of the same seed)
+ok9 = all((F.groupby("site")[c].nunique() == 1).all() for c in F.columns if c.startswith("fold_s"))
+check("S9 fixed splits are site-grouped", ok9, f"({F.site.nunique()} sites, {len(F)} patients)")
+
+c1 = pd.read_csv(os.path.join(R, "frozen_1c.csv"))
+o1 = pd.read_csv(os.path.join(R, "frozen_1c_oof.csv.gz"))
+q = L.PGR_log2.quantile(1 - L.PR_IHC.mean())
+L["PGR_prevmatch"] = (L.PGR_log2 >= q).astype(float).where(L.PGR_log2.notna())
+a1c = o1[~o1.label.str.startswith("1b")]
+# S10: 1c OOF integrity and pairing: per marker, the 4 blocks (DX/TS x IHC/molecular) cover the same patients
+blk = a1c.groupby(["comparison", "slide", "label"])
+ok10 = not (blk.patient.apply(lambda s: s.duplicated().any()).any() or a1c.p.isna().any()
+            or ((a1c.p < 0) | (a1c.p > 1)).any())
+for mk, d in a1c.groupby("comparison"):
+    sets = {k: frozenset(g.patient) for k, g in d.groupby(["slide", "label"])}
+    ok10 &= len(sets) == 4 and len(set(sets.values())) == 1
+check("S10 1c OOF integrity and pairing (DX/TS x IHC/molecular, same patients)", ok10, f"(blocks={blk.ngroups})")
+# S11: stored y equals the label table
+m = a1c.merge(L, left_on="patient", right_index=True, how="left")
+mism = sum(int((m[m.label == c].y.values != m[m.label == c][c].values).sum()) for c in a1c.label.unique())
+check("S11 1c stored y equals label table", mism == 0, f"(mismatches = {mism})")
+# S12: AUCs and interaction recomputed from the stored predictions == summary
+ok12, dmax = True, 0.0
+for r_ in c1[c1.comparison.str.contains(" vs ") & ~c1.comparison.str.startswith("1b")].itertuples():
+    mol, ihc = r_.comparison.split(" vs ")
+    A = {}
+    for src in ("DX", "TS"):
+        for lab in (ihc, mol):
+            d = a1c[(a1c.comparison == r_.comparison) & (a1c.slide == src) & (a1c.label == lab)]
+            A[src, lab] = roc_auc_score(d.y.astype(int), d.p)
+    inter = (A["TS", mol] - A["TS", ihc]) - (A["DX", mol] - A["DX", ihc])
+    dmax = max(dmax, abs(inter - r_.interaction), abs(A["DX", ihc] - r_.AUC_DX_ihc), abs(A["TS", mol] - r_.AUC_TS_mol))
+    ok12 &= dmax < 1e-9
+check("S12 1c AUCs and interaction recomputed from OOF match summary", ok12, f"(max |diff| = {dmax:.1e})")
+# S13: 1b-on-frozen counts recomputed
+ok13 = True
+for r_ in c1[c1.comparison.str.startswith("1b")].itertuples():
+    for src in ("DX", "TS"):
+        d = o1[(o1.label == r_.comparison) & (o1.slide == src)]
+        k = int(((d.p >= 0.5).astype(int) == d.y.astype(int)).sum())
+        ok13 &= len(d) == r_.n and k == getattr(r_, f"side_mol_{src}")
+check("S13 1c 1b counts recomputed from stored probabilities", ok13)
+
+# S14: 1e pairs are real pairs and the summary is reproducible
+e1 = pd.read_csv(os.path.join(R, "frozen_1e.csv"))
+ep = pd.read_csv(os.path.join(R, "frozen_1e_pairs.csv"))
+man = pd.read_csv("data/metadata/frozen_manifest.csv")
+man["pair_id"] = man.pair_id.fillna("")
+pm = man[man.pair_id != ""].groupby("pair_id").agg(n_ts=("section_type", lambda s: (s == "TS").sum()),
+                                                    n_bs=("section_type", lambda s: (s == "BS").sum()),
+                                                    patient=("patient", "first"))
+ok14 = ep.pair_id.isin(pm.index).all() and (pm.loc[ep.pair_id, "patient"].values == ep.patient.values).all()
+ok14 &= ((pm.n_ts >= 1) & (pm.n_bs >= 1)).all() and (pm.index.str[:12] == pm.patient).all()
+for lab, d in ep.groupby("label"):
+    row = e1[e1.label == lab].iloc[0]
+    ct, cb = (d.P_TS >= 0.5).astype(int), (d.P_BS >= 0.5).astype(int)
+    ok14 &= len(d) == row.n_pairs and abs(100 * (ct != cb).mean() - row.pct_flipped) < 1e-9
+    ok14 &= (d.y.values == L.loc[d.patient, lab].values).all()
+check("S14 1e pairs = one TS + one BS of the same patient and portion; flips and labels reproducible", ok14,
+      f"({ep.pair_id.nunique()} pairs)")
+# S15: extraction equivalence and cohort sizes
+eq = pd.read_csv(os.path.join(R, "equivalence_check.csv"))
+ok15 = (eq.cos_same_slide > 0.999).all() and ((eq.P_ER_trace >= 0.5) == (eq.P_ER_ours >= 0.5)).all()
+n1c = c1[c1.comparison == "ESR1_RNApos vs ER_IHC"].n.iloc[0]
+ok15 &= len(eq) >= 40 and n1c == 947 and e1[e1.label == "ER_IHC"].n_pairs.iloc[0] == 368 and man.slide_barcode.nunique() == 1515
+check("S15 extraction equivalence (cosine > 0.999, same ER calls) and frozen cohort sizes", ok15,
+      f"(equivalence n={len(eq)}, min cos={eq.cos_same_slide.min():.5f}; 1c ER n={n1c}; manifest slides={man.slide_barcode.nunique()})")
+
 print(f"\n{len(fails)} check(s) failed: {fails}" if fails else "\nALL SANITY CHECKS PASSED")
