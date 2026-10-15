@@ -155,7 +155,7 @@ reference standards). We do **not** propose a new architecture.
 
 ## Tier 6: Optional extensions (only after Tiers 0–5 pass their gates) ⬜
 
-- [ ] External check on CPTAC-BRCA (134 patients: H&E, RNA, protein; no survival) for 1a/1b (decided 15 Oct: after Tier 7; IDC has 653 slides / 198 patients, 385 standard-JPEG first; ~1 working day)
+- [ ] External check on CPTAC-BRCA (134 patients: H&E, RNA, protein; no survival) for 1a/1b (ON HOLD since 15 Oct; if resumed: IDC has 653 slides / 198 patients, start with the 385 standard-JPEG slides; ~1 working day + ~5 h Ada)
 - [ ] ~~1f: LoRA fine-tuning of UNI on IHC vs RNA labels (~30–60 GPU-h)~~ (dropped 15 Oct)
 - [ ] ~~Kamineni hospital data as an external test~~ (dropped 15 Oct unless data arrive)
 
@@ -179,8 +179,8 @@ reference standards). We do **not** propose a new architecture.
 | 3 Interpretation | Done (15 Oct, report 5c-2, 5d, 5f) | — |
 | 4 Frozen slides | Done (15 Oct, report 5e) | Sanity checks for frozen outputs moved to Tier 5 |
 | 5 Consolidation | Done (15 Oct, `docs/FINAL_RESULTS.md`) | — |
-| 6 Optional | Not started | Tiers 0–5 |
-| 7 Deliverables | Deck drafted (`slides/progress_update_2.tex`, not compiled) | Final report, final deck |
+| 6 Optional | On hold (CPTAC); 1f and Kamineni dropped | — |
+| 7 Deliverables | 3 of 5 done (report, docs, repo); decks updated but not compiled | Compile decks (no LaTeX); rehearsal
 
 ## Key files
 
