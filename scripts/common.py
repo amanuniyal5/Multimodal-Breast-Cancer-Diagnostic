@@ -49,7 +49,8 @@ def load_frozen_means(feat_dir, manifest):
     that have been extracted. Returns the manifest columns plus feature columns 0..D-1 (integers)."""
     import os
     rows, X = [], []
-    for r in manifest.itertuples(index=False):
+    # one row per slide: TCGA-A8-A06U-01A-01-TS1 has two GDC files (two scans) but one IDC copy, which is what we extract
+    for r in manifest.drop_duplicates("slide_barcode").itertuples(index=False):
         f = os.path.join(feat_dir, f"{r.slide_barcode}.npz")
         if os.path.exists(f):
             rows.append(r)
