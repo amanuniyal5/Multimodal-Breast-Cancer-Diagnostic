@@ -286,3 +286,4 @@ final tables + sanity 22560 (after all of these).
 - 15 Oct (later): Srivastava's Hugging Face account now has **CONCH approved** as well as UNI (token check on Ada pending,
   VPN down). Tier 0 HF item closed as not required. **@Uniyal:** if you got UNI/CONCH access, note it here; it only
   matters if you will encode new slides yourself (e.g. if CPTAC is resumed).
+- 15 Oct: CONCH access verified from Ada with Srivastava's token (pytorch_model.bin range request 206; was 403 GatedRepo on 14 Oct).
