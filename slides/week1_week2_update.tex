@@ -265,54 +265,50 @@ ER 10--39\% stained & 9 & 7:2 & 6:3 & 7:2 \\
 \end{frame}
 
 %===================================================================
-\begin{frame}[t]{Week 2: Fixed Splits, and Frozen Slides Encoded for 1c / 1e}
+\begin{frame}[t]{Week 2: Frozen Slides -- Results of 1c and 1e}
 \footnotesize
+1,515 frozen sections (TS = above, BS = below the sequenced tissue) encoded with the same pipeline as the FFPE (DX)
+features (verified: cosine 1.0000 on 46 re-extracted DX slides). UNI mean-pool, same patients, same site-grouped folds.
+
+\vspace{6pt}
 \begin{columns}[T]
-\begin{column}{0.36\textwidth}
-\begin{block}{Fixed site-grouped CV splits}
-\begin{itemize}
-  \item One shared split file (5 folds $\times$ 5 seeds, grouped by hospital) used by every experiment.
-  \item Every model and every label is compared on identical folds.
-  \item All linear baselines rerun on it: \textbf{conclusions unchanged} (TITAN ER $\Delta$AUC +0.058, 95\% CI +0.031 to +0.084).
-\end{itemize}
-\end{block}
-\begin{block}{Why frozen slides?}
-\begin{itemize}
-  \item DX = FFPE diagnostic slide, from a different block than the sequenced tissue.
-  \item TS / BS = frozen sections cut directly above / below the sequenced tissue.
-  \item \textbf{1c}: is the RNA preference a tissue-sampling artefact? \textbf{1e}: do two sections agree?
-\end{itemize}
-\end{block}
-\end{column}
-\begin{column}{0.61\textwidth}
-\begin{block}{Frozen-slide feature pipeline}
+\begin{column}{0.53\textwidth}
+\begin{block}{1c: does the answer change from FFPE to frozen? ($n$ = 947)}
 \centering
-\begin{tikzpicture}[
-  box/.style={draw, rounded corners=3pt, fill=blue!6, align=center, font=\scriptsize,
-              text width=1.45cm, minimum height=1.0cm},
-  arr/.style={-{Stealth[length=1.6mm]}, thick}, node distance=0.28cm]
-  \node[box] (m) {Manifest\\1,516 TS/BS\\373 pairs};
-  \node[box, right=of m, fill=orange!15] (d) {TCGA slides\\(NCI IDC)};
-  \node[box, right=of d] (t) {TRIDENT\\tissue seg.\\256\,px @ 20$\times$};
-  \node[box, right=of t] (u) {UNI v1\\(frozen)};
-  \node[box, right=of u] (f) {Mean +\\4,096-patch\\bag};
-  \draw[arr] (m) -- (d); \draw[arr] (d) -- (t); \draw[arr] (t) -- (u); \draw[arr] (u) -- (f);
-\end{tikzpicture}
-\end{block}
-\centering
-\begin{tabular}{lr}
+\scriptsize
+\begin{tabular}{lccc}
 \toprule
-Frozen slides encoded (1,044 TS + 471 BS) & \textbf{1,515} \\
-TS + BS pairs from the same tissue portion (for 1e) & 373 \\
-Our pipeline vs TRACE, 46 DX slides re-extracted & cosine \textbf{1.0000} \\
+$\Delta$AUC (molecular $-$ IHC) & DX & TS & Interaction (95\% CI) \\
+\midrule
+\textbf{ER: RNA $-$ IHC} & +0.032 & +0.032 & \textbf{0.000} ($-$0.024, +0.024) \\
+PR: RNA $-$ IHC (prev.-matched) & $-$0.003 & +0.026 & +0.029, $p$ = 0.12 \\
+HER2: amplif. $-$ strict & +0.045 & +0.014 & $-$0.030, $p$ = 0.44 \\
 \bottomrule
 \end{tabular}
-
-\vspace{4pt}
-\raggedright
-\begin{alertblock}{Ready for 1c and 1e}
-Our pipeline reproduces the precomputed DX features exactly, so DX vs frozen slides will differ only in the tissue.
-\end{alertblock}
+\end{block}
+\begin{itemize}
+  \item The frozen slide next to the sequenced tissue prefers RNA \textbf{exactly as much} as the FFPE slide:
+        the ER result is not a tissue-sampling artefact.
+  \item ER-discordant patients: frozen slides side with RNA \textbf{39 : 13} ($p$ = 0.0004; FFPE 34 : 18).
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{block}{1e: do two frozen sections of one tumour agree? (373 pairs)}
+\centering
+\scriptsize
+\begin{tabular}{lccc}
+\toprule
+ER model trained on & ICC & $\kappa$ & Calls flipped \\
+\midrule
+IHC label & 0.87 & 0.73 & 10.9\% \\
+RNA label & 0.89 & 0.81 & 7.6\% \\
+\bottomrule
+\end{tabular}
+\end{block}
+\begin{itemize}
+  \item Predictions agree well, but \textbf{$\sim$1 in 10 ER calls flips} between sections a few mm apart.
+  \item Flipped cases sit at the 0.5 threshold; the RNA-trained model is somewhat more reproducible.
+\end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
@@ -326,28 +322,28 @@ Our pipeline reproduces the precomputed DX features exactly, so DX vs frozen sli
 \begin{itemize}
   \item[\checkmark] ABMIL (UNI, CONCH) for 1a, 1b, 1d
   \item[\checkmark] PR cut-off test: no reliable preference
-  \item[\checkmark] ER-low vs ER-high discordant cases
-  \item[\checkmark] Attention maps on discordant cases
-  \item[\checkmark] Fixed CV splits; baselines rerun
-  \item[\checkmark] UNI access; 1,515 frozen slides encoded
+  \item[\checkmark] ER-low cases and attention maps
+  \item[\checkmark] Fixed site-grouped splits shared
+  \item[\checkmark] 1,515 frozen slides encoded
+  \item[\checkmark] \textbf{1c} and \textbf{1e} first results
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.32\textwidth}
-\begin{block}{Next experiments}
+\begin{block}{Statistics \& final numbers}
 \begin{itemize}
-  \item \textbf{1c:} FFPE vs frozen $\times$ IHC vs RNA label; interaction test; \% tumour cells as covariate
-  \item \textbf{1e:} TS vs BS agreement on 373 pairs (ICC, $\kappa$, \% flipped calls)
-  \item \textbf{Statistics:} DeLong tests for 1a; combined 1b evidence across encoders
+  \item DeLong tests for 1a, next to the bootstrap
+  \item Combined 1b evidence across the five models (one call per patient)
+  \item Rerun ABMIL on the fixed splits $\rightarrow$ one set of final tables
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.32\textwidth}
-\begin{block}{Analysis \& logistics}
+\begin{block}{Interpretation \& write-up}
 \begin{itemize}
-  \item Overlay attention on the real slide images (does it sit on tumour?)
-  \item Describe discordant patients: PAM50, \% of cells ER-stained, histology
-  \item Rerun ABMIL on the fixed splits for one set of final tables
+  \item Overlay attention on the real slide images
+  \item Describe discordant patients: PAM50 subtype, \% stained, histology
+  \item Primary vs secondary claims; multiple-testing note; start the final report
 \end{itemize}
 \end{block}
 \end{column}
@@ -357,11 +353,11 @@ Our pipeline reproduces the precomputed DX features exactly, so DX vs frozen sli
 \centering
 \begin{tabular}{lr}
 \toprule
-Compute on Ada (11\,GB GPUs) & Estimate \\
+Remaining compute & Estimate \\
 \midrule
-Frozen-slide features (1,515 slides) & done, $\sim$15\,h on 2--3 GPUs \\
-1c / 1e analyses (linear probes, bootstrap) & $<$ 1\,h CPU \\
 ABMIL rerun on fixed splits (UNI + CONCH) & $\sim$10 GPU-hours \\
+Attention overlays (download $\sim$10 DX slides) & $<$ 1 hour \\
+Statistics and final tables & minutes (CPU) \\
 \bottomrule
 \end{tabular}
 \end{frame}
