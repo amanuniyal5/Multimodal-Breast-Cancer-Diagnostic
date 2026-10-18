@@ -229,39 +229,37 @@ gap disappears and the discordant cases split evenly (all five models $p > 0.3$)
 
 %===================================================================
 \begin{frame}[t]{Week 2: ER-low Tumours Are Read as ER-negative}
-\footnotesize
-\begin{columns}[T]
-\begin{column}{0.52\textwidth}
-\begin{block}{ER discordant cases by subgroup (model trained on concordant cases; RNA : IHC)}
-\centering
 \scriptsize
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{block}{ER-discordant cases by subgroup (RNA : IHC side)}
+\centering
 \begin{tabular}{lcccc}
 \toprule
 Subgroup & $n$ & TITAN & UNI & CONCH \\
 \midrule
 IHC+ / RNA$-$ & 34 & 24:10 & 21:13 & 22:12 \\
 IHC$-$ / RNA+ & 20 & 15:5 & 13:7 & 13:7 \\
-\textbf{ER-low} (IHC+, $<$10\% stained) & 11 & \textbf{9:2} & \textbf{9:2} & \textbf{9:2} \\
+\textbf{ER-low} (IHC+, $<$10\%) & 11 & \textbf{9:2} & \textbf{9:2} & \textbf{9:2} \\
 ER 10--39\% stained & 9 & 7:2 & 6:3 & 7:2 \\
 \bottomrule
 \end{tabular}
 \end{block}
-\begin{block}{ABMIL attention maps: 54 discordant + 10 reference patients (UNI)}
+\begin{block}{ABMIL attention maps (UNI): 54 discordant + 10 reference patients}
 \begin{itemize}
-  \item Sides with RNA in \textbf{35 / 54} discordant and \textbf{8 / 10} ER-low patients; references 8 / 10 correct.
-  \item P(ER+) tracks ESR1 expression ($r$ = 0.52): graded, not a binary flip.
-  \item Attention is focused (5--7\% of patches hold half) and similar across groups.
-  \item Both ER-low exceptions are PAM50 HER2-enriched; all 6 Basal ER-low tumours are called ER$-$.
+  \item Sides with RNA in \textbf{35 / 54} discordant and \textbf{8 / 10} ER-low cases (references: 8 / 10 correct).
+  \item P(ER+) tracks ESR1 expression ($r$ = 0.52); attention is focused and similar across groups.
+  \item Both ER-low exceptions are HER2-enriched; all 6 Basal ER-low tumours are called ER$-$.
 \end{itemize}
 \end{block}
 \end{column}
-\begin{column}{0.45\textwidth}
+\begin{column}{0.42\textwidth}
 \centering
-\includegraphics[width=\linewidth]{week1_week2_build/att_TCGA-A2-A4S1.png}\\[1pt]
-{\scriptsize ER-low, RNA$-$, Basal $\rightarrow$ called ER$-$ (P(ER+) = 0.00)}\\[6pt]
-\includegraphics[height=2.6cm]{week1_week2_build/att_TCGA-AR-A0TX.png}\\[1pt]
-{\scriptsize Exception: ER-low, RNA$-$, HER2-enriched $\rightarrow$ called ER+}\\[2pt]
-{\tiny Colour = attention percentile within the slide (bright = high); patch positions only.}
+\includegraphics[height=2.3cm]{week1_week2_build/att_TCGA-A2-A4S1.png}\\[1pt]
+{\tiny ER-low, RNA$-$, Basal $\rightarrow$ called ER$-$}\\[4pt]
+\includegraphics[height=2.0cm]{week1_week2_build/att_TCGA-AR-A0TX.png}\\[1pt]
+{\tiny Exception: ER-low, RNA$-$, HER2-enriched $\rightarrow$ called ER+}\\[2pt]
+{\tiny Colour = attention percentile (bright = high).}
 \end{column}
 \end{columns}
 \end{frame}
