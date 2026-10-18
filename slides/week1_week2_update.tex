@@ -1,0 +1,371 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{Madrid}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usetikzlibrary{arrows.meta,positioning}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+\setbeamerfont{block title}{size=\small}
+\setbeamertemplate{itemize items}[circle]
+\setlength{\tabcolsep}{5pt}
+
+\title{Which Truth Does the Slide See?}
+\subtitle{Auditing what pathology foundation models learn when IHC, mRNA and protein disagree\\[3pt]\small Project Update: Week 1 + Week 2}
+\author{Aman Uniyal \and Aman Srivastava}
+\institute{Topics in AI for Healthcare, IIIT Hyderabad\\[2pt]
+  \footnotesize Base project: Kamineni -- Multimodal Breast Cancer Diagnostic \& Outcome Assistant}
+\date{\today}
+
+\begin{document}
+
+%===================================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Week 1: Proposal -- Problem, Question \& Pipeline}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{block}{Clinical problem}
+\begin{itemize}
+  \item ER/PR/HER2 status drives therapy and is measured by \textbf{IHC}.
+  \item IHC often disagrees with mRNA; on HER2 0 vs 1+ pathologists agree in only $\sim$26\% of cases.
+  \item H\&E models learn whatever label they are given: \textbf{which biological truth do they track?}
+\end{itemize}
+\end{block}
+\begin{alertblock}{Research question}
+When IHC, RNA and PAM50 disagree, which one does an H\&E foundation model follow, and does it depend on the slide type?
+\end{alertblock}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Five experiments}
+\begin{itemize}
+  \item[\textbf{1a}] Is the IHC or the RNA label more predictable?
+  \item[\textbf{1b}] On discordant cases, which side does the model take?
+  \item[\textbf{1c}] Does it change from FFPE to frozen slides?
+  \item[\textbf{1d}] Is HER2 0 vs 1+ visible in H\&E at all?
+  \item[\textbf{1e}] Do two frozen slides of one tumour agree?
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{8pt}
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, fill=blue!6, align=center, font=\footnotesize,
+              text width=2.3cm, minimum height=0.9cm},
+  lab/.style={draw, rounded corners=3pt, fill=orange!12, align=center, font=\footnotesize,
+              text width=3.6cm, minimum height=0.6cm},
+  arr/.style={-{Stealth[length=2mm]}, thick}, node distance=0.5cm]
+  \node[box] (wsi) {H\&E slide\\(FFPE / frozen)};
+  \node[box, right=of wsi] (patch) {Tissue\\patches};
+  \node[box, right=of patch] (enc) {Frozen encoder\\(UNI, CONCH, TITAN)};
+  \node[box, right=of enc] (head) {Slide classifier\\(mean-pool, ABMIL)};
+  \node[box, right=of head] (out) {Compare labels\\site-grouped CV};
+  \node[lab, below=0.3cm of head] (labels) {Labels: IHC $\mid$ RNA $\mid$ protein};
+  \draw[arr] (wsi) -- (patch);
+  \draw[arr] (patch) -- (enc);
+  \draw[arr] (enc) -- (head);
+  \draw[arr] (head) -- (out);
+  \draw[arr] (labels) -- (head);
+\end{tikzpicture}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Week 1: Dataset -- TCGA-BRCA}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.44\textwidth}
+\begin{block}{Cohort}
+\begin{itemize}
+  \item 1,097 patients from 40 tissue-source sites (open access).
+  \item Labels joined per patient from public metadata: IHC, RNA, PAM50, RPPA protein.
+  \item Three slide types per patient:
+\end{itemize}
+\end{block}
+\centering
+\begin{tabular}{lr}
+\toprule
+Slide type & Patients \\
+\midrule
+FFPE diagnostic (DX) & 1,060 \\
+Frozen top (TS) & 1,043 \\
+Frozen bottom (BS) & 427 \\
+\bottomrule
+\end{tabular}
+\end{column}
+\begin{column}{0.52\textwidth}
+\begin{block}{How often the ``truths'' disagree (no images)}
+\centering
+\scriptsize
+\begin{tabular}{llrc}
+\toprule
+Marker & Compared & Discordant & mRNA alone $\rightarrow$ IHC (AUC) \\
+\midrule
+ER & IHC vs RNA & 5.5\% & 0.96 \\
+PR & IHC vs RNA & 16.7\% & 0.92 \\
+HER2 & IHC/FISH vs amplification & 10.8\% & 0.87 \\
+\bottomrule
+\end{tabular}
+\end{block}
+\begin{block}{Notes}
+\begin{itemize}
+  \item TCGA's HER2 field is noisy $\rightarrow$ we use a strict IHC/FISH rule.
+  \item ER discordance is mostly ER-low tumours.
+  \item \textbf{All five experiments are feasible} on public data (smallest: 1d, 57 vs 261 cases).
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Week 1: Baselines \& First Results}
+\footnotesize
+\textbf{Setup:} 3 frozen encoders on the DX slides of 1,055 patients $\rightarrow$ logistic regression on the slide
+embedding (TITAN) or on the mean of all patches (UNI, CONCH); 5-fold \textbf{site-grouped} CV, repeated over seeds.
+\vspace{3pt}
+
+\centering
+\scriptsize
+\begin{tabular}{llccc}
+\toprule
+ & Task & TITAN & UNI v1 & CONCH v1 \\
+\midrule
+\textbf{1a} & ER: IHC $\rightarrow$ RNA label ($n$=801) & 0.87 $\rightarrow$ \textbf{0.92} & 0.87 $\rightarrow$ \textbf{0.91} & 0.84 $\rightarrow$ \textbf{0.87} \\
+AUC & PR: IHC $\rightarrow$ RNA label ($n$=986) & 0.80 $\rightarrow$ 0.79 & 0.80 $\rightarrow$ 0.73 & 0.78 $\rightarrow$ 0.75 \\
+ & HER2: clinical $\rightarrow$ amplif. ($n$=478) & 0.68 $\rightarrow$ 0.72 & 0.63 $\rightarrow$ 0.68 & 0.62 $\rightarrow$ 0.68 \\
+\midrule
+\textbf{1b} & ER discordant ($n$=54) & \textbf{RNA} 39:15** & RNA 34:20 & \textbf{RNA} 35:19* \\
+side & PR discordant ($n$=169) & \textbf{IHC} 100:69* & \textbf{IHC} 114:55*** & \textbf{IHC} 108:61*** \\
+ & HER2 discordant ($n$=60) & 35:25 & \textbf{amplif.} 44:16*** & \textbf{amplif.} 39:21* \\
+\midrule
+Ctrl & Shuffled ER labels & 0.46 & 0.51 & 0.46 \\
+ & HER2 0 vs low (mRNA alone 0.69) & 0.40 & 0.50 & 0.43 \\
+\bottomrule
+\end{tabular}
+
+\vspace{1pt}
+{\tiny 1b: discordant cases where the model sides with the winning label : the other. Binomial * $p<0.05$, ** $p<0.01$, *** $p<0.001$.
+TITAN 5 seeds, UNI/CONCH 3 seeds. ABMIL on UNI patches running on Ada (first seed: ER IHC 0.86 vs RNA 0.91).}
+
+\vspace{3pt}
+\raggedright
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{block}{Consistent across all three encoders}
+\begin{itemize}
+  \item \textbf{ER and HER2:} H\&E tracks the \textbf{molecular} label (mRNA / DNA amplification) more than clinical IHC.
+  \item \textbf{PR:} the opposite, the model sides with \textbf{IHC}.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{alertblock}{Site leakage and HER2-low}
+Embeddings identify the hospital 82\% of the time, and the hospital ID alone (no image) predicts the label with
+AUC 0.53--0.59. HER2 0 vs 1+ looks learnable with random folds (0.63) but is at chance with site-grouped folds.
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Week 2: ABMIL Agrees; the PR Reversal Was a Cut-off Artefact}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+\begin{block}{Attention-MIL (ABMIL), UNI and CONCH patches, 3 seeds}
+\centering
+\scriptsize
+\begin{tabular}{lcc}
+\toprule
+ & UNI v1 & CONCH v1 \\
+\midrule
+1a ER: IHC $\rightarrow$ RNA & 0.86 $\rightarrow$ \textbf{0.91} & 0.85 $\rightarrow$ \textbf{0.90} \\
+1a HER2: clinical $\rightarrow$ amplif. & 0.67 $\rightarrow$ 0.69 & 0.67 $\rightarrow$ 0.73 \\
+1b ER discordant ($n$=54) & RNA 34:20 & \textbf{RNA} 36:18* \\
+1b HER2 discordant ($n$=60) & \textbf{amplif.} 47:13*** & 34:26 \\
+Shuffled ER (control) & 0.49 & 0.46 \\
+HER2 0 vs low & 0.55 & 0.52 \\
+\bottomrule
+\end{tabular}
+\end{block}
+\begin{itemize}
+  \item ABMIL agrees with mean-pooling: the RNA-defined ER label is more predictable; HER2 calls side with amplification.
+  \item HER2-low stays at chance with attention as well.
+\end{itemize}
+\end{column}
+\begin{column}{0.50\textwidth}
+\begin{block}{PR: $\Delta$AUC (RNA $-$ IHC label) under two RNA cut-offs}
+\centering
+\scriptsize
+\begin{tabular}{lcc}
+\toprule
+Model & GMM cut-off & Prevalence-matched \\
+\midrule
+TITAN & $-$0.006 & +0.033 \\
+UNI mean & $-$0.047 & $-$0.008 \\
+CONCH mean & $-$0.027 & +0.010 \\
+UNI ABMIL & $-$0.058 & $-$0.006 \\
+CONCH ABMIL & $-$0.029 & +0.011 \\
+\midrule
+1b PR discordant & IHC wins ($n$=169) & 61--69 : 64--72 ($n$=133) \\
+\bottomrule
+\end{tabular}
+\end{block}
+\begin{alertblock}{PR: no reliable preference}
+The GMM cut-off calls more tumours PR-negative than IHC does. With a cut-off matching the IHC prevalence the
+gap disappears and the discordant cases split evenly (all five models $p > 0.3$).
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Week 2: ER-low Tumours Are Read as ER-negative}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\begin{block}{ER discordant cases by subgroup (model trained on concordant cases; RNA : IHC)}
+\centering
+\scriptsize
+\begin{tabular}{lcccc}
+\toprule
+Subgroup & $n$ & TITAN & UNI & CONCH \\
+\midrule
+IHC+ / RNA$-$ & 34 & 24:10 & 21:13 & 22:12 \\
+IHC$-$ / RNA+ & 20 & 15:5 & 13:7 & 13:7 \\
+\textbf{ER-low} (IHC+, $<$10\% stained) & 11 & \textbf{9:2} & \textbf{9:2} & \textbf{9:2} \\
+ER 10--39\% stained & 9 & 7:2 & 6:3 & 7:2 \\
+\bottomrule
+\end{tabular}
+\end{block}
+\begin{block}{ABMIL attention maps: 54 discordant + 10 reference patients (UNI)}
+\begin{itemize}
+  \item Sides with RNA in \textbf{35 / 54} discordant and \textbf{8 / 10} ER-low patients; references 8 / 10 correct.
+  \item P(ER+) tracks ESR1 expression ($r$ = 0.52): graded, not a binary flip.
+  \item Attention is focused (5--7\% of patches hold half) and similar across groups.
+  \item Both ER-low exceptions are PAM50 HER2-enriched; all 6 Basal ER-low tumours are called ER$-$.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{week1_week2_build/att_TCGA-A2-A4S1.png}\\[1pt]
+{\scriptsize ER-low, RNA$-$, Basal $\rightarrow$ called ER$-$ (P(ER+) = 0.00)}\\[6pt]
+\includegraphics[height=2.6cm]{week1_week2_build/att_TCGA-AR-A0TX.png}\\[1pt]
+{\scriptsize Exception: ER-low, RNA$-$, HER2-enriched $\rightarrow$ called ER+}\\[2pt]
+{\tiny Colour = attention percentile within the slide (bright = high); patch positions only.}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Week 2: Fixed Splits, and Frozen Slides Encoded for 1c / 1e}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.36\textwidth}
+\begin{block}{Fixed site-grouped CV splits}
+\begin{itemize}
+  \item Two scikit-learn versions gave different folds for the same seed.
+  \item One shared split file (\texttt{data/splits/folds.csv}) used by every script; library pinned.
+  \item All linear baselines rerun on Ada: \textbf{conclusions unchanged} (TITAN ER $\Delta$AUC +0.058, 95\% CI +0.031 to +0.084).
+\end{itemize}
+\end{block}
+\begin{block}{Why IDC, not GDC}
+\begin{itemize}
+  \item GDC from Ada: 0.02--0.3\,MB/s per connection (430\,GB $\rightarrow$ weeks).
+  \item Same slides in the NCI Imaging Data Commons (DICOM) via Google Cloud: $\sim$10\,MB/s.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.61\textwidth}
+\begin{block}{Frozen-slide feature pipeline (Ada, RTX 2080 Ti)}
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, fill=blue!6, align=center, font=\scriptsize,
+              text width=1.45cm, minimum height=1.0cm},
+  arr/.style={-{Stealth[length=1.6mm]}, thick}, node distance=0.28cm]
+  \node[box] (m) {Manifest\\1,516 TS/BS\\373 pairs};
+  \node[box, right=of m, fill=orange!15] (d) {Download\\IDC copy};
+  \node[box, right=of d] (t) {TRIDENT\\tissue seg.\\256\,px @ 20$\times$};
+  \node[box, right=of t] (u) {UNI v1\\(frozen)};
+  \node[box, right=of u] (f) {Mean +\\4,096-patch\\bag};
+  \draw[arr] (m) -- (d); \draw[arr] (d) -- (t); \draw[arr] (t) -- (u); \draw[arr] (u) -- (f);
+\end{tikzpicture}
+\end{block}
+\centering
+\begin{tabular}{lr}
+\toprule
+UNI weights access & granted \\
+Frozen slides encoded (1,044 TS + 471 BS) & \textbf{1,515} \\
+Time per slide (3 GPUs in parallel) & $\sim$75\,s \\
+Our pipeline vs TRACE, 46 DX slides re-extracted & cosine \textbf{1.0000} \\
+\bottomrule
+\end{tabular}
+
+\vspace{4pt}
+\raggedright
+\begin{alertblock}{Ready for 1c and 1e}
+Our pipeline reproduces the precomputed DX features exactly, so DX vs frozen slides will differ only in the tissue.
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Plan for the Next Week (Week 3)}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.32\textwidth}
+\begin{block}{Done in Week 2}
+\begin{itemize}
+  \item[\checkmark] ABMIL (UNI, CONCH) for 1a, 1b, 1d
+  \item[\checkmark] PR cut-off test: no reliable preference
+  \item[\checkmark] ER-low vs ER-high discordant cases
+  \item[\checkmark] Attention maps on discordant cases
+  \item[\checkmark] Fixed CV splits; baselines rerun
+  \item[\checkmark] UNI access; 1,515 frozen slides encoded
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{Next experiments}
+\begin{itemize}
+  \item \textbf{1c:} FFPE vs frozen $\times$ IHC vs RNA label; interaction test; \% tumour cells as covariate
+  \item \textbf{1e:} TS vs BS agreement on 373 pairs (ICC, $\kappa$, \% flipped calls)
+  \item \textbf{Statistics:} DeLong tests for 1a; combined 1b evidence across encoders
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{Analysis \& logistics}
+\begin{itemize}
+  \item Overlay attention on the real slide images (does it sit on tumour?)
+  \item Describe discordant patients: PAM50, \% of cells ER-stained, histology
+  \item Rerun ABMIL on the fixed splits for one set of final tables
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{10pt}
+\centering
+\begin{tabular}{lr}
+\toprule
+Compute on Ada (11\,GB GPUs) & Estimate \\
+\midrule
+Frozen-slide features (1,515 slides) & done, $\sim$15\,h on 2--3 GPUs \\
+1c / 1e analyses (linear probes, bootstrap) & $<$ 1\,h CPU \\
+ABMIL rerun on fixed splits (UNI + CONCH) & $\sim$10 GPU-hours \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\end{document}
