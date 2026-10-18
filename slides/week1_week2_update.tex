@@ -271,27 +271,28 @@ ER 10--39\% stained & 9 & 7:2 & 6:3 & 7:2 \\
 \begin{column}{0.36\textwidth}
 \begin{block}{Fixed site-grouped CV splits}
 \begin{itemize}
-  \item Two scikit-learn versions gave different folds for the same seed.
-  \item One shared split file (\texttt{data/splits/folds.csv}) used by every script; library pinned.
-  \item All linear baselines rerun on Ada: \textbf{conclusions unchanged} (TITAN ER $\Delta$AUC +0.058, 95\% CI +0.031 to +0.084).
+  \item One shared split file (5 folds $\times$ 5 seeds, grouped by hospital) used by every experiment.
+  \item Every model and every label is compared on identical folds.
+  \item All linear baselines rerun on it: \textbf{conclusions unchanged} (TITAN ER $\Delta$AUC +0.058, 95\% CI +0.031 to +0.084).
 \end{itemize}
 \end{block}
-\begin{block}{Why IDC, not GDC}
+\begin{block}{Why frozen slides?}
 \begin{itemize}
-  \item GDC from Ada: 0.02--0.3\,MB/s per connection (430\,GB $\rightarrow$ weeks).
-  \item Same slides in the NCI Imaging Data Commons (DICOM) via Google Cloud: $\sim$10\,MB/s.
+  \item DX = FFPE diagnostic slide, from a different block than the sequenced tissue.
+  \item TS / BS = frozen sections cut directly above / below the sequenced tissue.
+  \item \textbf{1c}: is the RNA preference a tissue-sampling artefact? \textbf{1e}: do two sections agree?
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.61\textwidth}
-\begin{block}{Frozen-slide feature pipeline (Ada, RTX 2080 Ti)}
+\begin{block}{Frozen-slide feature pipeline}
 \centering
 \begin{tikzpicture}[
   box/.style={draw, rounded corners=3pt, fill=blue!6, align=center, font=\scriptsize,
               text width=1.45cm, minimum height=1.0cm},
   arr/.style={-{Stealth[length=1.6mm]}, thick}, node distance=0.28cm]
   \node[box] (m) {Manifest\\1,516 TS/BS\\373 pairs};
-  \node[box, right=of m, fill=orange!15] (d) {Download\\IDC copy};
+  \node[box, right=of m, fill=orange!15] (d) {TCGA slides\\(NCI IDC)};
   \node[box, right=of d] (t) {TRIDENT\\tissue seg.\\256\,px @ 20$\times$};
   \node[box, right=of t] (u) {UNI v1\\(frozen)};
   \node[box, right=of u] (f) {Mean +\\4,096-patch\\bag};
@@ -301,9 +302,8 @@ ER 10--39\% stained & 9 & 7:2 & 6:3 & 7:2 \\
 \centering
 \begin{tabular}{lr}
 \toprule
-UNI weights access & granted \\
 Frozen slides encoded (1,044 TS + 471 BS) & \textbf{1,515} \\
-Time per slide (3 GPUs in parallel) & $\sim$75\,s \\
+TS + BS pairs from the same tissue portion (for 1e) & 373 \\
 Our pipeline vs TRACE, 46 DX slides re-extracted & cosine \textbf{1.0000} \\
 \bottomrule
 \end{tabular}
