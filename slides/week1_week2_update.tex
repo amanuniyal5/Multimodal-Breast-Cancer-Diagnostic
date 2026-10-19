@@ -345,6 +345,7 @@ RNA label & 0.89 & 0.81 & 7.6\% \\
   \item Overlay attention on the real slide images
   \item Describe discordant patients: PAM50 subtype, \% stained, histology
   \item Primary vs secondary claims; multiple-testing note; start the final report
+  \item \textbf{New:} label-free audit with zero-shot CONCH (next slide)
 \end{itemize}
 \end{block}
 \end{column}
@@ -358,9 +359,51 @@ Remaining compute & Estimate \\
 \midrule
 ABMIL rerun on fixed splits (UNI + CONCH) & $\sim$10 GPU-hours \\
 Attention overlays (download $\sim$10 DX slides) & $<$ 1 hour \\
+Zero-shot CONCH audit & a few GPU-hours \\
 Statistics and final tables & minutes (CPU) \\
 \bottomrule
 \end{tabular}
+\end{frame}
+
+%===================================================================
+\begin{frame}[t]{Week 3 Plan: Which Label Does a Model That Never Saw a Label Follow?}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{alertblock}{Idea}
+CONCH is a vision--language model: it can score slides against \textbf{text prompts}, with no training labels.
+If zero-shot CONCH also sides with RNA on the 54 discordant patients, the RNA preference comes from the
+\textbf{morphology itself}, not from how our classifiers were trained.
+\end{alertblock}
+\begin{block}{Method}
+\begin{enumerate}
+  \item \textbf{Zero-shot prompts}, e.g.\ ``ER-positive luminal breast carcinoma'' vs ``ER-negative basal-like
+        carcinoma'': 1a AUC against IHC and RNA; 1b on the discordant patients.
+  \item \textbf{Concept scores} per patch: tubule formation, nuclear pleomorphism, mitoses, necrosis,
+        lymphocytes, apocrine change.
+  \item \textbf{Concept-only model} ($\sim$10--20 scores): does it reproduce the RNA preference? Does
+        ``apocrine'' explain the HER2-enriched exception?
+\end{enumerate}
+\end{block}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{block}{Why it matters}
+\begin{itemize}
+  \item Builds on 1b, the PAM50 finding and the attention maps.
+  \item A language-aligned foundation model as a \textbf{label-free auditor and explainer}: carries over to any
+        medical imaging question.
+\end{itemize}
+\end{block}
+\begin{block}{Practicalities}
+\begin{itemize}
+  \item CONCH image + text encoders (access in place); a few GPU-hours.
+  \item Day-1 check: precomputed CONCH features match CONCH's own image--text space (re-encode 3--5 slides).
+  \item Effort $\sim$5--6 days. Risk: medium; zero-shot AUC may be modest, but 1b and the concept analysis
+        still work.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
 \end{frame}
 
 \end{document}
