@@ -318,90 +318,40 @@ RNA label & 0.89 & 0.81 & 7.6\% \\
 \begin{frame}[t]{Plan for the Next Week (Week 3)}
 \footnotesize
 \begin{columns}[T]
-\begin{column}{0.32\textwidth}
+\begin{column}{0.27\textwidth}
 \begin{block}{Done in Week 2}
 \begin{itemize}
-  \item[\checkmark] ABMIL (UNI, CONCH) for 1a, 1b, 1d
-  \item[\checkmark] PR cut-off test: no reliable preference
-  \item[\checkmark] ER-low cases and attention maps
-  \item[\checkmark] Fixed site-grouped splits shared
+  \item[\checkmark] ABMIL for 1a, 1b, 1d
+  \item[\checkmark] PR cut-off test
+  \item[\checkmark] ER-low cases, attention maps
+  \item[\checkmark] Fixed site-grouped splits
   \item[\checkmark] 1,515 frozen slides encoded
-  \item[\checkmark] \textbf{1c} and \textbf{1e} first results
+  \item[\checkmark] \textbf{1c}, \textbf{1e} first results
 \end{itemize}
 \end{block}
 \end{column}
-\begin{column}{0.32\textwidth}
-\begin{block}{Statistics \& final numbers}
+\begin{column}{0.33\textwidth}
+\begin{block}{Consolidate \& interpret}
 \begin{itemize}
-  \item DeLong tests for 1a, next to the bootstrap
-  \item Combined 1b evidence across the five models (one call per patient)
-  \item Rerun ABMIL on the fixed splits $\rightarrow$ one set of final tables
-\end{itemize}
-\end{block}
-\end{column}
-\begin{column}{0.32\textwidth}
-\begin{block}{Interpretation \& write-up}
-\begin{itemize}
+  \item DeLong tests for 1a; combined 1b evidence across the five models
+  \item Rerun ABMIL on the fixed splits ($\sim$10 GPU-h) $\rightarrow$ one set of final tables
   \item Overlay attention on the real slide images
-  \item Describe discordant patients: PAM50 subtype, \% stained, histology
-  \item Primary vs secondary claims; multiple-testing note; start the final report
-  \item \textbf{New:} label-free audit with zero-shot CONCH (next slide)
+  \item Describe discordant patients: PAM50, \% stained, histology
+  \item Claims, multiple-testing note; start the report
 \end{itemize}
 \end{block}
 \end{column}
-\end{columns}
-
-\vspace{10pt}
-\centering
-\begin{tabular}{lr}
-\toprule
-Remaining compute & Estimate \\
-\midrule
-ABMIL rerun on fixed splits (UNI + CONCH) & $\sim$10 GPU-hours \\
-Attention overlays (download $\sim$10 DX slides) & $<$ 1 hour \\
-Zero-shot CONCH audit & a few GPU-hours \\
-Statistics and final tables & minutes (CPU) \\
-\bottomrule
-\end{tabular}
-\end{frame}
-
-%===================================================================
-\begin{frame}[t]{Week 3 Plan: Which Label Does a Model That Never Saw a Label Follow?}
-\footnotesize
-\begin{columns}[T]
-\begin{column}{0.55\textwidth}
-\begin{alertblock}{Idea}
-CONCH is a vision--language model: it can score slides against \textbf{text prompts}, with no training labels.
-If zero-shot CONCH also sides with RNA on the 54 discordant patients, the RNA preference comes from the
-\textbf{morphology itself}, not from how our classifiers were trained.
-\end{alertblock}
-\begin{block}{Method}
+\begin{column}{0.37\textwidth}
+\begin{alertblock}{New: label-free audit with zero-shot CONCH}
+CONCH (vision--language) scores slides against \textbf{text prompts}, with no labels. If it also sides with RNA on
+the 54 discordant patients, the RNA preference comes from \textbf{morphology}, not from training.
 \begin{enumerate}
-  \item \textbf{Zero-shot prompts}, e.g.\ ``ER-positive luminal breast carcinoma'' vs ``ER-negative basal-like
-        carcinoma'': 1a AUC against IHC and RNA; 1b on the discordant patients.
-  \item \textbf{Concept scores} per patch: tubule formation, nuclear pleomorphism, mitoses, necrosis,
-        lymphocytes, apocrine change.
-  \item \textbf{Concept-only model} ($\sim$10--20 scores): does it reproduce the RNA preference? Does
-        ``apocrine'' explain the HER2-enriched exception?
+  \item Prompts (``ER-positive luminal'' vs ``ER-negative basal-like carcinoma''): 1a vs IHC and RNA; 1b.
+  \item Concept scores (tubules, pleomorphism, mitoses, necrosis, lymphocytes, apocrine change) $\rightarrow$
+        concept-only model: does it reproduce the RNA preference and explain the HER2-enriched exception?
 \end{enumerate}
-\end{block}
-\end{column}
-\begin{column}{0.42\textwidth}
-\begin{block}{Why it matters}
-\begin{itemize}
-  \item Builds on 1b, the PAM50 finding and the attention maps.
-  \item A language-aligned foundation model as a \textbf{label-free auditor and explainer}: carries over to any
-        medical imaging question.
-\end{itemize}
-\end{block}
-\begin{block}{Practicalities}
-\begin{itemize}
-  \item CONCH image + text encoders (access in place); a few GPU-hours.
-  \item Day-1 check: precomputed CONCH features match CONCH's own image--text space (re-encode 3--5 slides).
-  \item Effort $\sim$5--6 days. Risk: medium; zero-shot AUC may be modest, but 1b and the concept analysis
-        still work.
-\end{itemize}
-\end{block}
+{\scriptsize $\sim$5--6 days, a few GPU-h; risk medium (zero-shot AUC may be modest).}
+\end{alertblock}
 \end{column}
 \end{columns}
 \end{frame}
