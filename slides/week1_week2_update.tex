@@ -272,19 +272,20 @@ features (verified: cosine 1.0000 on 46 re-extracted DX slides). UNI mean-pool, 
 
 \vspace{6pt}
 \begin{columns}[T]
-\begin{column}{0.53\textwidth}
+\begin{column}{0.56\textwidth}
 \begin{block}{1c: does the answer change from FFPE to frozen? ($n$ = 947)}
 \centering
 \scriptsize
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
-$\Delta$AUC (molecular $-$ IHC) & DX & TS & Interaction (95\% CI) \\
+$\Delta$AUC (molecular $-$ IHC) & DX & TS & TS $-$ DX & $p$ \\
 \midrule
-\textbf{ER: RNA $-$ IHC} & +0.032 & +0.032 & \textbf{0.000} ($-$0.024, +0.024) \\
-PR: RNA $-$ IHC (prev.-matched) & $-$0.003 & +0.026 & +0.029, $p$ = 0.12 \\
-HER2: amplif. $-$ strict & +0.045 & +0.014 & $-$0.030, $p$ = 0.44 \\
+\textbf{ER: RNA $-$ IHC} & +0.032 & +0.032 & \textbf{0.000} & 0.98 \\
+PR: RNA $-$ IHC (matched) & $-$0.003 & +0.026 & +0.029 & 0.12 \\
+HER2: amp. $-$ strict & +0.045 & +0.014 & $-$0.030 & 0.44 \\
 \bottomrule
-\end{tabular}
+\end{tabular}\\[2pt]
+{\tiny TS $-$ DX = interaction; ER 95\% CI $-$0.024 to +0.024.}
 \end{block}
 \begin{itemize}
   \item The frozen slide next to the sequenced tissue prefers RNA \textbf{exactly as much} as the FFPE slide:
@@ -292,7 +293,7 @@ HER2: amplif. $-$ strict & +0.045 & +0.014 & $-$0.030, $p$ = 0.44 \\
   \item ER-discordant patients: frozen slides side with RNA \textbf{39 : 13} ($p$ = 0.0004; FFPE 34 : 18).
 \end{itemize}
 \end{column}
-\begin{column}{0.44\textwidth}
+\begin{column}{0.41\textwidth}
 \begin{block}{1e: do two frozen sections of one tumour agree? (373 pairs)}
 \centering
 \scriptsize
