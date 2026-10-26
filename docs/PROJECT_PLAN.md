@@ -159,6 +159,13 @@ reference standards). We do **not** propose a new architecture.
 - [ ] ~~1f: LoRA fine-tuning of UNI on IHC vs RNA labels (~30–60 GPU-h)~~ (dropped 15 Oct)
 - [ ] ~~Kamineni hospital data as an external test~~ (dropped 15 Oct unless data arrive)
 
+## Tier 6b: Week 3 extensions (after Tiers 0–5; same frozen settings) ⬜
+
+- [~] Frozen slides with ABMIL: 1c (DX vs TS × IHC vs molecular) and 1e (TS vs BS) with the ABMIL head, fixed folds, 3 seeds (`scripts/frozen_abmil.py`) (in progress (Srivastava, 2026-10-26))
+- [~] Label-free audit with zero-shot CONCH: ER/HER2 prompts (1a/1b without any training label), concept scores, concept-only model (`scripts/conch_zeroshot.py`; day-1 check that TRACE CONCH features are pre-projection) (in progress (Srivastava, 2026-10-26))
+- [~] Statistics beyond p-values: TOST equivalence for 1c, Wilson/exact CIs, Bayesian posteriors and Bayes factors for 1b, McNemar for paired calls (1b DX vs TS, 1e), prevalence-robust agreement (PABAK, AC1, Bland–Altman) for 1e, calibration vs each reference (`scripts/stats_extended.py`) (in progress (Srivastava, 2026-10-26))
+- [ ] New foundation-model experiments (candidates in `docs/WEEK3_EXPERIMENTS.md`; pick before starting)
+
 ## Tier 7: Deliverables ⬜
 
 - [~] Slides: fix PR bullet ("no reliable preference"), Ada CONCH numbers, remove/keep "attention maps" consistently (done in both decks; compile pending: no LaTeX locally or on Ada)
