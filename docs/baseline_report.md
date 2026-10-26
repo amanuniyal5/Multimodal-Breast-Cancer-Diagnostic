@@ -397,6 +397,79 @@ UNI ABMIL ER ΔAUC +0.018 (CI −0.008, +0.044; was +0.034), CONCH ABMIL +0.045 
 significant for CONCH ABMIL (+0.080); 1b counts unchanged (no folds involved). **Where the two differ, the fixed-split
 numbers in `FINAL_RESULTS.md` are the ones to report.**
 
+## 5h. Statistics beyond p-values (26 Oct 2026)
+
+`scripts/stats_extended.py` (saved predictions only, laptop; also run on Ada by `jobs/week3_stats.sbatch`) adds effect
+sizes, interval estimates, Bayesian summaries, equivalence and paired tests to the existing DeLong / bootstrap /
+binomial results. Files: `results/stats_ext_1a.csv`, `stats_ext_1b.csv`, `stats_ext_1c.csv`, `stats_ext_1e.csv`.
+These are descriptive additions: they do not add confirmatory tests to the Holm family (P1-P3).
+
+**1a, Bayesian bootstrap of ΔAUC (Dirichlet weights over patients, 2,000 draws), ER RNA − IHC, n = 801:**
+
+| Variant | ΔAUC | 95% credible interval | P(ΔAUC > 0) | Brier IHC / RNA model | Calibration slope IHC / RNA |
+|---|---|---|---|---|---|
+| TITAN linear | +0.057 | +0.034, +0.086 | 1.000 | 0.125 / 0.094 | 0.80 / 0.88 |
+| UNI mean (primary) | +0.036 | +0.009, +0.065 | 0.994 | 0.124 / 0.104 | 0.83 / 0.96 |
+| CONCH mean | +0.030 | +0.003, +0.059 | 0.986 | 0.152 / 0.137 | 0.80 / 0.85 |
+| UNI ABMIL | +0.018 | −0.009, +0.042 | 0.912 | 0.114 / 0.090 | 0.33 / 0.37 |
+| CONCH ABMIL | +0.045 | +0.018, +0.073 | 1.000 | 0.135 / 0.115 | 0.62 / 0.65 |
+
+- The posterior probability that the RNA label is the more predictable one is ≥ 0.91 in every variant (≥ 0.99 in 4 of 5).
+- Calibration tells the same story as AUC: each RNA-label model has a lower Brier score than the IHC-label model
+  on the same patients. The ABMIL heads give over-confident probabilities (slope 0.3-0.65; ideal 1), the linear probes
+  are close to calibrated (0.8-0.96). Use ABMIL for ranking (AUC), not for its raw probabilities.
+- PR with the prevalence-matched cut-off: P(Δ > 0) 0.46-0.99 across variants (TITAN 0.986, ABMIL 0.46 / 0.66):
+  no consistent preference, as before. HER2 amplification − strict: P(Δ > 0) 0.85-0.99.
+
+**1b, the "which side" counts as proportions (Wilson and exact 95% CI, Cohen's h vs 50:50, Beta(1, 1) posterior,
+Bayes factors BF10 = θ ~ U(0, 1) vs θ = 0.5 and BF+0 = θ ~ U(0.5, 1) vs θ = 0.5):**
+
+| Comparison | k / n | Proportion (Wilson 95% CI) | Cohen's h | P(θ > 0.5) | BF10 | BF+0 |
+|---|---|---|---|---|---|---|
+| ER consensus, FFPE (P2) | 34 / 54 | 0.63 (0.50, 0.75) | 0.26 | 0.971 | 1.0 | 2.0 |
+| ER, frozen TS (UNI mean) | 39 / 52 | 0.75 (0.62, 0.85) | 0.52 | 1.000 | 134 | 268 |
+| ER, FFPE DX, same 52 patients | 34 / 52 | 0.65 (0.52, 0.77) | 0.31 | 0.986 | 2.0 | 3.9 |
+| ER-low (IHC+ < 10%), consensus | 8 / 10 | 0.80 (0.49, 0.94) | 0.64 | 0.967 | 2.1 | 4.0 |
+| HER2 consensus (amplification) | 42 / 60 | 0.70 (0.58, 0.80) | 0.41 | 0.999 | 20 | 41 |
+| PR consensus, prevalence-matched | 67 / 133 | 0.50 (0.42, 0.59) | 0.01 | 0.534 | 0.11 | 0.12 |
+
+- The Bayes factors sharpen P2: on FFPE slides the data are **as likely under "no preference" as under "some
+  preference"** (BF10 = 1.0); only the directional BF+0 = 2.0 leans to RNA (anecdotal). On the frozen slide the evidence
+  is decisive (BF10 = 134). HER2 → amplification is strong (BF10 = 20). PR: evidence **for** no preference (BF10 = 0.11,
+  i.e. 9 : 1 for 50:50).
+- **Paired DX vs TS calls on the same discordant patients (exact McNemar):** ER: 3 patients side with RNA only on DX,
+  8 only on TS, p = 0.23, so the frozen slide's stronger 1b result (39 vs 34) is not itself a significant
+  difference. HER2: 9 vs 7, p = 0.80. PR (prevalence-matched): 11 vs 24, p = 0.041; this is a single borderline test
+  and is labelled **not robust**.
+
+**1c, equivalence (TOST) of the slide × label interaction, margin ±0.05 AUC** (stated here, after the estimate was
+known; the smallest margin that would still pass is reported so readers can apply their own), 2,000 bootstraps;
+permutation test swapping DX and TS within patients (2,000 permutations):
+
+| Comparison (UNI mean) | n | Interaction | 90% CI | TOST p (±0.05) | Smallest equivalence margin | Permutation p |
+|---|---|---|---|---|---|---|
+| ER RNA vs IHC (P3) | 947 | 0.000 | −0.018, +0.019 | < 0.001: **equivalent** | 0.019 | 0.99 |
+| ER RPPA vs IHC | 777 | −0.035 | −0.062, −0.008 | 0.19 | 0.062 | 0.032 |
+| PR prevalence-matched | 944 | +0.029 | −0.003, +0.060 | 0.13 | 0.060 | 0.11 |
+| HER2 amplification | 537 | −0.030 | −0.094, +0.034 | 0.31 | 0.094 | 0.45 |
+
+- P3 is now a positive equivalence result: the FFPE and frozen slides show the same RNA-over-IHC advantage within
+  ±0.019 AUC (90% CI). The other markers are neither shown different nor shown equivalent (too few events); the
+  ER-RPPA interaction stays "not robust" (permutation p = 0.032, one of many tests).
+
+**1e, agreement beyond kappa (368 / 367 pairs with an out-of-fold prediction):**
+
+| ER model | % flipped (Wilson 95% CI) | PABAK | Gwet's AC1 (95% CI) | McNemar TS+/BS− vs TS−/BS+ | Bland–Altman bias, logit P (95% CI) | 95% limits of agreement |
+|---|---|---|---|---|---|---|
+| IHC label | 10.9% (8.1, 14.5) | 0.78 | 0.82 (0.76, 0.87) | 17 vs 23, p = 0.43 | −0.07 (−0.20, +0.06) | −2.59, +2.46 |
+| RNA label | 7.6% (5.3, 10.8) | 0.85 | 0.87 (0.83, 0.92) | 14 vs 14, p = 1.00 | −0.09 (−0.23, +0.05) | −2.77, +2.59 |
+
+- No systematic difference between the top and bottom section (McNemar, Bland–Altman bias ≈ 0). The disagreement
+  is random, not a shift. The limits of agreement (about ±2.5 on the logit scale) are wide: a patient at P = 0.5 on
+  one section can be anywhere from about 0.08 to 0.92 on the other. That is why single-section calls near the
+  threshold are unreliable (the flips sit at the threshold, 5e).
+- Prevalence-robust agreement (AC1, PABAK) is higher than κ (0.73 / 0.81), as expected with ~75% ER-positive.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |
