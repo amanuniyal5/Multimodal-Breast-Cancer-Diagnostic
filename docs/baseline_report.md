@@ -488,7 +488,7 @@ projection (`visual.proj_contrast`), then normalises; without it, image and text
 ER prompt sets: all, receptor words only ("estrogen receptor positive breast cancer"…), subtype words only ("luminal" vs
 "basal-like"). 14 morphology concepts (2-3 phrasings each); per patch softmax over concepts, per patient the mean share.
 
-**(1) Direct zero-shot receptor prompts do not read receptor status.** AUC against every reference is 0.41-0.56
+**(1) Direct zero-shot receptor prompts do not read receptor status.** AUC against every reference is 0.40-0.56
 (ER all/top-k: 0.510 vs IHC, 0.507 vs RNA, n = 989; PR 0.50; HER2 0.53-0.54). Mean pooling gives AUCs below 0.5 (0.40-0.46):
 the whole-slide composition, not receptor morphology, drives the score. With the score at chance, the paired ΔAUC and
 the 1b counts carry no information (e.g. ER 1b 23 : 31 to 34 : 20 depending on prompt set and pooling; threshold-free
