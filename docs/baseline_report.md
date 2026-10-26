@@ -470,6 +470,75 @@ permutation test swapping DX and TS within patients (2,000 permutations):
   threshold are unreliable (the flips sit at the threshold, 5e).
 - Prevalence-robust agreement (AC1, PABAK) is higher than κ (0.73 / 0.81), as expected with ~75% ER-positive.
 
+## 5i. Zero-shot CONCH: label-free prompts and a 14-concept model (26 Oct 2026)
+
+`scripts/conch_zeroshot.py`, Ada jobs 40964 (failed: two JPEG-2000 check slides, memory at 512 px) and **40983**.
+Files: `results/conch_feature_check.json`, `equivalence_check_conch.csv`, `conch_zeroshot_scores.csv` (per patient),
+`conch_zeroshot_1a.csv`, `conch_zeroshot_1b.csv`, `conch_concepts_model.csv`, `conch_concepts_coef.csv`,
+`conch_concepts_by_group.csv`. DX slides only (no CONCH features exist for the frozen slides).
+
+**Day-1 check: which CONCH space are the TRACE features in?** TRIDENT's `conch_v1` encoder calls
+`encode_image(proj_contrast=False)` (its output equals the pre-projection embedding exactly; max |diff| 0.0 on test
+images). Our TRIDENT re-extraction of 5 DX slides equals the TRACE CONCH means (cosine 1.0000, other patients 0.64;
+same ER call 5/5). So **TRACE CONCH features are pre-projection**. Zero-shot scoring first applies CONCH's contrastive
+projection (`visual.proj_contrast`), then normalises; without it, image and text would not share one space.
+
+**Method.** 22 CONCH prompt templates × class names, prompt-ensemble text embeddings; per patch cosine × logit scale
+(56.3); per patient top-k pooling (k = 100; primary, stated before the run) and the mean of patch probabilities.
+ER prompt sets: all, receptor words only ("estrogen receptor positive breast cancer"…), subtype words only ("luminal" vs
+"basal-like"). 14 morphology concepts (2-3 phrasings each); per patch softmax over concepts, per patient the mean share.
+
+**(1) Direct zero-shot receptor prompts do not read receptor status.** AUC against every reference is 0.41-0.56
+(ER all/top-k: 0.510 vs IHC, 0.507 vs RNA, n = 989; PR 0.50; HER2 0.53-0.54). Mean pooling gives AUCs below 0.5 (0.40-0.46):
+the whole-slide composition, not receptor morphology, drives the score. With the score at chance, the paired ΔAUC and
+the 1b counts carry no information (e.g. ER 1b 23 : 31 to 34 : 20 depending on prompt set and pooling; threshold-free
+AUC_disc 0.40-0.61, all CIs include 0.5). The one nominal difference (subtype prompts, ER-RPPA − IHC +0.044, p = 0.011)
+sits on AUCs of 0.52-0.56 and is not interpretable. **Conclusion: CONCH's text side does not know what "ER-positive"
+looks like, so receptor prompts cannot serve as a label-free auditor.** This is itself a useful negative result for
+vision-language models in pathology: named-entity prompts for molecular markers are not grounded.
+
+**(2) A 14-concept model reproduces the RNA preference.** Logistic regression (C = 1, balanced) on the 14 zero-shot
+concept shares (standardised), fixed folds, 5 seeds, seed-averaged out-of-fold P:
+
+| Comparison | n | AUC IHC label | AUC molecular label | ΔAUC (paired bootstrap 95% CI) |
+|---|---|---|---|---|
+| ER: RNA − IHC | 989 | 0.824 | 0.860 | **+0.036 (+0.010, +0.065)** |
+| ER: RPPA − IHC | 802 | 0.813 | 0.859 | +0.046 (+0.018, +0.076) |
+| PR: prevalence-matched RNA − IHC | 986 | 0.738 | 0.764 | +0.026 (−0.008, +0.060) |
+| HER2: amplification − strict | 568 | 0.622 | 0.656 | +0.034 (−0.020, +0.091) |
+
+1b with the concept model (trained on concordant patients): **ER 36 : 18 towards RNA (p = 0.020, n = 54)**; HER2
+38 : 22 towards amplification (p = 0.052, n = 60).
+
+- Fourteen named, human-readable concepts recover the same ER ΔAUC as the 1,024-d UNI probe (+0.036 vs +0.036), with
+  AUCs about 0.06 lower in absolute terms. The RNA preference therefore lives in **ordinary, nameable morphology**
+  (differentiation and grade), not in some hidden feature of the embedding.
+- Coefficients (`conch_concepts_coef.csv`): the ER model leans on tubules (+), lobular pattern (+), pleomorphism (−),
+  necrosis (−) and lymphocytes (−), and these weights are **larger for the RNA label than for the IHC label** (tubules
+  +0.86 vs +0.45, pleomorphism −0.94 vs −0.68, necrosis −1.12 vs −0.83): the RNA label is more tightly tied to the
+  grade/differentiation axis. The HER2 model leans on apocrine (+0.45 / +0.63) and lymphocytes (+).
+
+**(3) The concepts describe the discordant groups** (mean z-score of each concept share; `conch_concepts_by_group.csv`):
+
+| Group | n | Pleomorphism | Necrosis | Lymphocytes | Apocrine | Tubules | Normal breast |
+|---|---|---|---|---|---|---|---|
+| Concordant ER+ | 729 | −0.27 | −0.21 | −0.17 | −0.05 | +0.06 | +0.06 |
+| Concordant ER− | 206 | +0.88 | +0.74 | +0.55 | −0.01 | −0.22 | −0.26 |
+| IHC+/RNA−, PAM50 Basal | 15 | **+2.09** | **+1.10** | +0.78 | −0.10 | −0.36 | −0.52 |
+| IHC+/RNA−, PAM50 HER2-enriched | 11 | −0.25 | −0.23 | −0.25 | **+0.79** | −0.32 | −0.44 |
+| IHC−/RNA+ | 20 | −0.27 | −0.13 | −0.02 | −0.21 | +0.06 | +0.53 |
+
+- IHC+/RNA− **Basal** tumours look *more* ER-negative than the typical ER-negative tumour (extreme pleomorphism and
+  necrosis), so every model calls them ER− (15/15, report 5d).
+- IHC+/RNA− **HER2-enriched** tumours have the highest apocrine share of any group and none of the high-grade
+  features, which matches them being called ER+ (8/11) and the apocrine-like cells under attention (5c-2). Apocrine
+  share HER2-enriched vs Basal: Mann–Whitney p = 0.41 (n = 11 vs 15): **lead only**.
+- IHC−/RNA+ tumours look like concordant ER+ tumours (low grade, more normal breast and stroma), consistent with being
+  called ER+ (9/9 LumA, 5d).
+
+**Status:** exploratory (secondary), DX slides, one encoder. The concept model is trained on labels (it is not
+label-free); only the receptor prompts were label-free, and those failed.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |
