@@ -8,6 +8,7 @@ and one row per slide (seconds for download / segmentation / patching / encoding
 --out/timing_<job>.csv. Slides already present in --out are skipped, so a job can be resubmitted after a time-out.
 
 --encoder uni_v1        UNI v1 (gated: needs Hugging Face access + `huggingface-cli login` on Ada)
+--encoder conch_v1      CONCH v1 (gated; use --patch-size 512 as TRACE conch_v1 20x): for the CONCH space check
 --encoder vitl_random   same architecture as UNI v1 (ViT-L/16, 224 px) with random weights: timing only
 
 Usage: python scripts/extract_frozen.py --manifest data/metadata/frozen_manifest.csv --batch 0 \
@@ -44,7 +45,7 @@ ap.add_argument("--slides", default="", help="comma-separated slide barcodes (ov
 ap.add_argument("--limit", type=int, default=0)
 ap.add_argument("--work", required=True, help="node-local scratch for raw slides and TRIDENT outputs")
 ap.add_argument("--out", required=True)
-ap.add_argument("--encoder", default="uni_v1", choices=["uni_v1", "vitl_random"])
+ap.add_argument("--encoder", default="uni_v1", choices=["uni_v1", "conch_v1", "vitl_random"])
 ap.add_argument("--segmenter", default="hest")
 ap.add_argument("--mag", type=int, default=20)
 ap.add_argument("--patch-size", type=int, default=256)
@@ -69,8 +70,8 @@ os.makedirs(a.out, exist_ok=True)
 dev = "cuda:0" if torch.cuda.is_available() else "cpu"
 job = os.environ.get("SLURM_JOB_ID", "local")
 NCPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 4))
-if a.encoder == "uni_v1" and dev == "cpu":
-    sys.exit("no usable GPU (check the torch build vs the driver): refusing to run UNI on CPU")
+if a.encoder != "vitl_random" and dev == "cpu":
+    sys.exit("no usable GPU (check the torch build vs the driver): refusing to run the encoder on CPU")
 t_start = time.time()
 
 
@@ -101,8 +102,8 @@ log(f"{len(m)} slides selected, {len(todo)} to do ({todo['size'].sum() / 1e9:.1f
     f"{torch.cuda.get_device_name(0) if dev != 'cpu' else ''}")
 
 seg_model = segmentation_model_factory(a.segmenter)
-if a.encoder == "uni_v1":
-    encoder = encoder_factory("uni_v1")
+if a.encoder in ("uni_v1", "conch_v1"):
+    encoder = encoder_factory(a.encoder)
 else:  # timing surrogate: UNI v1 is timm vit_large_patch16_224 (init_values=1e-5, no class token pooling change)
     import timm
     from trident.patch_encoder_models import CustomInferenceEncoder
