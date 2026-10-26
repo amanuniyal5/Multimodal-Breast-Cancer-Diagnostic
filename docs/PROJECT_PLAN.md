@@ -159,11 +159,11 @@ reference standards). We do **not** propose a new architecture.
 - [ ] ~~1f: LoRA fine-tuning of UNI on IHC vs RNA labels (~30–60 GPU-h)~~ (dropped 15 Oct)
 - [ ] ~~Kamineni hospital data as an external test~~ (dropped 15 Oct unless data arrive)
 
-## Tier 6b: Week 3 extensions (after Tiers 0–5; same frozen settings) ⬜
+## Tier 6b: Week 3 extensions (after Tiers 0–5; same frozen settings) 🟨
 
-- [~] Frozen slides with ABMIL: 1c (DX vs TS × IHC vs molecular) and 1e (TS vs BS) with the ABMIL head, fixed folds, 3 seeds (`scripts/frozen_abmil.py`) (in progress (Srivastava, 2026-10-26))
-- [~] Label-free audit with zero-shot CONCH: ER/HER2 prompts (1a/1b without any training label), concept scores, concept-only model (`scripts/conch_zeroshot.py`; day-1 check that TRACE CONCH features are pre-projection) (in progress (Srivastava, 2026-10-26))
-- [~] Statistics beyond p-values: TOST equivalence for 1c, Wilson/exact CIs, Bayesian posteriors and Bayes factors for 1b, McNemar for paired calls (1b DX vs TS, 1e), prevalence-robust agreement (PABAK, AC1, Bland–Altman) for 1e, calibration vs each reference (`scripts/stats_extended.py`) (in progress (Srivastava, 2026-10-26))
+- [x] Frozen slides with ABMIL: 1c (DX vs TS × IHC vs molecular) and 1e (TS vs BS) with the ABMIL head, fixed folds, 3 seeds (`scripts/frozen_abmil.py`). Jobs 40963 (array) + 40965; report 5j. ER interaction +0.018 (−0.008, +0.046), TOST ±0.05 equivalent (p = 0.012); 1b TS 41 : 11; 1e 7.9% / 8.7% flipped
+- [x] Label-free audit with zero-shot CONCH: ER/HER2 prompts (1a/1b without any training label), concept scores, concept-only model (`scripts/conch_zeroshot.py`; day-1 check that TRACE CONCH features are pre-projection). Job 40983; report 5i. TRACE CONCH is pre-projection; receptor prompts at chance (AUC 0.40-0.56); 14-concept model ER ΔAUC +0.036, 1b 36 : 18
+- [x] Statistics beyond p-values: TOST equivalence for 1c, Wilson/exact CIs, Bayesian posteriors and Bayes factors for 1b, McNemar for paired calls (1b DX vs TS, 1e), prevalence-robust agreement (PABAK, AC1, Bland–Altman) for 1e, calibration vs each reference (`scripts/stats_extended.py`). `results/stats_ext_*.csv` (job 40965 incl. ABMIL rows); report 5h, 5j
 - [ ] New foundation-model experiments (candidates in `docs/WEEK3_EXPERIMENTS.md`; pick before starting)
 
 ## Tier 7: Deliverables ⬜
@@ -187,6 +187,7 @@ reference standards). We do **not** propose a new architecture.
 | 4 Frozen slides | Done (15 Oct, report 5e) | Sanity checks for frozen outputs moved to Tier 5 |
 | 5 Consolidation | Done (15 Oct, `docs/FINAL_RESULTS.md`) | — |
 | 6 Optional | On hold (CPTAC); 1f and Kamineni dropped | — |
+| 6b Week 3 extensions | 3 of 4 done (27 Oct: frozen ABMIL 5j, zero-shot CONCH 5i, extended statistics 5h) | New experiments: pick from `docs/WEEK3_EXPERIMENTS.md` |
 | 7 Deliverables | 3 of 5 done (report, docs, repo); decks updated but not compiled | Compile decks (no LaTeX); rehearsal
 
 ## Key files

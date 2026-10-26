@@ -17,12 +17,12 @@ encoders (decision rule 0.5).
 | # | Primary claim (ER) | Primary-model result | Replication | Status |
 |---|---|---|---|---|
 | P1 | 1a: the RNA-defined ER label is more predictable from H&E than the IHC label | ΔAUC +0.036 (DeLong 95% CI +0.007, +0.065), p = 0.014, n = 801 | Same direction in all 5 variants; CI excludes 0 in 4 of 5 (fixed-split UNI ABMIL: +0.018, CI −0.008 to +0.044); holds under 3 RNA cut-offs | **Supported** |
-| P2 | 1b: on IHC-vs-RNA discordant patients, a model trained on concordant patients sides with RNA | 34 : 20, p = 0.076, n = 54 | All 5 variants lean to RNA (34-39 of 54); patient-level consensus 34 : 20, p = 0.076; frozen TS slide 39 : 13, p = 0.0004 | **Suggestive** (direction consistent, not significant after correction on FFPE) |
-| P3 | 1c: the answer does not change between the FFPE slide and the frozen slide next to the sequenced tissue | Interaction 0.000 (95% CI -0.024, +0.024), n = 947 | (frozen features: UNI only) | **Supported as "no change"**: the CI rules out a difference larger than ±0.024 AUC |
+| P2 | 1b: on IHC-vs-RNA discordant patients, a model trained on concordant patients sides with RNA | 34 : 20, p = 0.076, n = 54 | All 5 variants lean to RNA (34-39 of 54); patient-level consensus 34 : 20, p = 0.076 (Wilson 0.50-0.75, BF10 1.0); frozen TS slide 39 : 13, p = 0.0004 (BF10 134), with ABMIL 41 : 11 | **Suggestive** (direction consistent, not significant after correction on FFPE; Bayes factor inconclusive on FFPE, decisive on the frozen slide) |
+| P3 | 1c: the answer does not change between the FFPE slide and the frozen slide next to the sequenced tissue | Interaction 0.000 (95% CI -0.024, +0.024), n = 947; TOST at ±0.05 AUC p < 0.001 (smallest equivalence margin 0.019) | UNI ABMIL (frozen features: UNI only): interaction +0.018 (-0.008, +0.046), TOST p = 0.012 (margin 0.040) | **Supported as "no change"**: equivalent within ±0.05 AUC with both heads |
 
 **Correction for the primary family (Holm, 3 tests):** P1 p = 0.014 → adjusted 0.042 (significant at 0.05);
 P2 p = 0.076 → 0.152 (not significant); P3 is an absence-of-difference claim and is judged by its CI, not by a p-value
-(p = 0.98).
+(p = 0.98); with a ±0.05 AUC margin the equivalence test (TOST) passes for both heads (report 5h, 5j).
 
 **Secondary claims** (exploratory; not corrected; reported with all variants):
 
@@ -33,8 +33,10 @@ P2 p = 0.076 → 0.152 (not significant); P3 is an absence-of-difference claim a
 | S3 HER2-low (0 vs 1+, 0 vs low) is not visible in H&E | AUC 0.40-0.55 in all variants vs 0.65-0.69 for ERBB2 mRNA alone | Robust null |
 | S4 The ER call follows the intrinsic subtype | 15/15 Basal IHC+/RNA- called ER-; 9/9 LumA IHC-/RNA+ called ER+; HER2-enriched the exception | Descriptive, n = 54 |
 | S5 ER-low tumours that are RNA-negative are read as ER-negative | 8 of 10 (FFPE), 7 of 10 (frozen) | Lead only, n = 10 |
-| S6 Two frozen sections of one tumour agree well but not perfectly (1e) | ICC 0.87-0.89, κ 0.73 / 0.81, 8-11% of calls flip (373 pairs) | Descriptive with bootstrap CIs |
-| S7 ER-RPPA vs IHC interaction between DX and TS (1c) | -0.035 (-0.066, -0.001), p = 0.045 | **Not robust**: one borderline p among many |
+| S6 Two frozen sections of one tumour agree well but not perfectly (1e) | ICC 0.87-0.89, κ 0.73 / 0.81, 8-11% of calls flip (373 pairs); ABMIL 7.9% / 8.7% flip, AC1 0.86-0.88; no systematic TS vs BS shift (McNemar p ≥ 0.43) | Flip rate robust across heads; the IHC-vs-RNA model difference is not |
+| S7 ER-RPPA vs IHC interaction between DX and TS (1c) | -0.035 (-0.066, -0.001), p = 0.045 | **Not robust**: one borderline p among many; not replicated with ABMIL (+0.013, p = 0.45) |
+| S8 On the frozen slide, discordant ER patients side with RNA more often than on FFPE (1b, same 52 patients) | Mean-pool 34 → 39 (McNemar 3 vs 8, p = 0.23); ABMIL 34 → 41 (1 vs 8, p = 0.039) | Exploratory; direction consistent in both heads |
+| S9 The RNA preference is carried by nameable morphology (zero-shot CONCH concepts) | 14-concept model ER ΔAUC +0.036 (+0.010, +0.065), 1b 36 : 18 (p = 0.020); receptor prompts at chance (AUC 0.40-0.56) | Exploratory, DX, one encoder (report 5i) |
 
 ## 2. Multiple-testing note
 
