@@ -43,7 +43,7 @@ Update the "Current state" section whenever you finish something.
 | Use TRACE precomputed features for DX slides; extract frozen slides ourselves | TRACE covers DX only (verified); avoids downloading 1.16 TB of DX slides |
 | Do **not** re-extract all DX slides for 1c | Instead check our extraction matches TRACE on ~50 DX slides |
 
-## 3. Current state (15 Oct 2026)
+## 3. Current state (27 Oct 2026)
 
 The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a summary.
 
@@ -62,7 +62,20 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
   - HER2 tracks amplification (consensus 42 : 18, p = 0.003); PR no preference; HER2-low invisible in H&E.
 - **Frozen features:** 1,515 TS/BS slides from the IDC copy (Google Cloud), TRIDENT + UNI v1, in
   `~/project/data/features/frozen_uni_v1/` on Srivastava's Ada account; pipeline verified to reproduce TRACE exactly.
-- **Open:** Tier 7 deliverables (compile/finalise `slides/progress_update_2.tex`, final report, rehearsal, repo clean-up);
+- **Week 3 (Tier 6b, 26-27 Oct; report 5h-5j):**
+  - **Statistics beyond p-values** (`scripts/stats_extended.py`): Bayesian ΔAUC (P(RNA better) ≥ 0.91 in all 5 variants),
+    calibration (RNA-label models lower Brier; ABMIL over-confident, slope 0.3-0.65), Wilson CIs / Bayes factors for 1b
+    (P2 FFPE BF10 1.0 = inconclusive; frozen TS BF10 134), TOST for 1c (P3 equivalent within ±0.05, smallest margin 0.019),
+    McNemar / AC1 / Bland–Altman for 1e (no systematic TS vs BS shift).
+  - **Zero-shot CONCH** (`scripts/conch_zeroshot.py`, job 40983): TRACE CONCH features are pre-projection (apply
+    `visual.proj_contrast`); receptor prompts are at chance (AUC 0.40-0.56), so no label-free auditor; a 14-concept
+    model reproduces the ER RNA preference (+0.036) and describes the discordant groups (Basal: pleomorphism/necrosis;
+    HER2-enriched: apocrine, lead only).
+  - **Frozen-slide ABMIL** (`scripts/frozen_abmil.py`, jobs 40963 + 40965): P3 equivalence replicates (interaction
+    +0.018, TOST p = 0.012, margin 0.040); 1b ER DX 34 : 18 → TS 41 : 11 (McNemar p = 0.039, exploratory); ER-RPPA 1c
+    interaction not replicated; 1e 7.9% / 8.7% calls flip.
+  - Candidate new experiments: `docs/WEEK3_EXPERIMENTS.md` (pick before starting).
+- **Open:** pick and run new experiments (Tier 6b last item); Week 3 slides (Beamer, compile on Overleaf); rehearsal;
   optional Tier 6 (CPTAC on hold).
 - **Slides:** `slides/progress_update_2.tex` (draft for the next update, includes 1c/1e); not compiled yet.
 

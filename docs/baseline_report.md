@@ -539,6 +539,83 @@ concept shares (standardised), fixed folds, 5 seeds, seed-averaged out-of-fold P
 **Status:** exploratory (secondary), DX slides, one encoder. The concept model is trained on labels (it is not
 label-free); only the receptor prompts were label-free, and those failed.
 
+## 5j. Frozen slides with the ABMIL head: 1c, 1b and 1e (27 Oct 2026)
+
+`scripts/frozen_abmil.py`, Ada array **40963** (tasks 0-4: DX er, TS er, DX prher2, TS prher2, TS 1e; 0.9-1.7 h each)
+and analysis job **40965** (`--analyse`, then `stats_extended.py` with the ABMIL rows). Same patients, labels, fixed
+folds and comparisons as the mean-pool 1c/1e (5e); gated ABMIL with the `train_mil.py` settings, 3 seeds, probabilities
+averaged per patient. DX bags = TRACE UNI (≤ 4,096 patches), TS/BS bags = our UNI extraction (≤ 4,096 patches).
+Files: `results/frozen_abmil_1c.csv`, `frozen_abmil_1c_oof.csv.gz`, `frozen_abmil_1e.csv`, `frozen_abmil_1e_pairs.csv`;
+the TOST / McNemar / AC1 rows for ABMIL are in `stats_ext_1b.csv`, `stats_ext_1c.csv`, `stats_ext_1e.csv`.
+
+**1c, slide × label interaction (paired bootstrap 95% CI, 2,000; TOST margin ±0.05 as in 5h):**
+
+| Comparison | n | Head | ΔAUC DX (95% CI) | ΔAUC TS (95% CI) | Interaction (95% CI) | p | TOST ±0.05 (smallest margin) |
+|---|---|---|---|---|---|---|---|
+| ER RNA vs IHC (P3) | 947 | UNI mean | +0.032 (+0.007, +0.058) | +0.032 (+0.011, +0.055) | 0.000 (−0.024, +0.024) | 0.98 | equivalent (0.019) |
+| | | **UNI ABMIL** | +0.011 (−0.016, +0.036) | +0.029 (+0.006, +0.054) | **+0.018 (−0.008, +0.046)** | 0.18 | **equivalent, p = 0.012 (0.040)** |
+| ER RPPA vs IHC | 777 | UNI mean | +0.041 | +0.007 | −0.035 (−0.066, −0.001) | 0.045 | not shown (0.062) |
+| | | UNI ABMIL | +0.010 | +0.023 | +0.013 (−0.020, +0.047) | 0.45 | equivalent, p = 0.018 (0.041) |
+| PR prevalence-matched | 944 | UNI mean | −0.003 | +0.026 | +0.029 (−0.007, +0.066) | 0.12 | not shown (0.060) |
+| | | UNI ABMIL | −0.017 | +0.025 | +0.042 (+0.005, +0.079) | 0.031 | not shown (0.073) |
+| HER2 amplification | 537 | UNI mean | +0.045 | +0.014 | −0.030 (−0.110, +0.046) | 0.44 | not shown (0.094) |
+| | | UNI ABMIL | −0.003 | +0.031 | +0.034 (−0.047, +0.116) | 0.39 | not shown (0.099) |
+
+AUCs (ABMIL): ER IHC / RNA label DX 0.907 / 0.918, TS 0.900 / 0.929; ER RPPA DX 0.894, TS 0.889; HER2 0.65-0.68.
+Per-seed ER interaction +0.012 ± 0.025 (3 seeds).
+
+- **P3 replicates with a second head:** the FFPE vs frozen difference in the RNA-over-IHC advantage is equivalent to
+  zero within ±0.05 AUC with ABMIL as well (TOST p = 0.012). The ABMIL interval is wider (smallest margin 0.040 vs
+  0.019), and its point estimate leans the other way from zero (+0.018: a slightly larger RNA advantage on the frozen
+  slide), so the honest summary is "no change larger than about 0.04 AUC".
+- On DX the ABMIL ER ΔAUC is small (+0.011, CI includes 0), as in the fixed-split UNI ABMIL rerun (+0.018, 5g): the
+  attention head narrows the IHC-RNA gap on FFPE slides; on the frozen slide the gap stays (+0.029).
+- The mean-pool ER-RPPA interaction (−0.035, p = 0.045) **does not replicate** with ABMIL (+0.013, p = 0.45): this
+  confirms its "not robust" label. The PR interaction is positive with both heads (+0.029 / +0.042; ABMIL p = 0.031)
+  and is a lead only (one of many tests, not confirmatory). HER2: no evidence either way (n = 537, wide CIs).
+
+**1b on the patients with a frozen slide (trained on concordant patients, seed-averaged calls; Wilson CI, Bayes
+factors, exact McNemar for the paired DX vs TS calls):**
+
+| Comparison | n | Head | DX molecular : IHC | TS molecular : IHC | TS: Wilson 95% CI, BF10 | McNemar DX-only vs TS-only |
+|---|---|---|---|---|---|---|
+| ER: RNA vs IHC | 52 | UNI mean | 34 : 18 (p = 0.036) | 39 : 13 (p = 0.0004) | 0.62-0.85, 134 | 3 vs 8, p = 0.23 |
+| | | **UNI ABMIL** | 34 : 18 (p = 0.036) | **41 : 11 (p < 0.0001)** | 0.66-0.88, 1,407 | **1 vs 8, p = 0.039** |
+| HER2: amplification vs strict | 56 | UNI mean | 38 : 18 | 36 : 20 | 0.51-0.76, 1.6 | 9 vs 7, p = 0.80 |
+| | | UNI ABMIL | 40 : 16 (p = 0.002) | 45 : 11 (p < 0.0001) | 0.68-0.89, 8,490 | 6 vs 11, p = 0.33 |
+| PR prevalence-matched | 127 | UNI mean | 60 : 67 | 73 : 54 | 0.49-0.66, 0.46 | 11 vs 24, p = 0.041 |
+| | | UNI ABMIL | 60 : 67 | 69 : 58 | 0.46-0.63, 0.18 | 13 vs 22, p = 0.18 |
+
+- ER: both heads give the **same FFPE count (34 : 18)** and a **stronger RNA side on the frozen slide** (39 and 41 of
+  52). With ABMIL the paired shift is nominally significant (only 1 patient moves towards IHC, 8 towards RNA,
+  p = 0.039); with mean-pool it is not (p = 0.23). The direction is consistent with the frozen section being cut next
+  to the RNA-sequenced tissue, but it is one exploratory test (not in the Holm family) and is reported as **suggestive**.
+- HER2 follows amplification on both slide types with both heads (ABMIL 40 : 16 and 45 : 11).
+- PR: no preference with either head (Bayes factors 0.13-0.46 favour 50:50); the mean-pool PR McNemar (p = 0.041)
+  does not replicate with ABMIL (p = 0.18).
+
+**1e, top (TS) vs bottom (BS) frozen section, ER model trained on primary TS slides of out-of-fold patients:**
+
+| ER model | Head | Pairs | ICC (logit P) | κ | Gwet's AC1 (95% CI) | % flipped (Wilson 95% CI) | McNemar | Bland–Altman bias, LoA (logit) | AUC TS / BS |
+|---|---|---|---|---|---|---|---|---|---|
+| IHC label | UNI mean | 368 | 0.871 | 0.73 | 0.82 (0.76, 0.87) | 10.9% (8.1, 14.5) | 17 vs 23, p = 0.43 | −0.07, −2.6 to +2.5 | 0.891 / 0.877 |
+| | UNI ABMIL | 368 | 0.811 (0.767, 0.846) | 0.78 | 0.88 (0.83, 0.92) | 7.9% (5.5, 11.1) | 14 vs 15, p = 1.00 | −0.22, −6.1 to +5.6 | 0.889 / 0.885 |
+| RNA label | UNI mean | 367 | 0.892 | 0.81 | 0.87 (0.82, 0.92) | 7.6% (5.3, 10.8) | 14 vs 14, p = 1.00 | −0.09, −2.8 to +2.6 | 0.939 / 0.940 |
+| | UNI ABMIL | 367 | 0.855 (0.821, 0.884) | 0.77 | 0.86 (0.81, 0.91) | 8.7% (6.2, 12.1) | 16 vs 16, p = 1.00 | −0.29, −5.9 to +5.3 | 0.945 / 0.947 |
+
+- With either head, **8-11% of ER calls flip between two sections of the same tumour**, with no systematic direction
+  (McNemar p ≥ 0.43, bias ≈ 0) and the same accuracy on both sections. Section-to-section variability is a property of
+  the tissue, not of the pooling.
+- ABMIL has a lower ICC but a higher AC1 / fewer flips for the IHC model: its probabilities are pushed towards 0 and 1
+  (over-confident, calibration slope 0.3-0.4, 5h), so the logit scale spreads (limits of agreement ±6 vs ±2.5) while the
+  binary calls agree more often. Agreement on calls, not on logits, is the comparable number across heads.
+- The mean-pool finding "the RNA-label model is more stable than the IHC-label model" (7.6% vs 10.9% flipped) **does
+  not replicate** with ABMIL (8.7% vs 7.9%): treat the label difference in 1e as head-dependent; the overall flip rate
+  (~8-11%) is the robust result.
+
+**Status:** 1c (P3) replicated with a second aggregation head (equivalence holds); 1b frozen-slide shift and the PR
+interaction are exploratory; 1e flip rate robust across heads.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |
@@ -549,6 +626,7 @@ label-free); only the receptor prompts were label-free, and those failed.
 | HER2 significance encoder-dependent | **Done (5d):** DeLong per variant; HER2 1a not robust across encoders, but combined 1b 42 : 18 (p = 0.003) |
 | CONCH mean-pool numbers on slide 4 are from the laptop run | Update slides with the Ada values (conclusions unchanged); change the PR bullet to "no reliable preference" |
 | ~~1c and 1e not yet run~~ | **Done (5e):** 1,515 frozen slides extracted (IDC), equivalence with TRACE verified, 1c and 1e run |
+| ~~1c and 1e only with the mean-pool head~~ | **Done (5j):** ABMIL on DX vs TS bags; P3 equivalence holds, 1e flip rate 8-11% with both heads |
 | Frozen-slide outputs not yet in `sanity_check.py` | Extend the sanity checks to 1c/1e (Tier 5) |
 | Attention analysis is exploratory (n = 10 ER-low) | Report as a lead. **Done (5d):** discordant cases described by PAM50 / ER % / histology; check HER2-enriched exceptions in the heatmaps |
 

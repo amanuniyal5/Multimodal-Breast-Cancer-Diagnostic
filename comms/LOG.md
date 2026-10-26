@@ -287,3 +287,24 @@ final tables + sanity 22560 (after all of these).
   VPN down). Tier 0 HF item closed as not required. **@Uniyal:** if you got UNI/CONCH access, note it here; it only
   matters if you will encode new slides yourself (e.g. if CPTAC is resumed).
 - 15 Oct: CONCH access verified from Ada with Srivastava's token (pytorch_model.bin range request 206; was 403 GatedRepo on 14 Oct).
+
+## 2026-10-27 (02:15) · Srivastava (via Claude Code) · Week 3 extensions done (Tier 6b, 3 of 4)
+
+- **Statistics beyond p-values** (`scripts/stats_extended.py`, report 5h; `results/stats_ext_1a/1b/1c/1e.csv`, rerun in
+  job 40965 with the ABMIL rows): Bayesian bootstrap ΔAUC, calibration (Brier, ECE, slope), Wilson/exact CIs, Cohen's h,
+  Bayes factors for 1b (P2 FFPE 34/54 BF10 1.0, frozen TS 39/52 BF10 134, HER2 42/60 BF10 20, PR BF10 0.11),
+  exact McNemar for paired DX vs TS calls, TOST for 1c (P3 equivalent at ±0.05, smallest margin 0.019; permutation
+  p = 0.99), PABAK / Gwet's AC1 / Bland–Altman for 1e.
+- **Zero-shot CONCH** (`scripts/conch_zeroshot.py`, job 40983; 40964 failed on JPEG-2000 check slides and memory at
+  512 px, fixed; report 5i): TRACE CONCH features are pre-projection (cosine 1.0000 vs our TRIDENT re-extraction);
+  receptor prompts at chance (AUC 0.40-0.56); 14-concept model ER IHC 0.824 vs RNA 0.860, ΔAUC +0.036 (+0.010, +0.065),
+  1b 36 : 18 (p = 0.020).
+- **Frozen-slide ABMIL** (`scripts/frozen_abmil.py`, array 40963 tasks 0-4 + analysis 40965; report 5j): ER 1c
+  interaction +0.018 (−0.008, +0.046), TOST ±0.05 p = 0.012 (P3 replicates); ER-RPPA interaction +0.013 (p = 0.45; the
+  mean-pool −0.035 does not replicate); PR +0.042 (p = 0.031, lead only). 1b ER DX 34 : 18 → TS 41 : 11 (McNemar 1 vs 8,
+  p = 0.039, exploratory); HER2 40 : 16 → 45 : 11. 1e: 7.9% (IHC model) / 8.7% (RNA model) flipped, AC1 0.88 / 0.86.
+- `docs/FINAL_RESULTS.md` Section 1 notes updated (P2 Bayes factor, P3 TOST with both heads, S6-S9); generated tables
+  unchanged.
+- Candidate new foundation-model experiments in `docs/WEEK3_EXPERIMENTS.md` (A-H).
+
+**Next open items:** choose and run new experiments from `docs/WEEK3_EXPERIMENTS.md`; Week 3 slides; rehearsal.
