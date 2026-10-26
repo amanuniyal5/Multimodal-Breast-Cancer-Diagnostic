@@ -34,11 +34,12 @@ assert torch.__version__.startswith('2.5.1'), 'torch was changed by the CONCH in
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 
 if [ ! -f results/conch_feature_check.json ]; then
-    SLIDES=$(python scripts/equivalence_check.py --select $N)
+    # DX slides that already went through our pipeline in the UNI equivalence check (readable; no JPEG-2000 copies)
+    SLIDES=$(python -c "import pandas as pd; ok = pd.read_csv('results/equivalence_check.csv').patient.head($N); x = pd.read_csv('data/metadata/idc_slides.csv'); x = x[(x.slide_type == 'DX') & x.slide_barcode.str[:12].isin(ok)]; print(','.join(sorted(x.slide_barcode.unique())))")
     echo "CONCH space check on $N DX slides: $SLIDES"
     W=/scratch/$USER/conch_check_${SLURM_JOB_ID}
     python -u scripts/extract_frozen.py --slides "$SLIDES" --work $W --out data/features/dx_check_conch_v1 \
-        --encoder conch_v1 --patch-size 512
+        --encoder conch_v1 --patch-size 512 --batch-limit 32  # 512 px patches: 256 per batch ran out of GPU and host memory
     rm -rf $W
     python -u scripts/equivalence_check.py --compare --name conch_v1_20x --ours data/features/dx_check_conch_v1 \
         --out results/equivalence_check_conch.csv
