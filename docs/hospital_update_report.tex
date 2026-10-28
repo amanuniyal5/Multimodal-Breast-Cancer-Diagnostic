@@ -1,0 +1,140 @@
+% Two-page progress report for our clinical collaborators (compile on Overleaf with pdfLaTeX).
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=1.8cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+
+\setlist{nosep,leftmargin=1.3em,topsep=2pt}
+\titleformat{\section}{\normalsize\bfseries}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\pagestyle{plain}
+
+\begin{document}
+
+\begin{center}
+  {\large\bfseries Which Truth Does the Slide See?}\\[2pt]
+  {\normalsize What AI models reading H\&E breast-cancer slides learn when IHC, RNA and protein disagree}\\[4pt]
+  {\small Progress report \textbullet{} Aman Uniyal, Aman Srivastava \textbullet{} Topics in AI for Healthcare, IIIT Hyderabad \textbullet{} 29 October 2026}
+\end{center}
+\vspace{-4pt}
+
+\section{Aim}
+
+ER, PR and HER2 status decide endocrine and anti-HER2 therapy and are measured in the clinic by immunohistochemistry
+(IHC, with ISH for equivocal HER2). IHC is semi-quantitative and depends on fixation, antibody and reader thresholds; in
+5--17\% of tumours it disagrees with the receptor's RNA expression or with the gene's DNA amplification. A fast-growing
+line of research trains AI models to predict receptor status directly from the routine H\&E slide, almost always using IHC
+as the ``ground truth''. Our question is therefore: \textbf{when the reference measurements disagree, which one does an
+H\&E model actually follow, and does the answer depend on the type of slide (FFPE diagnostic slide vs.\ frozen section
+cut next to the tissue that was sequenced)?} The aim is a stricter way of \emph{evaluating} such models, not a new model.
+
+\section{What we did}
+
+\begin{itemize}
+  \item \textbf{Patients and slides.} Public TCGA breast-cancer cohort: 1,097 patients from 40 hospitals; 1,055 with an
+        FFPE diagnostic slide; 1,515 frozen sections (top and bottom section of the sequenced tissue block, 373
+        tumours with both) that we processed ourselves.
+  \item \textbf{Reference standards for the same patients.} IHC (clinical record); RNA expression of \emph{ESR1},
+        \emph{PGR}, \emph{ERBB2}; protein by reverse-phase protein array (RPPA); \emph{ERBB2} DNA amplification. HER2
+        ``clinical'' = IHC 3+ or ISH-positive vs.\ IHC 0/1+ or 2+ ISH-negative. Disagreement IHC vs.\ RNA: ER 57 of 1,031
+        patients (5.5\%), PR 16.7\%; HER2 clinical vs.\ amplification 64 of 591 (10.8\%).
+  \item \textbf{AI models.} Three published pathology foundation models (UNI, CONCH, TITAN), which turn each slide into
+        numerical features, with simple classifiers on top: five model variants in total. Each model was trained once
+        with the IHC label and once with the RNA (or DNA/protein) label on exactly the same patients.
+  \item \textbf{Fair testing.} Every result is measured on patients from hospitals the model never saw during training
+        (5-fold cross-validation grouped by hospital), because the slides carry a strong hospital ``signature''.
+        Accuracy is reported as AUC (0.5 = chance, 1.0 = perfect), with 95\% confidence intervals and correction for
+        multiple testing on the three main claims.
+\end{itemize}
+
+\section{Main findings}
+
+{\small
+\renewcommand{\arraystretch}{1.15}
+\noindent
+\begin{tabularx}{\textwidth}{@{}p{3.6cm}Lp{2.3cm}@{}}
+\toprule
+\textbf{Question} & \textbf{Result} & \textbf{Strength} \\
+\midrule
+ER: which label is easier to predict from H\&E? &
+  The RNA-defined ER status is predicted better than IHC ER status by all 5 models (AUC higher by 0.02--0.06). Main
+  model: AUC 0.870 against IHC vs.\ 0.906 against RNA, difference +0.036 (95\% CI 0.007--0.065), corrected $p = 0.042$
+  ($n = 801$). &
+  Supported \\
+ER: on the 54 tumours where IHC and RNA disagree, which side does the model take? &
+  Models side with RNA in 34 vs.\ 20 patients (63\%) on FFPE slides; 39 vs.\ 13 on frozen sections ($p = 0.0004$). &
+  Suggestive on FFPE ($p = 0.076$) \\
+Does the slide type matter? &
+  The RNA advantage is identical on FFPE and frozen slides (+0.032 each; difference 0.000, 95\% CI $-0.024$ to $+0.024$),
+  confirmed with a second model type. &
+  Supported (no difference) \\
+HER2 &
+  Calls follow \emph{ERBB2} gene amplification rather than the clinical HER2 label: 42 vs.\ 18 of 60 disagreeing
+  tumours ($p = 0.003$). &
+  Supported \\
+PR &
+  No preference once RNA cut-offs are matched to the clinical positivity rate (67 vs.\ 66). &
+  No preference \\
+HER2-low (0 vs.\ 1+; 0 vs.\ low) &
+  Not detectable from H\&E: AUC 0.42--0.54 in every model, whereas \emph{ERBB2} mRNA alone reaches 0.65--0.69. &
+  Robust negative \\
+Two frozen sections of the same tumour &
+  Predictions agree well (intraclass correlation 0.81--0.89; 373 tumours), but 8--11\% of ER calls flip between the two sections;
+  the flips are cases close to the decision threshold, with no systematic direction. &
+  Descriptive \\
+\bottomrule
+\end{tabularx}
+\par}
+
+\textbf{Who are the disagreeing ER tumours?} The model's call follows the tumour's intrinsic (PAM50) subtype rather than the
+IHC result: all 15 Basal-like tumours that were IHC-positive but RNA-negative were called ER-negative, and all 9
+Luminal-A tumours that were IHC-negative but RNA-positive were called ER-positive. The exception is HER2-enriched tumours
+that were IHC-positive and RNA-negative: 8 of 11 were called ER-positive. Among \textbf{ER-low tumours} (IHC-positive in
+fewer than 10\% of cells) that were RNA-negative, 8 of 10 were called ER-negative on FFPE and 7 of 10 on frozen slides (small numbers; a lead,
+not a conclusion).
+
+\textbf{What does the model look at?} Attention maps place the model's focus on tumour cells. A model restricted to 14
+named morphological features scored automatically on each slide (tubule formation, nuclear pleomorphism, necrosis,
+lymphocytes, apocrine change, lobular pattern and others) reproduced the same RNA-over-IHC advantage for ER (+0.036 AUC):
+the preference lives in ordinary grade and differentiation features. The IHC-positive/RNA-negative Basal-like tumours
+showed extreme pleomorphism and necrosis, whereas the HER2-enriched exceptions showed the most apocrine features of any
+group. Asking a vision--language model directly for ``ER-positive'' or ``HER2-positive'' tissue gave chance-level results
+(AUC 0.40--0.56): these models do not know what a receptor ``looks like'' by name.
+
+\textbf{Hospital signature.} The slide features alone identify the hospital of origin in 82\% of cases (chance 18\%).
+An apparent HER2-low signal (AUC 0.63) seen with ordinary random testing disappeared when testing on unseen hospitals.
+
+\section{Inferences so far}
+
+\begin{enumerate}
+  \item \textbf{H\&E models learn the tumour's biological hormone-receptor programme} (how differentiated and how
+        high-grade it looks), which RNA expression captures more closely than the IHC readout. Evaluating such models
+        only against IHC therefore under-rates them, and part of their ``error'' against IHC reflects genuine
+        IHC--biology disagreement rather than model failure.
+  \item \textbf{The effect is not a sampling artefact}: it is the same on the FFPE slide and on the frozen section cut
+        next to the sequenced tissue.
+  \item \textbf{Disagreement between the model and IHC is informative}: it concentrates in biologically ambiguous
+        tumours (Basal-like ER-low, HER2-enriched), the same groups in which IHC itself is least reliable.
+  \item \textbf{HER2}: H\&E reflects gene amplification, but \textbf{HER2-low cannot be read from H\&E} with current
+        models; it still requires IHC.
+  \item \textbf{A single section is not fully reproducible}: about one call in ten changes between two sections of the
+        same tumour, so predictions close to the threshold should be treated as uncertain.
+  \item \textbf{Validation must be across hospitals}: without it, models partly learn the hospital and can report
+        effects that are not real.
+\end{enumerate}
+
+{\small\textit{Scope.} Retrospective research analysis on public data (TCGA); all numbers from fixed hospital-grouped
+cross-validation. These are research findings, not a clinically validated tool.}
+
+\end{document}
