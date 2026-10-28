@@ -5,6 +5,7 @@
 \usepackage{booktabs}
 \usepackage{tikz}
 \usepackage{graphicx}
+\usepackage{adjustbox}
 \usetikzlibrary{arrows.meta,positioning}
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{footline}{}
@@ -315,269 +316,137 @@ RNA label & 0.89 & 0.81 & 7.6\% \\
 \end{frame}
 
 %===================================================================
-\begin{frame}[t]{Week 3: Zero-shot CONCH Prompts Cannot Read Receptor Status}
+\begin{frame}[t]{Week 3: Zero-shot CONCH -- Prompts Fail, Concepts Explain}
 \footnotesize
-\begin{columns}[T]
-\begin{column}{0.45\textwidth}
-\begin{block}{Label-free audit with CONCH (vision--language)}
-\begin{itemize}
-  \item Each patch is scored against \textbf{text prompts}, no training labels:
-        e.g.\ ``estrogen receptor positive'' vs ``negative breast carcinoma''.
-  \item 22 prompt templates $\times$ class names; patient score = top-100 patches.
-  \item ER prompt sets: all words, receptor words only, subtype words only (``luminal'' vs ``basal-like'').
-  \item Check first: the public CONCH features are taken \textbf{before} the image--text projection
-        (cosine 1.0000 on 5 re-extracted slides) $\rightarrow$ projection applied before scoring.
-\end{itemize}
-\end{block}
-\end{column}
-\begin{column}{0.52\textwidth}
-\begin{block}{Zero-shot AUC against each reference (top-k pooling)}
-\centering
-\scriptsize
-\begin{tabular}{llcc}
-\toprule
-Marker & Prompt set & vs IHC & vs molecular \\
-\midrule
-ER ($n$=989) & all words & 0.51 & 0.51 (RNA) \\
- & receptor words & 0.48 & 0.46 (RNA) \\
- & subtype words & 0.52 & 0.53 (RNA) \\
-PR ($n$=986) & receptor words & 0.50 & 0.51 (RNA) \\
-HER2 ($n$=568) & receptor words & 0.53 & 0.54 (amplif.) \\
-\bottomrule
-\end{tabular}\\[2pt]
-{\tiny Mean pooling: ER AUC 0.40--0.46. 1b counts swing with prompt set and pooling (ER 19:35 to 34:20).}
-\end{block}
-\begin{alertblock}{No label-free auditor}
-Every prompt set is at chance against \textbf{every} reference: CONCH's text side does not know what
-``ER-positive'' looks like. Named molecular markers are not grounded in the model, a useful negative result for
-vision--language models in pathology.
-\end{alertblock}
-\end{column}
-\end{columns}
-\end{frame}
+CONCH (vision--language) scores every patch against \textbf{text}, with no training labels. Check first: the public
+CONCH features are taken before the image--text projection (cosine 1.0000 on 5 re-extracted slides), so we apply it.
 
-%===================================================================
-\begin{frame}[t]{Week 3: 14 Named Concepts Reproduce the RNA Preference}
-\footnotesize
-Zero-shot CONCH share of 14 concepts per slide (tubules, low-grade nuclei, pleomorphism, mitoses, necrosis,
-lymphocytes, apocrine, solid sheets, lobular, mucin, stroma, adipose, DCIS, normal breast) $\rightarrow$ logistic
-regression, same site-grouped folds, 5 seeds.
-
-\vspace{6pt}
+\vspace{4pt}
 \begin{columns}[T]
-\begin{column}{0.56\textwidth}
-\begin{block}{Concept-only model: AUC with IHC $\rightarrow$ molecular label}
+\begin{column}{0.44\textwidth}
+\begin{block}{1. Receptor prompts (no labels)}
 \centering
 \scriptsize
-\begin{tabular}{lccc}
-\toprule
-Comparison & $n$ & AUC & $\Delta$AUC (95\% CI) \\
-\midrule
-\textbf{ER: RNA $-$ IHC} & 989 & 0.82 $\rightarrow$ \textbf{0.86} & \textbf{+0.036} (+0.010, +0.065) \\
-ER: RPPA $-$ IHC & 802 & 0.81 $\rightarrow$ \textbf{0.86} & \textbf{+0.046} (+0.018, +0.076) \\
-PR: RNA $-$ IHC (matched) & 986 & 0.74 $\rightarrow$ 0.76 & +0.026 ($-$0.008, +0.060) \\
-HER2: amp. $-$ strict & 568 & 0.62 $\rightarrow$ 0.66 & +0.034 ($-$0.020, +0.091) \\
-\midrule
-1b ER discordant & 54 & \multicolumn{2}{c}{\textbf{RNA 36 : 18*}} \\
-1b HER2 discordant & 60 & \multicolumn{2}{c}{amplif.\ 38 : 22 ($p$ = 0.052)} \\
-\bottomrule
-\end{tabular}
-\end{block}
-\begin{itemize}
-  \item Same ER gain as the 1,024-dim UNI model (+0.036), with AUCs only $\sim$0.06 lower.
-\end{itemize}
-\end{column}
-\begin{column}{0.41\textwidth}
-\begin{block}{ER model weights (standardised)}
-\centering
-\scriptsize
+\begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{lcc}
 \toprule
-Concept & IHC label & RNA label \\
+Prompt & AUC vs IHC & AUC vs molecular \\
 \midrule
-Tubules & +0.45 & \textbf{+0.86} \\
-Lobular pattern & +0.59 & +0.70 \\
-Pleomorphism & $-$0.68 & \textbf{$-$0.94} \\
-Necrosis & $-$0.83 & \textbf{$-$1.12} \\
-Lymphocytes & $-$0.49 & $-$0.47 \\
+ER (all / receptor / subtype words) & 0.48--0.52 & 0.46--0.53 \\
+PR & 0.50 & 0.51 \\
+HER2 & 0.53 & 0.54 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{block}
+\begin{alertblock}{No label-free auditor}
+Chance against \textbf{every} reference: CONCH does not know what ``ER-positive'' looks like, so the 1b counts are
+meaningless (ER 19:35 to 34:20 depending on prompts).
+\end{alertblock}
 \begin{alertblock}{Inference}
-The RNA preference lives in \textbf{ordinary, nameable morphology} (grade and differentiation); the RNA label is more
-tightly tied to it than the IHC label.
+The RNA preference lives in \textbf{ordinary, nameable morphology} (grade and differentiation), not in a hidden
+feature.
 \end{alertblock}
 \end{column}
-\end{columns}
-\end{frame}
-
-%===================================================================
-\begin{frame}[t]{Week 3: Concepts Describe Who the Discordant Patients Are}
-\footnotesize
-\begin{block}{Mean concept share per group (z-score; 0 = cohort average)}
+\begin{column}{0.53\textwidth}
+\begin{block}{2. Model on 14 named concepts}
 \centering
 \scriptsize
-\begin{tabular}{lccccccc}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lcc}
 \toprule
-Group & $n$ & Pleomorphism & Necrosis & Lymphocytes & Apocrine & Tubules & Normal breast \\
+Comparison & AUC: IHC $\rightarrow$ molecular & $\Delta$AUC \\
 \midrule
-Concordant ER+ & 729 & $-$0.27 & $-$0.21 & $-$0.17 & $-$0.05 & +0.06 & +0.06 \\
-Concordant ER$-$ & 206 & +0.88 & +0.74 & +0.55 & $-$0.01 & $-$0.22 & $-$0.26 \\
-IHC+ / RNA$-$, Basal & 15 & \textbf{+2.09} & \textbf{+1.10} & +0.78 & $-$0.10 & $-$0.36 & $-$0.52 \\
-IHC+ / RNA$-$, HER2-enriched & 11 & $-$0.25 & $-$0.23 & $-$0.25 & \textbf{+0.79} & $-$0.32 & $-$0.44 \\
-IHC$-$ / RNA+ & 20 & $-$0.27 & $-$0.13 & $-$0.02 & $-$0.21 & +0.06 & +0.53 \\
+\textbf{ER: RNA $-$ IHC} ($n$=989) & 0.82 $\rightarrow$ 0.86 & \textbf{+0.036} \\
+ER: RPPA $-$ IHC ($n$=802) & 0.81 $\rightarrow$ 0.86 & \textbf{+0.046} \\
+PR: RNA $-$ IHC, matched ($n$=986) & 0.74 $\rightarrow$ 0.76 & +0.026 \\
+HER2: amp.\ $-$ strict ($n$=568) & 0.62 $\rightarrow$ 0.66 & +0.034 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}\\[1pt]
+{\tiny Concepts: tubules, pleomorphism, necrosis, mitoses, apocrine, \ldots{} Bold: 95\% CI excludes 0
+(ER RNA +0.010 to +0.065).}
 \end{block}
+\begin{itemize}
+  \item Same ER gain as the full UNI model (+0.036); ER 1b: \textbf{RNA 36 : 18} ($p$ = 0.02).
+  \item Weights grow with the RNA label: tubules +0.45 $\rightarrow$ +0.86, necrosis $-$0.83 $\rightarrow$ $-$1.12.
+  \item Basal IHC+/RNA$-$: extreme pleomorphism and necrosis (called ER$-$); HER2-enriched IHC+/RNA$-$: most apocrine
+        of any group (called ER+; lead, $n$ = 11).
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
 
+%===================================================================
+\begin{frame}[t]{Week 3: Frozen Slides with ABMIL -- 1c, 1b and 1e}
+\footnotesize
+ABMIL (UNI patches) trained separately on the FFPE (DX) and frozen (TS) slides of the same patients; same site-grouped
+folds, 3 seeds; compared with the Week 2 mean-pool results.
+
+\vspace{4pt}
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
-\begin{itemize}
-  \item \textbf{Basal IHC+/RNA$-$} tumours look \emph{more} ER-negative than the typical ER-negative tumour
-        (extreme pleomorphism and necrosis) $\rightarrow$ all 15 called ER$-$.
-  \item \textbf{IHC$-$/RNA+} tumours look like concordant ER+ tumours (low grade, more normal breast)
-        $\rightarrow$ called ER+.
-\end{itemize}
-\end{column}
-\begin{column}{0.48\textwidth}
-\begin{alertblock}{The HER2-enriched exception}
-IHC+/RNA$-$ HER2-enriched tumours have the \textbf{highest apocrine share} of any group and none of the high-grade
-features: this matches 8 / 11 called ER+ and the apocrine-like cells under ABMIL attention (Week 2).
-Lead only ($n$ = 11).
-\end{alertblock}
-\end{column}
-\end{columns}
-\end{frame}
-
-%===================================================================
-\begin{frame}[t]{Week 3: ABMIL 1c -- FFPE vs Frozen ``No Change'' Holds}
-\footnotesize
-ABMIL (UNI patches, $\le$4,096 per slide) trained separately on FFPE (DX) and frozen (TS) bags of the same 947 patients;
-same site-grouped folds, 3 seeds. Mean-pool rows from Week 2 for comparison.
-
-\vspace{6pt}
-\begin{columns}[T]
-\begin{column}{0.60\textwidth}
-\begin{block}{1c: $\Delta$AUC (molecular $-$ IHC) on DX and TS, and the interaction}
+\begin{block}{1c: TS $-$ DX interaction ($n$ = 947)}
 \centering
 \scriptsize
-\begin{tabular}{llcccc}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lcc}
 \toprule
-Comparison & Head & DX & TS & TS $-$ DX (95\% CI) & $p$ \\
+$\Delta$AUC (molecular $-$ IHC) & Mean-pool & ABMIL \\
 \midrule
-\textbf{ER: RNA $-$ IHC} & mean & +0.032 & +0.032 & 0.000 ($-$0.024, +0.024) & 0.98 \\
- & \textbf{ABMIL} & +0.011 & +0.029 & \textbf{+0.018} ($-$0.008, +0.046) & 0.18 \\
-ER: RPPA $-$ IHC & mean & +0.041 & +0.007 & $-$0.035 ($-$0.066, $-$0.001) & 0.045 \\
- & ABMIL & +0.010 & +0.023 & +0.013 ($-$0.020, +0.047) & 0.45 \\
-PR: RNA $-$ IHC (matched) & mean & $-$0.003 & +0.026 & +0.029 ($-$0.007, +0.066) & 0.12 \\
- & ABMIL & $-$0.017 & +0.025 & +0.042 (+0.005, +0.079) & 0.031 \\
-HER2: amp. $-$ strict & mean & +0.045 & +0.014 & $-$0.030 ($-$0.110, +0.046) & 0.44 \\
- & ABMIL & $-$0.003 & +0.031 & +0.034 ($-$0.047, +0.116) & 0.39 \\
+\textbf{ER: RNA $-$ IHC} & \textbf{0.000} & \textbf{+0.018} \\
+ER: RPPA $-$ IHC & $-$0.035* & +0.013 \\
+PR: RNA $-$ IHC (matched) & +0.029 & +0.042* \\
+HER2: amp.\ $-$ strict & $-$0.030 & +0.034 \\
 \bottomrule
-\end{tabular}\\[2pt]
-{\tiny ABMIL ER AUC: DX 0.91 $\rightarrow$ 0.92, TS 0.90 $\rightarrow$ 0.93 (IHC $\rightarrow$ RNA label).}
+\end{tabular}
+\end{adjustbox}\\[1pt]
+{\tiny ER 95\% CI: mean-pool $-$0.024 to +0.024; ABMIL $-$0.008 to +0.046. * $p<0.05$.}
 \end{block}
-\end{column}
-\begin{column}{0.37\textwidth}
 \begin{itemize}
-  \item \textbf{ER:} no FFPE vs frozen change with ABMIL either; the CI is wider but stays inside $\pm$0.05 AUC.
-  \item ABMIL narrows the IHC--RNA gap on FFPE (+0.011) but not on the frozen slide (+0.029).
-  \item The mean-pool ER-RPPA interaction ($p$ = 0.045) \textbf{does not replicate} $\rightarrow$ not robust.
-  \item PR leans the same way with both heads: a lead, not a claim.
+  \item ER: \textbf{no FFPE vs frozen change with either head}.
+  \item The mean-pool ER-RPPA effect does not replicate $\rightarrow$ not robust; PR is a lead only.
 \end{itemize}
-\begin{alertblock}{Inference}
-The ER result is not a tissue-sampling or pooling artefact: it holds for both slide types and both heads.
-\end{alertblock}
 \end{column}
-\end{columns}
-\end{frame}
-
-%===================================================================
-\begin{frame}[t]{Week 3: ABMIL 1b -- Frozen Slides Side More with RNA}
-\footnotesize
-1b on the patients who have both slide types: train on concordant patients, score the discordant ones
-(molecular : IHC side; binomial vs 50 : 50).
-
-\vspace{6pt}
-\begin{columns}[T]
-\begin{column}{0.58\textwidth}
-\begin{block}{1b: DX vs TS, mean-pool vs ABMIL}
+\begin{column}{0.49\textwidth}
+\begin{block}{1b: molecular : IHC side, DX $\rightarrow$ TS}
 \centering
 \scriptsize
-\begin{tabular}{lccccc}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lcc}
 \toprule
- & & \multicolumn{2}{c}{UNI mean-pool} & \multicolumn{2}{c}{UNI ABMIL} \\
-Discordant pair & $n$ & DX & TS & DX & TS \\
+Discordant pair & Mean-pool & ABMIL \\
 \midrule
-\textbf{ER: IHC vs RNA} & 52 & 34:18* & \textbf{39:13***} & 34:18* & \textbf{41:11***} \\
-HER2: strict vs amplif. & 56 & 38:18* & 36:20* & 40:16** & 45:11*** \\
-PR: IHC vs RNA (matched) & 127 & 60:67 & 73:54 & 60:67 & 69:58 \\
+\textbf{ER} ($n$=52) & 34:18 $\rightarrow$ \textbf{39:13} & 34:18 $\rightarrow$ \textbf{41:11} \\
+HER2 ($n$=56) & 38:18 $\rightarrow$ 36:20 & 40:16 $\rightarrow$ 45:11 \\
+PR ($n$=127) & 60:67 $\rightarrow$ 73:54 & 60:67 $\rightarrow$ 69:58 \\
 \bottomrule
-\end{tabular}\\[2pt]
-{\tiny * $p<0.05$, ** $p<0.01$, *** $p<0.001$.}
+\end{tabular}
+\end{adjustbox}
 \end{block}
-\begin{itemize}
-  \item Both heads give the \textbf{same FFPE count} (34 : 18) and a \textbf{stronger RNA side on the frozen slide}
-        (39 and 41 of 52).
-  \item ABMIL, DX $\rightarrow$ TS: only 1 patient moves towards IHC, 8 towards RNA.
-\end{itemize}
-\end{column}
-\begin{column}{0.39\textwidth}
-\begin{alertblock}{Inference}
-The frozen section is cut next to the tissue that was RNA-sequenced, so it sees the same tumour state the RNA label
-measured: the model's RNA side gets stronger there.
-\end{alertblock}
-\begin{block}{Other markers}
-\begin{itemize}
-  \item HER2 follows amplification on both slide types with both heads.
-  \item PR: no preference with either head.
-\end{itemize}
-\end{block}
-\end{column}
-\end{columns}
-\end{frame}
-
-%===================================================================
-\begin{frame}[t]{Week 3: ABMIL 1e -- About 1 in 10 Calls Still Flip}
-\footnotesize
-1e: ER model trained on the top section (TS) of out-of-fold patients, applied to both sections (TS and BS) of each
-tumour; bootstrap 95\% CIs.
-
-\vspace{6pt}
-\begin{columns}[T]
-\begin{column}{0.62\textwidth}
-\begin{block}{Agreement between the two sections of one tumour}
+\begin{block}{1e: TS vs BS sections of one tumour}
 \centering
 \scriptsize
-\begin{tabular}{llcccc}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lcc}
 \toprule
-ER model & Head & ICC (95\% CI) & $\kappa$ & Calls flipped (95\% CI) & AUC TS / BS \\
+ER calls flipped & Mean-pool & ABMIL \\
 \midrule
-IHC label & mean & 0.87 (0.84, 0.90) & 0.73 & 10.9\% (7.9, 14.1) & 0.89 / 0.88 \\
- & ABMIL & 0.81 (0.77, 0.85) & 0.78 & 7.9\% (5.2, 10.6) & 0.89 / 0.89 \\
-RNA label & mean & 0.89 (0.87, 0.91) & 0.81 & 7.6\% (4.9, 10.4) & 0.94 / 0.94 \\
- & ABMIL & 0.86 (0.82, 0.88) & 0.77 & 8.7\% (6.0, 11.4) & 0.95 / 0.95 \\
+IHC-label model (368 pairs) & 10.9\% & 7.9\% \\
+RNA-label model (367 pairs) & 7.6\% & 8.7\% \\
 \bottomrule
-\end{tabular}\\[2pt]
-{\tiny 368 / 367 pairs with an out-of-fold prediction.}
-\end{block}
-\begin{itemize}
-  \item ABMIL pushes probabilities towards 0 and 1: lower ICC on the probability scale, but binary calls agree
-        as often.
-  \item Both sections give the same accuracy: the flips have no direction.
-\end{itemize}
-\end{column}
-\begin{column}{0.35\textwidth}
-\begin{alertblock}{Inference}
-\textbf{8--11\% of ER calls flip} between two sections of one tumour with either head: section-to-section
-variability is a property of the tissue, not of the pooling.
-\end{alertblock}
-\begin{block}{Correction to Week 2}
-``The RNA-trained model is more reproducible'' does \textbf{not} replicate with ABMIL (8.7\% vs 7.9\%):
-head-dependent, so we drop it.
+\end{tabular}
+\end{adjustbox}
 \end{block}
 \end{column}
 \end{columns}
+
+\vspace{2pt}
+\begin{alertblock}{Inference}
+The ER result holds for both slide types and both heads; the frozen slide, cut next to the sequenced tissue, sides
+\textbf{more} with RNA (only 1 of 52 patients moves to IHC, 8 to RNA). About \textbf{1 in 10 calls flips} between
+sections with either head; the Week 2 ``RNA model is more reproducible'' does not replicate.
+\end{alertblock}
 \end{frame}
 
 %===================================================================
