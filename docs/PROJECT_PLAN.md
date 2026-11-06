@@ -166,6 +166,22 @@ reference standards). We do **not** propose a new architecture.
 - [x] Statistics beyond p-values: TOST equivalence for 1c, Wilson/exact CIs, Bayesian posteriors and Bayes factors for 1b, McNemar for paired calls (1b DX vs TS, 1e), prevalence-robust agreement (PABAK, AC1, Bland–Altman) for 1e, calibration vs each reference (`scripts/stats_extended.py`). `results/stats_ext_*.csv` (job 40965 incl. ABMIL rows); report 5h, 5j
 - [ ] New foundation-model experiments (candidates in `docs/WEEK3_EXPERIMENTS.md`; pick before starting)
 
+## Tier 6c: AI extensions (spec: `docs/DESIGN_SPEC.md`, proposal: `docs/AI_EXTENSIONS.md`) 🟨
+
+- [~] in progress (Srivastava, 2026-11-07) Shared harness `scripts/bench/` (registry, tasks, inner folds from `folds.csv`, metrics, paired stats) + sanity checks S16–S18
+- [~] in progress (Srivastava, 2026-11-07) Feature store: TRACE patient means (+std) for UNI2-h, GigaPath, H-optimus-0, Hibou-L, CTransPath (20x), UNI 10x; slide-level CHIEF and GigaPath-slide; ResNet-50 (ImageNet) DX extraction, pre-set random subset first
+- [~] in progress (Srivastava, 2026-11-07) X1 encoder benchmark, mean-pool heads: all tasks, label-efficiency curves, hospital-ID accuracy, ER ΔAUC (RNA − IHC) per encoder; ResNet-50 on its subset
+- [~] in progress (Srivastava, 2026-11-07) X3 regression on ESR1/PGR/ERBB2 (ridge on means) and regression → classification
+- [~] in progress (Srivastava, 2026-11-07) X4a encoder fusion / ensembling; X4f calibration (mean-pool)
+- [~] in progress (Srivastava, 2026-11-07) X5a t-SNE/UMAP + kNN purity metrics; X5c CKA between encoders; X5e concept probing
+- [ ] X2 aggregation methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL, pooling variants) on UNI
+- [ ] X1 ABMIL on the top 2 encoders (needs bags; storage gate)
+- [ ] X3 ABMIL regression; PAM50 gene-panel regression
+- [ ] X4b multi-task ABMIL; X4c site-invariant features; X4d noisy-label training (after experiment C); X4e multi-magnification
+- [ ] X5b patch-level feature maps (contribution, attention, concept, PCA-RGB) + map metrics; X5d retrieval
+- [ ] X6 reliability: ensembles, conformal prediction, risk–coverage, links to 1e flips and discordance
+- [ ] ReceptorCheck demo app (case bundles + Streamlit) and its retrospective evaluation (spec §7)
+
 ## Tier 7: Deliverables ⬜
 
 - [~] Slides: fix PR bullet ("no reliable preference"), Ada CONCH numbers, remove/keep "attention maps" consistently (done in both decks; compile pending: no LaTeX locally or on Ada)
@@ -188,6 +204,7 @@ reference standards). We do **not** propose a new architecture.
 | 5 Consolidation | Done (15 Oct, `docs/FINAL_RESULTS.md`) | — |
 | 6 Optional | On hold (CPTAC); 1f and Kamineni dropped | — |
 | 6b Week 3 extensions | 3 of 4 done (27 Oct: frozen ABMIL 5j, zero-shot CONCH 5i, extended statistics 5h) | New experiments: pick from `docs/WEEK3_EXPERIMENTS.md` |
+| 6c AI extensions | Started 7 Nov (harness, feature store, X1, X3, X4a/f, X5a/c/e) | — |
 | 7 Deliverables | 3 of 5 done (report, docs, repo); decks updated but not compiled | Compile decks (no LaTeX); rehearsal
 
 ## Key files
