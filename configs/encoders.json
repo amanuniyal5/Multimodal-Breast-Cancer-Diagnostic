@@ -1,0 +1,14 @@
+{
+  "uni_v1":       {"label": "UNI",          "file": "uni_v1_20x",      "dim": 1024, "kind": "patch", "pretrain": "Mass-100K, DINOv2, ViT-L",            "tcga_pretrained": false},
+  "uni_v2":       {"label": "UNI2-h",       "file": "uni_v2_20x",      "dim": 1536, "kind": "patch", "pretrain": "Mass-200M+, DINOv2, ViT-H",           "tcga_pretrained": false},
+  "gigapath":     {"label": "GigaPath",     "file": "gigapath_20x",    "dim": 1536, "kind": "patch", "pretrain": "Providence 1.3B tiles, DINOv2, ViT-g", "tcga_pretrained": false},
+  "hoptimus0":    {"label": "H-optimus-0",  "file": "hoptimus0_20x",   "dim": 1536, "kind": "patch", "pretrain": "500k slides, DINOv2, ViT-g",          "tcga_pretrained": false},
+  "hibou_l":      {"label": "Hibou-L",      "file": "hibou_l_20x",     "dim": 1024, "kind": "patch", "pretrain": "1.1M slides, DINOv2, ViT-L",          "tcga_pretrained": false},
+  "conch_v1":     {"label": "CONCH",        "file": "conch_v1_20x",    "dim": 512,  "kind": "patch", "pretrain": "1.17M image-caption pairs, CoCa, ViT-B","tcga_pretrained": false},
+  "uni_v1_10x":   {"label": "UNI 10x",      "file": "uni_v1_10x",      "dim": 1024, "kind": "patch", "pretrain": "as UNI, 10x patches",                 "tcga_pretrained": false},
+  "resnet50":     {"label": "ResNet-50 (ImageNet)", "file": "resnet50_20x", "dim": 1024, "kind": "patch", "pretrain": "ImageNet-1k supervised, stage 3", "tcga_pretrained": false},
+  "titan":        {"label": "TITAN",        "file": "titan",           "dim": 768,  "kind": "slide", "pretrain": "slide transformer on CONCH v1.5",     "tcga_pretrained": false},
+  "gigapath_slide": {"label": "GigaPath-slide", "file": "gigapath_slide", "dim": 768, "kind": "slide", "pretrain": "LongNet slide encoder on GigaPath", "tcga_pretrained": false},
+  "ctranspath":   {"label": "CTransPath",   "file": "ctranspath_20x",  "dim": 768,  "kind": "patch", "pretrain": "TCGA + PAIP, SRCL, Swin-T",           "tcga_pretrained": true},
+  "chief":        {"label": "CHIEF",        "file": "chief_slide",     "dim": 768,  "kind": "slide", "pretrain": "60k slides incl. TCGA, on CTransPath", "tcga_pretrained": true}
+}
