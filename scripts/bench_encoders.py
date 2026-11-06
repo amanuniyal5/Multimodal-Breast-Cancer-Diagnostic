@@ -54,7 +54,8 @@ def log(*x):
 
 
 L = tasks.labels()
-ENCS = a.encoders.split(",") if a.encoders else registry.available()
+ENCS = a.encoders.split(",") if a.encoders else [e for e in registry.available()  # ResNet-50 only on its subset
+                                                  if a.cohort == "subset" or e != "resnet50"]
 FE = {e: registry.load_means(e) for e in ENCS}
 if a.std:
     for e in list(ENCS):
