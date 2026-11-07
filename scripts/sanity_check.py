@@ -214,4 +214,60 @@ ok15 &= len(eq) >= 40 and n1c == 947 and e1[e1.label == "ER_IHC"].n_pairs.iloc[0
 check("S15 extraction equivalence (cosine > 0.999, same ER calls) and frozen cohort sizes", ok15,
       f"(equivalence n={len(eq)}, min cos={eq.cos_same_slide.min():.5f}; 1c ER n={n1c}; manifest slides={man.slide_barcode.nunique()})")
 
+# ---------------- S16-S18: Tier 6c harness (scripts/bench, results/bench) ----------------
+B = os.path.join(R, "bench")
+if os.path.isdir(os.path.join(B, "x1")):
+    import json
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+    from bench import folds as bfolds, tasks as btasks
+    # S16: inner folds sit inside the outer training set and are site-grouped
+    Fs = pd.read_csv("data/splits/folds.csv", index_col="patient")
+    P16 = Fs.index.to_numpy()
+    ok16 = True
+    for s in range(5):
+        for tr, te in bfolds.outer(P16, s):
+            ptr = P16[tr]
+            for itr, iva in bfolds.inner(ptr, s):
+                ok16 &= not (set(ptr[iva]) & set(P16[te]))
+                ok16 &= not (set(Fs.loc[ptr[itr], "site"]) & set(Fs.loc[ptr[iva], "site"]))
+    check("S16 inner folds: no outer-test patient in inner validation, no hospital in both inner train and validation",
+          ok16)
+    # S17: feature rows <-> index <-> labels, dims as in the registry (encoders whose files are present here)
+    ENCJ = json.load(open("configs/encoders.json"))
+    ok17, seen = True, []
+    for e, c in ENCJ.items():
+        f = os.path.join("data/features", f"{c['file']}_mean.npz")
+        if e == "titan" or not os.path.exists(f):
+            continue
+        z = np.load(f, allow_pickle=True)
+        pts = z["patients"].astype(str)
+        ok17 &= z["X"].shape == (len(pts), c["dim"]) and len(set(pts)) == len(pts) and np.isfinite(z["X"]).all()
+        ok17 &= set(pts) <= set(L.index)
+        if "S" in z.files:
+            ok17 &= z["S"].shape == z["X"].shape
+        idx = os.path.join("data/features", f"{c['file']}_index.csv")
+        if os.path.exists(idx):
+            ok17 &= set(pd.read_csv(idx).iloc[:, 0].astype(str).str[:12]) >= set(pts)
+        seen.append(e)
+    A16 = pd.read_csv(os.path.join(B, "x1", "aucs.csv"))
+    ok17 &= (A16.groupby("task").n.nunique() == 1).all()  # every encoder on the same patients per task
+    check("S17 feature files: shape = (patients, registry dim), unique finite rows, patients in label table; "
+          "X1 uses one cohort per task", ok17, f"(checked {seen})")
+    # S18: OOF complete and labels match the label table
+    LB = btasks.labels()
+    ok18 = True
+    for d in ["x1", "x1_subset"]:
+        O = pd.read_csv(os.path.join(B, d, "oof.csv.gz"))
+        A = pd.read_csv(os.path.join(B, d, "aucs.csv")).set_index(["encoder", "task", "group"])
+        for (e, t, g), blk in O.groupby(["encoder", "task", "group"]):
+            ok18 &= blk.patient.is_unique and len(blk) == A.loc[(e, t, g), "n"]
+            ok18 &= blk.p.between(0, 1).all() and blk.p.notna().all()
+            if t != "ER_IHC_shuffled":
+                ok18 &= (blk.y.values == LB.loc[blk.patient, t].astype(int).values).all()
+    R3 = pd.read_csv(os.path.join(B, "x3", "oof_reg.csv.gz"))
+    ok18 &= not R3.duplicated(["encoder", "gene", "patient"]).any() and np.isfinite(R3.pred).all()
+    check("S18 bench OOF complete: one prediction per patient per encoder x task, n as in aucs.csv, y = label table",
+          ok18)
+
 print(f"\n{len(fails)} check(s) failed: {fails}" if fails else "\nALL SANITY CHECKS PASSED")

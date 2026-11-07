@@ -308,3 +308,36 @@ final tables + sanity 22560 (after all of these).
 - Candidate new foundation-model experiments in `docs/WEEK3_EXPERIMENTS.md` (A-H).
 
 **Next open items:** choose and run new experiments from `docs/WEEK3_EXPERIMENTS.md`; Week 3 slides; rehearsal.
+
+## 2026-11-08 (01:30) · Srivastava (via Claude Code) · Tier 6c: encoder benchmark, regression, fusion, calibration, representations
+
+- **Feature store (Ada, Srivastava's account; not in git):**
+  - Patient means streamed from TRACE (`scripts/trace_means.py`, `jobs/trace_means.sbatch`): UNI2-h 62653, GigaPath
+    62654, H-optimus-0 62655, Hibou-L 62656, CTransPath 62657, UNI 10x 62658; slide-level CHIEF 62648, GigaPath-slide
+    62649. Streamed CONCH equals the existing file exactly (62647).
+  - ResNet-50 (ImageNet) on the pre-set random subset (`data/metadata/dx_manifest.csv`): 468/477 slides, 436 patients
+    (job 62650). The failures are site-AC JPEG-2000 DICOMs.
+- **Benchmarks** (`jobs/bench_cpu.sbatch`, jobs 62667 + 62668, `results/bench/`, report 5k). Sanity checks S16-S18
+  added: all pass. S6-CONCH is the known old item.
+- **ResNet-50 vs FMs (436-patient subset):** ER IHC 0.736 vs UNI 0.867 (−0.130, CI −0.181, −0.079), TITAN 0.912;
+  HER2 0.48 (chance). With all its training patients, ResNet-50 is still below UNI trained on 50.
+- **11 encoders on 1,004 patients (ER IHC, mean pooling):** none beats UNI v1 (0.870). GigaPath −0.037, CTransPath
+  −0.037, CONCH −0.022; UNI2-h, H-optimus-0, TITAN, CHIEF within ±0.004.
+  - Hospital ID: patch encoders 90-96%, CONCH 83%, TITAN 82%.
+  - Label efficiency with 25 patients: TITAN 0.83 vs patch encoders 0.60-0.73.
+- **Improvements:**
+  - Mean + SD pooling: ER IHC +0.033 GigaPath, +0.029 UNI 10x (0.895, best linear model), +0.013 H-optimus-0.
+  - Ridge on ESR1 scored against ER IHC beats the IHC classifier: H-optimus-0 0.904 (+0.035, p = 0.001), and in 3 more
+    encoders. PGR prevalence-matched: 7 of 11 encoders.
+  - Fusion: no gain over TITAN.
+  - Platt scaling: HER2 ECE 0.22 → 0.06, ER 0.09 → 0.04.
+- **Representations:** patch encoders are near-identical (CKA 0.87-0.96) and organised by hospital. TITAN differs
+  (CKA ≤ 0.55): best ER/PAM50 kNN purity (0.84/0.58), lowest hospital purity (0.36). Only TITAN's raw space puts
+  ER-discordant patients on the RNA side (62%, p = 0.008). Mitoses and tubules are poorly encoded by every encoder.
+- **Generalisation of P1:** ER RNA − IHC ΔAUC is positive in all 11 encoders (CI excludes 0 in 9); 1b sides with RNA
+  in all (33-39 of 54).
+- **Lead:** H-optimus-0 HER2-low 1+ vs 0 AUC 0.63 (+SD 0.65) vs ERBB2 mRNA 0.65; no other encoder. Needs replication.
+- Registry fix: TITAN has no patch SD (its "+sd" rows in `x1/aucs.csv` are duplicates; ignored).
+
+**Next open items:** Tier 6c X2 (MIL methods beyond ABMIL), X1 ABMIL on the top 2 encoders, X3 ABMIL / PAM50 panel,
+X4b-e, X5b feature maps / X5d retrieval, X6 reliability, ReceptorCheck demo; optional full-cohort ResNet-50 (batches 18-42).

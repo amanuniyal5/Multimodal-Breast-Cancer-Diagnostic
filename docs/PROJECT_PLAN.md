@@ -168,12 +168,12 @@ reference standards). We do **not** propose a new architecture.
 
 ## Tier 6c: AI extensions (spec: `docs/DESIGN_SPEC.md`, proposal: `docs/AI_EXTENSIONS.md`) 🟨
 
-- [~] in progress (Srivastava, 2026-11-07) Shared harness `scripts/bench/` (registry, tasks, inner folds from `folds.csv`, metrics, paired stats) + sanity checks S16–S18
-- [~] in progress (Srivastava, 2026-11-07) Feature store: TRACE patient means (+std) for UNI2-h, GigaPath, H-optimus-0, Hibou-L, CTransPath (20x), UNI 10x; slide-level CHIEF and GigaPath-slide; ResNet-50 (ImageNet) DX extraction, pre-set random subset first
-- [~] in progress (Srivastava, 2026-11-07) X1 encoder benchmark, mean-pool heads: all tasks, label-efficiency curves, hospital-ID accuracy, ER ΔAUC (RNA − IHC) per encoder; ResNet-50 on its subset
-- [~] in progress (Srivastava, 2026-11-07) X3 regression on ESR1/PGR/ERBB2 (ridge on means) and regression → classification
-- [~] in progress (Srivastava, 2026-11-07) X4a encoder fusion / ensembling; X4f calibration (mean-pool)
-- [~] in progress (Srivastava, 2026-11-07) X5a t-SNE/UMAP + kNN purity metrics; X5c CKA between encoders; X5e concept probing
+- [x] Shared harness `scripts/bench/` (registry, tasks, inner folds from `folds.csv`, metrics, paired stats) + sanity checks S16–S18 (all pass, 8 Nov)
+- [x] Feature store: TRACE patient means (+std) for UNI2-h, GigaPath, H-optimus-0, Hibou-L, CTransPath (20x), UNI 10x; slide-level CHIEF and GigaPath-slide; ResNet-50 (ImageNet) DX extraction, pre-set random subset first (jobs 62647-62658; ResNet-50 468/477 subset slides, 436 patients; full-cohort ResNet-50 not run)
+- [x] X1 encoder benchmark, mean-pool heads: all tasks, label-efficiency curves, hospital-ID accuracy, ER ΔAUC (RNA − IHC) per encoder; ResNet-50 on its subset (jobs 62667/62668, `results/bench/x1*`, report 5k-1/5k-2)
+- [x] X3 regression on ESR1/PGR/ERBB2 (ridge on means) and regression → classification (`results/bench/x3`, report 5k-3)
+- [x] X4a encoder fusion / ensembling; X4f calibration (mean-pool) (`results/bench/x4`, report 5k-4)
+- [x] X5a t-SNE + kNN purity metrics (UMAP skipped: not installed); X5c CKA between encoders; X5e concept probing (`results/bench/x5`, report 5k-5)
 - [ ] X2 aggregation methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL, pooling variants) on UNI
 - [ ] X1 ABMIL on the top 2 encoders (needs bags; storage gate)
 - [ ] X3 ABMIL regression; PAM50 gene-panel regression
@@ -204,7 +204,7 @@ reference standards). We do **not** propose a new architecture.
 | 5 Consolidation | Done (15 Oct, `docs/FINAL_RESULTS.md`) | — |
 | 6 Optional | On hold (CPTAC); 1f and Kamineni dropped | — |
 | 6b Week 3 extensions | 3 of 4 done (27 Oct: frozen ABMIL 5j, zero-shot CONCH 5i, extended statistics 5h) | New experiments: pick from `docs/WEEK3_EXPERIMENTS.md` |
-| 6c AI extensions | Started 7 Nov (harness, feature store, X1, X3, X4a/f, X5a/c/e) | — |
+| 6c AI extensions | 6 of 13 done (harness, feature store, X1, X3 ridge, X4a/f, X5a/c/e; report 5k, 8 Nov) | X2, MIL items, X5b/d, X6, ReceptorCheck open |
 | 7 Deliverables | 3 of 5 done (report, docs, repo); decks updated but not compiled | Compile decks (no LaTeX); rehearsal
 
 ## Key files

@@ -616,6 +616,172 @@ factors, exact McNemar for the paired DX vs TS calls):**
 **Status:** 1c (P3) replicated with a second aggregation head (equivalence holds); 1b frozen-slide shift and the PR
 interaction are exploratory; 1e flip rate robust across heads.
 
+## 5k. Tier 6c AI extensions: encoder benchmark, regression, fusion, calibration, representations (7-8 Nov 2026)
+
+Spec: `docs/DESIGN_SPEC.md` §3-5; proposal `docs/AI_EXTENSIONS.md`. **All results here are secondary** (no change to
+P1-P3 or Holm). Mean-pool linear probe (StandardScaler + LR, C = 0.01, class-balanced) unless stated, fixed site-grouped
+folds (`data/splits/folds.csv`), 5 seeds averaged per patient, DeLong for paired AUC differences. Reporting rule (spec
+§4): a difference is called an effect only if its CI excludes 0 and it holds in ≥ 2 encoders or both heads.
+
+**Jobs (Ada, Srivastava):**
+- **Patient means streamed from TRACE** (`jobs/trace_means.sbatch` → `scripts/trace_means.py`, DX slides only):
+  - UNI2-h 62653, GigaPath 62654, H-optimus-0 62655, Hibou-L 62656, CTransPath 62657, UNI 10x 62658.
+  - Slide-level CHIEF 62648 and GigaPath-slide 62649.
+  - Check job 62647: streamed CONCH means equal `conch_v1_20x_mean.npz` exactly (max |diff| 0).
+- **ResNet-50 (ImageNet, TRIDENT `resnet50`, stage 3, 1,024-d)** on the pre-set random subset (450 patients /
+  477 slides, `data/metadata/dx_manifest.csv`, seed-0 permutation):
+  - Job 62650 (`jobs/extract_frozen.sbatch`, `ENCODER=resnet50`, `--cap 512`): 468 slides extracted.
+  - The failures are JPEG-2000 (YBR_FULL_422) DICOMs of site AC that OpenSlide cannot read.
+  - Analysed cohort: 436 patients.
+- **Benchmarks** (`jobs/bench_cpu.sbatch`): 62667 (X1 all encoders `--std`, X3, X4, X5; 29 min) and 62668 (X1 on the
+  ResNet subset). Outputs in `results/bench/{x1,x1_subset,x3,x4,x5}/`.
+- **Sanity checks:** S16-S18 added to `scripts/sanity_check.py` (inner folds site-grouped and inside the outer training
+  set; feature shapes/rows; OOF completeness and labels): all pass.
+
+### 5k-1. Do we need pathology foundation models? ResNet-50 vs foundation models (436-patient subset)
+
+| Task (n) | ResNet-50 | UNI | TITAN | ResNet − UNI (95% CI) |
+|---|---|---|---|---|
+| ER IHC (330) | 0.736 | 0.867 | 0.912 | −0.130 (−0.181, −0.079) |
+| ER RNA (330) | 0.714 | 0.885 | 0.956 | −0.171 (−0.222, −0.120) |
+| ER RPPA (330) | 0.729 | 0.885 | 0.919 | −0.156 (−0.211, −0.102) |
+| PR IHC (398) | 0.663 | 0.777 | 0.827 | −0.114 (−0.159, −0.068) |
+| HER2 strict (240) | 0.480 | 0.663 | 0.669 | −0.182 (−0.269, −0.096) |
+| HER2 amplification (240) | 0.518 | 0.662 | 0.677 | −0.144 (−0.229, −0.059) |
+
+- **Yes, they are needed.** ImageNet features lose 0.11-0.18 AUC on every receptor task, and HER2 is at chance.
+- **Label efficiency (ER IHC, seed-0 folds, 5 repeats):** trained on all ~260 training patients, ResNet-50 reaches 0.759.
+  UNI reaches 0.808 with only 50 patients.
+- **Hospital signature:** ResNet-50 identifies the hospital in 81.8% of cases (UNI 90.9%, TITAN 68.4%; chance 20.1%).
+  Hospital information is in the slides (stain, scanner), not only in the foundation models.
+- **Label preference:** no RNA preference with ResNet-50 (ER ΔAUC −0.023, CI −0.075, +0.030). On this smaller subset,
+  most foundation models also lose significance, so this is not interpretable.
+
+### 5k-2. Eleven encoders on the same 1,004-1,055 patients (X1)
+
+ER AUC (mean pooling), with the difference vs UNI v1 (DeLong):
+
+| Encoder | ER IHC | Δ vs UNI (p) | ER RNA | PR IHC | HER2 strict | Hospital ID |
+|---|---|---|---|---|---|---|
+| UNI v1 | 0.870 | ref | 0.906 | 0.796 | 0.628 | 95.6% |
+| UNI2-h | 0.865 | −0.004 (0.63) | 0.892 | 0.773 | 0.573 | 95.9% |
+| GigaPath | 0.833 | −0.037 (< 0.001) | 0.885 | 0.770 | 0.654 | 94.3% |
+| H-optimus-0 | 0.869 | −0.001 (0.93) | 0.925 | 0.800 | 0.620 | 96.0% |
+| Hibou-L | 0.851 | −0.019 (0.11) | 0.870 | 0.756 | 0.568 | 94.3% |
+| CONCH | 0.847 | −0.022 (0.040) | 0.877 | 0.782 | 0.573 | 83.3% |
+| UNI 10x | 0.866 | −0.004 (0.61) | 0.907 | 0.805 | 0.638 | 95.3% |
+| TITAN (slide) | 0.873 | +0.004 (0.75) | 0.931 | 0.807 | 0.684 | 81.6% |
+| GigaPath-slide | 0.844 | −0.025 (0.018) | 0.879 | 0.781 | 0.635 | 93.8% |
+| CTransPath † | 0.833 | −0.037 (0.002) | 0.863 | 0.781 | 0.614 | 90.5% |
+| CHIEF † (slide) | 0.868 | −0.001 (0.91) | 0.908 | 0.825 | 0.676 | 84.6% |
+
+† pretrained on TCGA (leakage contrast, never "best"). Hospital ID: 10 largest sites, n = 772, chance 18.4%. Shuffled-label
+control 0.46-0.52 for all encoders.
+
+- **Scale and newer pretraining do not help with mean pooling.** No encoder beats UNI v1 on ER IHC. TITAN and
+  H-optimus-0 beat it on ER RNA: +0.025 (p = 0.006) and +0.019 (p = 0.035). The ceiling is about 0.87 (IHC) and
+  0.93 (RNA).
+- **Label efficiency differs by family.** ER IHC AUC with 25 / 50 training patients:
+  - TITAN 0.833 / 0.841, CHIEF † 0.774 / 0.789, CONCH 0.752 / 0.783.
+  - Patch encoders: 0.60-0.73 / 0.64-0.77; Hibou-L lowest (0.599 / 0.636).
+  - Slide-level and vision-language pretraining is the most data-efficient, which matters for a small hospital cohort.
+- **Mean + SD pooling** (second-order statistics; TRACE encoders only), own-encoder DeLong:
+  - ER IHC: GigaPath +0.033 (+0.018, +0.048), UNI 10x +0.029 (+0.016, +0.043; AUC **0.895**, the best single linear
+    model), H-optimus-0 +0.013 (+0.003, +0.022).
+  - ER RNA: GigaPath +0.031, CTransPath +0.024, UNI2-h +0.013.
+  - Not significant for UNI2-h, Hibou-L or CTransPath on ER IHC, and never for PR or HER2.
+  - A cheap aggregation improvement in ≥ 2 encoders. UNI v1 / CONCH have no SD in their older feature files. TITAN has
+    no patch SD; its "+sd" rows in `aucs.csv` duplicate TITAN and are ignored (registry fixed for future runs).
+- **Label preference is encoder-independent (generalises P1):**
+  - ER RNA − IHC ΔAUC is positive in all 11 encoders (+0.020 to +0.057), with the CI excluding 0 in 9 of 11 (not
+    Hibou-L, UNI2-h).
+  - 1b: every encoder sides with RNA on the 54 discordant patients (33-39 : 15-21).
+  - HER2 sides with amplification in 10 of 11 (39-44 : 16-21; TITAN 35 : 25).
+  - PR shows no preference (58-71 of 133).
+- **HER2-low (lead only):**
+  - Every encoder is at chance (0.37-0.57) except H-optimus-0: 1+ vs 0 0.629 (0.557, 0.702); with SD 0.654 (0.587, 0.721).
+  - Measured ERBB2 mRNA reaches 0.649.
+  - One encoder out of 11 (× 2 tasks × 2 poolings), not seen in any other: needs replication (ABMIL, other folds)
+    before any claim. The 1d conclusion "HER2-low invisible in H&E" stands.
+
+### 5k-3. Regression on mRNA expression (X3; ridge, alpha chosen on inner folds, 5 seeds)
+
+| Gene | Pearson r (range over 11 encoders) | Best |
+|---|---|---|
+| ESR1 | 0.55-0.69 | H-optimus-0 0.694, TITAN 0.690 |
+| PGR | 0.50-0.61 | TITAN 0.611 |
+| ERBB2 | 0.05-0.37 | TITAN 0.366 (Hibou-L 0.046) |
+
+**Training on the continuous molecular target and scoring against the clinical label** often beats training on the
+clinical label:
+- **ER IHC:** H-optimus-0 0.869 → **0.904** (+0.035, CI +0.014, +0.056, p = 0.001), CHIEF † +0.020 (p = 0.002),
+  GigaPath +0.024 (p = 0.044), GigaPath-slide +0.022 (p = 0.031). UNI +0.012 (n.s.).
+- **PR prevalence-matched label:** +0.015 to +0.026 with the CI excluding 0 in 7 of 11 encoders.
+- **HER2:** no consistent gain (amplification −0.11 to +0.02; HER2 strict −0.07 to +0.07).
+
+ER expression is a smoother, less noisy training target than the IHC call. It needs no cut-off and gives one continuous
+score per receptor for the application.
+
+### 5k-4. Fusion (X4a) and calibration (X4f)
+
+- **Fusion gives no gain over the best single encoder (TITAN).**
+  - Early fusion (concatenation, C from inner folds) and late fusion (mean logit) of the 9 non-TCGA encoders:
+    ER IHC +0.007 / +0.010 (n.s.).
+  - Worse than TITAN for ER RNA (−0.011 / −0.015) and PR prevalence-matched (−0.038 / −0.026).
+  - Fusion beats UNI alone (e.g. PR IHC late +0.017, p = 0.003), but only because it includes TITAN.
+- **Calibration (seed 0):** class-balanced probabilities are miscalibrated. Platt scaling fitted on inner folds of the
+  training patients fixes them:
+
+| | UNI raw → Platt ECE | TITAN raw → Platt ECE | UNI slope raw → Platt |
+|---|---|---|---|
+| ER IHC | 0.090 → 0.044 | 0.113 → 0.032 | 0.82 → 0.96 |
+| PR IHC | 0.105 → 0.047 | 0.116 → 0.039 | 0.65 → 0.98 |
+| HER2 strict | 0.215 → 0.058 | 0.173 → 0.051 | 0.27 → 0.76 |
+| ERBB2 amplification | 0.221 → 0.023 | 0.191 → 0.031 | 0.40 → 0.82 |
+
+Brier scores improve in every row. Calibrated probabilities are required before the application's confident / uncertain
+triage.
+
+### 5k-5. What the representations contain (X5a t-SNE + kNN purity, X5c CKA, X5e concept probing; 1,055 patients)
+
+| Encoder family | kNN purity: ER RNA | PAM50 | Hospital | Discordant: RNA-side share of 10 nearest concordant (p) |
+|---|---|---|---|---|
+| Patch encoders (UNI, UNI2-h, GigaPath, H-optimus-0, Hibou-L, UNI 10x, CTransPath †) | 0.68-0.74 | 0.40-0.45 | 0.54-0.73 | 0.44-0.52 (all p ≥ 0.20) |
+| GigaPath-slide | 0.716 | 0.427 | 0.659 | 0.496 (0.94) |
+| CONCH | 0.779 | 0.506 | 0.389 | 0.578 (0.095) |
+| CHIEF † | 0.786 | 0.503 | 0.418 | 0.552 (0.16) |
+| TITAN | **0.838** | **0.579** | **0.356** | **0.620 (0.008)** |
+
+- **Two families.** Linear CKA among UNI, UNI 10x, H-optimus-0, GigaPath, GigaPath-slide and CTransPath is 0.87-0.96
+  (UNI vs H-optimus-0 0.91, vs GigaPath 0.89, vs CTransPath 0.88); UNI2-h 0.73-0.83 and Hibou-L 0.57-0.65 to the same
+  set. They largely learn the same representation, dominated by hospital.
+- **TITAN differs from all others** (CKA 0.33-0.55) and organises patients by ER and subtype rather than hospital.
+  CONCH and CHIEF sit in between.
+- **Only TITAN's raw feature space** places ER-discordant patients next to concordant patients of their RNA status,
+  without any classifier.
+- **Concept probing** (ridge to the 14 CONCH concept shares, out-of-fold R²):
+  - Ranges below exclude CONCH and CHIEF.
+  - Well encoded: adipose, lobular, mucin, normal breast (0.69-0.98).
+  - Moderate: necrosis, pleomorphism, apocrine (0.44-0.76).
+  - Poor: mitoses (≤ 0.27) and tubules (0.12-0.36).
+  - Two of the three Nottingham grade components are weakly linearly encoded in slide means.
+  - The CONCH probe is circular (the concepts come from CONCH); CHIEF is low throughout (one slide vector).
+- Figures: `results/bench/x5/figures/x5a_<encoder>.png` (t-SNE by ER RNA / ER IHC / PAM50 / hospital, discordant patients
+  marked) and `x5c_cka.png`. UMAP was skipped (umap-learn not installed on Ada).
+
+**Status:** X1 (mean-pool), X3 (ridge), X4a/f and X5a/c/e done. Secondary results only.
+
+**Effects meeting the reporting rule:**
+- Foundation models beat ResNet-50 on every receptor task.
+- No encoder beats UNI on ER IHC.
+- Mean + SD pooling helps ER (≥ 2 encoders).
+- The regression target beats the IHC target for ER IHC and the prevalence-matched PR label (≥ 2 encoders).
+- Fusion gives no gain over the best single encoder.
+- Platt scaling fixes calibration.
+- The ER RNA preference holds in 9 of 11 encoders.
+
+**Leads:** H-optimus-0 on HER2-low; TITAN's representation-level RNA preference (single encoder).
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |
@@ -647,4 +813,7 @@ interaction are exploratory; 1e flip rate robust across heads.
 | Frozen-slide features | `~/project/data/features/frozen_uni_v1/` on Ada (Srivastava) | `jobs/extract_frozen.sbatch` -> `scripts/extract_frozen.py` (job 20080) |
 | Extraction equivalence | `results/equivalence_check.csv` | `jobs/equivalence_check.sbatch` (job 21300) |
 | 1c, 1e | `results/frozen_1c*.csv*`, `results/frozen_1e*.csv` | `jobs/frozen_analysis.sbatch` -> `scripts/frozen_1c.py`, `scripts/frozen_1e.py` (job 22323) |
+| Tier 6c feature store (patient means, not in git) | `~/project/data/features/<enc>_20x_mean.npz`, `chief_slide_*`, `gigapath_slide_*`, `dx_resnet50/` on Ada (Srivastava) | `jobs/trace_means.sbatch` → `scripts/trace_means.py` (jobs 62647-62649, 62653-62658); ResNet-50 `jobs/extract_frozen.sbatch` `ENCODER=resnet50` with `data/metadata/dx_manifest.csv` (`scripts/make_dx_manifest.py`; job 62650) |
+| Tier 6c X1 encoder benchmark (all encoders; ResNet-50 subset) | `results/bench/x1/`, `results/bench/x1_subset/` | `jobs/bench_cpu.sbatch` → `scripts/bench_encoders.py` (jobs 62667, 62668) |
+| Tier 6c X3 regression, X4 fusion + calibration, X5 representations | `results/bench/{x3,x4,x5}/` | `scripts/bench_regression.py`, `scripts/bench_fusion.py`, `scripts/embeddings.py` (job 62667) |
 | Job logs | `results/logs/17536.out` … `17661.out` | Ada |

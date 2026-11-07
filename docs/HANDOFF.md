@@ -43,7 +43,7 @@ Update the "Current state" section whenever you finish something.
 | Use TRACE precomputed features for DX slides; extract frozen slides ourselves | TRACE covers DX only (verified); avoids downloading 1.16 TB of DX slides |
 | Do **not** re-extract all DX slides for 1c | Instead check our extraction matches TRACE on ~50 DX slides |
 
-## 3. Current state (27 Oct 2026)
+## 3. Current state (8 Nov 2026)
 
 The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a summary.
 
@@ -75,8 +75,18 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
     +0.018, TOST p = 0.012, margin 0.040); 1b ER DX 34 : 18 → TS 41 : 11 (McNemar p = 0.039, exploratory); ER-RPPA 1c
     interaction not replicated; 1e 7.9% / 8.7% calls flip.
   - Candidate new experiments: `docs/WEEK3_EXPERIMENTS.md` (pick before starting).
-- **Open:** pick and run new experiments (Tier 6b last item); Week 3 slides (Beamer, compile on Overleaf); rehearsal;
-  optional Tier 6 (CPTAC on hold).
+- **Tier 6c AI extensions (7-8 Nov; spec `docs/DESIGN_SPEC.md`, proposal `docs/AI_EXTENSIONS.md`, report 5k):**
+  harness `scripts/bench/` + S16-S18; patient means for 11 encoders (TRACE streaming, `scripts/trace_means.py`) and
+  ResNet-50 on a pre-set random 436-patient subset (job 62650); benchmarks in `results/bench/` (jobs 62667, 62668).
+  - ResNet-50 (ImageNet) is 0.11-0.18 AUC below UNI on every receptor task (HER2 at chance): pathology FMs are needed.
+  - No newer/larger FM beats UNI v1 on ER IHC with mean pooling (ceiling ~0.87); patch encoders are near-identical
+    (CKA 0.87-0.96) and hospital-dominated (90-96% hospital ID); TITAN / CONCH / CHIEF carry less hospital, organise by
+    ER/PAM50 and are far more label-efficient (TITAN ER 0.83 with 25 training patients).
+  - Improvements: mean + SD pooling (+0.013 to +0.033 ER, ≥ 2 encoders); ridge on ESR1 mRNA scored against IHC beats
+    the IHC-trained classifier (H-optimus-0 0.904); fusion gives nothing over TITAN; Platt scaling fixes calibration.
+  - ER RNA-over-IHC preference holds in all 11 encoders (CI excludes 0 in 9). Lead: H-optimus-0 HER2-low 0.63-0.65.
+- **Open:** Tier 6c X2 (MIL methods), MIL/regression items, X5b maps, X6 reliability, ReceptorCheck app; Week 4 extended
+  statistics and experiments C, D, G; slides (Beamer, compile on Overleaf); rehearsal; CPTAC on hold.
 - **Slides:** `slides/progress_update_2.tex` (draft for the next update, includes 1c/1e); not compiled yet.
 
 ## 4. Next actions

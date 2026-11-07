@@ -40,8 +40,8 @@ def slides_to_patients(slide_dir, out_npz):
 def load_means(enc, feats="data/features", std=False):
     """DataFrame patients x d (patient-level mean features); std=True appends per-feature patch SD where stored"""
     c = ENC[enc]
-    if enc == "titan":
-        return load_titan(os.path.join(feats, "titan_brca_20x.parquet"))
+    if enc == "titan":  # one slide embedding per slide: no patch SD
+        return None if std else load_titan(os.path.join(feats, "titan_brca_20x.parquet"))
     f = os.path.join(feats, f"{c['file']}_mean.npz")
     if enc == "resnet50":  # rebuilt every time: the extraction may still be adding slides
         slides_to_patients(os.path.join(feats, "dx_resnet50"), f)
