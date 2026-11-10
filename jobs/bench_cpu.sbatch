@@ -1,6 +1,6 @@
 #!/bin/bash
 # Tier 6c: CPU benchmarks on saved patient means (X1 encoders + label efficiency, X1 ResNet-50 subset, X3 regression,
-# X4a/f fusion + calibration, X5a/c/e embeddings). Pick steps with STEPS (default all), e.g.
+# X4a/f fusion + calibration, X5a/c/e embeddings; x2pool = X2 pooling baselines, x2an = X2 tables). Pick steps with STEPS (default all), e.g.
 #   sbatch --export=ALL,STEPS="x1 x3" jobs/bench_cpu.sbatch
 #SBATCH -A research
 #SBATCH --qos=medium
@@ -24,6 +24,8 @@ for s in $STEPS; do
     x3)    python -u scripts/bench_regression.py --x1 results/bench/x1 --out results/bench/x3 ;;
     x4)    python -u scripts/bench_fusion.py --x1 results/bench/x1 --out results/bench/x4 ;;
     x5)    python -u scripts/embeddings.py --out results/bench/x5 ;;
+    x2pool) python -u scripts/bench_mil.py --method pool --name ${NAME:-uni_v1_20x} --out results/bench/x2 ;;
+    x2an)  python -u scripts/analyse_x2.py --dir results/bench/x2 --name ${NAME:-uni_v1_20x} ;;
   esac
 done
 echo BENCH_CPU_OK
