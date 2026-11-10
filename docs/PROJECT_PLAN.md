@@ -174,7 +174,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] X3 regression on ESR1/PGR/ERBB2 (ridge on means) and regression → classification (`results/bench/x3`, report 5k-3)
 - [x] X4a encoder fusion / ensembling; X4f calibration (mean-pool) (`results/bench/x4`, report 5k-4)
 - [x] X5a t-SNE + kNN purity metrics (UMAP skipped: not installed); X5c CKA between encoders; X5e concept probing (`results/bench/x5`, report 5k-5)
-- [ ] X2 aggregation methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL, pooling variants) on UNI
+- [~] in progress (Srivastava, 2026-11-10) X2 aggregation methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL, pooling variants) on UNI
 - [ ] X1 ABMIL on the top 2 encoders (needs bags; storage gate)
 - [ ] X3 ABMIL regression; PAM50 gene-panel regression
 - [ ] X4b multi-task ABMIL; X4c site-invariant features; X4d noisy-label training (after experiment C); X4e multi-magnification
