@@ -133,6 +133,8 @@ from mil_models import MODELS  # noqa: E402
 
 dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 log("device", dev, torch.cuda.get_device_name(0) if dev.type == "cuda" else "")
+if dev.type != "cuda" and os.environ.get("SLURM_JOB_ID"):
+    sys.exit(f"no usable GPU on {os.environ.get('SLURMD_NODENAME')}: refusing to train on CPU")
 AMP = dev.type == "cuda"
 
 
