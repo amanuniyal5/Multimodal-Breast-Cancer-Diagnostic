@@ -174,7 +174,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] X3 regression on ESR1/PGR/ERBB2 (ridge on means) and regression → classification (`results/bench/x3`, report 5k-3)
 - [x] X4a encoder fusion / ensembling; X4f calibration (mean-pool) (`results/bench/x4`, report 5k-4)
 - [x] X5a t-SNE + kNN purity metrics (UMAP skipped: not installed); X5c CKA between encoders; X5e concept probing (`results/bench/x5`, report 5k-5)
-- [~] in progress (Srivastava, 2026-11-10) X2 aggregation methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL, pooling variants) on UNI
+- [x] X2 aggregation methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL, pooling variants) on UNI: no head beats ABMIL, mean+SD matches them, preference head-independent (jobs 68332, 68319; `results/bench/x2`, report 5k-6, 11 Nov)
 - [ ] X1 ABMIL on the top 2 encoders (needs bags; storage gate)
 - [ ] X3 ABMIL regression; PAM50 gene-panel regression
 - [ ] X4b multi-task ABMIL; X4c site-invariant features; X4d noisy-label training (after experiment C); X4e multi-magnification
@@ -204,7 +204,7 @@ reference standards). We do **not** propose a new architecture.
 | 5 Consolidation | Done (15 Oct, `docs/FINAL_RESULTS.md`) | — |
 | 6 Optional | On hold (CPTAC); 1f and Kamineni dropped | — |
 | 6b Week 3 extensions | 3 of 4 done (27 Oct: frozen ABMIL 5j, zero-shot CONCH 5i, extended statistics 5h) | New experiments: pick from `docs/WEEK3_EXPERIMENTS.md` |
-| 6c AI extensions | 6 of 13 done (harness, feature store, X1, X3 ridge, X4a/f, X5a/c/e; report 5k, 8 Nov) | X2, MIL items, X5b/d, X6, ReceptorCheck open |
+| 6c AI extensions | 7 of 13 done (harness, feature store, X1, X3 ridge, X4a/f, X5a/c/e, X2; report 5k, 11 Nov) | MIL items, X5b/d, X6, ReceptorCheck open |
 | 7 Deliverables | 3 of 5 done (report, docs, repo); decks updated but not compiled | Compile decks (no LaTeX); rehearsal
 
 ## Key files

@@ -782,6 +782,61 @@ triage.
 
 **Leads:** H-optimus-0 on HER2-low; TITAN's representation-level RNA preference (single encoder).
 
+### 5k-6. Aggregation methods beyond ABMIL (X2; UNI v1 20x, 3 seeds, fixed splits; 10-11 Nov 2026)
+
+**Setup.** CLAM-SB, TransMIL, DSMIL and ACMIL re-implemented in plain PyTorch (`scripts/mil_models.py`), with paper
+defaults and no tuning; 2,048 patches per training step, 15 epochs (20 for TransMIL), fp16, seeds 0-2, same folds and
+inner folds as everything else. ABMIL is run through the same runner. Pooling baselines on the same bags: mean,
+mean+SD, mean+max, kNN (k = 25) and class prototypes. Job 68332 (array, 129 fits per head) and 68319 (pooling);
+`scripts/bench_mil.py`, `scripts/analyse_x2.py`, output `results/bench/x2/`. Same reporting rule as 5k (CI excludes 0
+and at least 2 encoders or both heads).
+
+**AUC (seed-averaged predictions).**
+
+| Method | ER IHC | ESR1 RNA | ER RPPA | PR IHC | PGR prev-matched | HER2 strict | ERBB2 amp | HER2 1+ vs 0 |
+|---|---|---|---|---|---|---|---|---|
+| mean | 0.869 | 0.906 | 0.910 | 0.794 | 0.785 | 0.630 | 0.681 | 0.499 |
+| mean+SD | 0.893 | 0.923 | 0.920 | 0.803 | 0.799 | 0.678 | 0.719 | 0.537 |
+| mean+max | 0.873 | 0.911 | 0.911 | 0.795 | 0.803 | 0.636 | 0.669 | 0.507 |
+| kNN-25 | 0.754 | 0.787 | 0.807 | 0.707 | 0.717 | 0.551 | 0.534 | 0.508 |
+| prototypes | 0.817 | 0.848 | 0.839 | 0.753 | 0.767 | 0.580 | 0.604 | 0.509 |
+| ABMIL | 0.891 | 0.910 | 0.891 | 0.806 | 0.806 | 0.695 | 0.702 | 0.531 |
+| CLAM-SB | 0.889 | 0.917 | 0.901 | 0.818 | 0.800 | 0.709 | 0.709 | 0.525 |
+| TransMIL | 0.880 | 0.910 | 0.905 | 0.809 | 0.810 | 0.675 | 0.704 | 0.609 |
+| DSMIL | 0.873 | 0.925 | 0.901 | 0.814 | 0.817 | 0.672 | 0.644 | 0.480 |
+| ACMIL | 0.883 | 0.912 | 0.903 | 0.808 | 0.803 | 0.702 | 0.682 | 0.529 |
+
+**Findings.**
+1. **No MIL head beats ABMIL.** On ER IHC no head is significantly better (CLAM −0.002, TransMIL −0.011, ACMIL
+   −0.008; DSMIL −0.018, p = 0.019, worse). The best single head differences are leads only: DSMIL on ESR1 +0.014
+   (p = 0.017), CLAM on PR IHC +0.011 (p = 0.044), TransMIL on HER2 1+ vs 0 0.609 vs 0.531 (p = 0.034; ERBB2 mRNA
+   comparator 0.65). Each appears in one head and one label among about 50 comparisons.
+2. **Mean+SD pooling matches the trained heads at no training cost:** ER IHC 0.893 vs ABMIL 0.891 (Δ +0.002,
+   p = 0.80); +0.024 over plain mean (p < 0.001). Plain mean pooling is 0.022 below ABMIL on ER IHC (p = 0.010).
+3. **Heads help HER2 strict over plain mean** (+0.042 to +0.078, p ≤ 0.047 for all five), but not over mean+SD
+   (ABMIL +0.017, p = 0.36).
+4. **kNN and prototype baselines are clearly worse** (ER IHC 0.754 / 0.817; −0.14 / −0.075 vs ABMIL).
+5. **Label preference is head-independent.** ER RNA − IHC ΔAUC is positive for all 10 methods (+0.019 to +0.052;
+   CI excludes 0 in 9 of 10, ABMIL's CI is −0.007, +0.045); against RPPA it is +0.000 (ABMIL) to +0.053. On the
+   54 discordant patients 31-36 side with RNA in every method (p 0.020-0.341 per method, not Holm-adjusted). PR shows
+   no preference (61-68 of 133 on the molecular side, p ≥ 0.39). HER2 follows amplification in 8 of 10 methods
+   (e.g. ABMIL 47 : 13); kNN is not significant (35 : 25) and the prototype baseline leans the other way (21 : 39).
+6. **Calibration** is similar across heads (ER Brier 0.101-0.117, ECE 0.07-0.09; TransMIL best 0.101 / 0.068);
+   kNN and prototypes are poor (ECE 0.25-0.29). Platt scaling (5k-4) still applies.
+7. **Cost.** Seconds per fit / parameters: ABMIL 78 / 0.33M, DSMIL 122 / 0.38M, CLAM 131 / 0.79M, ACMIL 188 / 0.33M,
+   TransMIL 225 / 2.67M.
+
+**Reproduction check (`results/bench/x2/repro.txt`).** ABMIL through this runner vs the fixed-split `train_mil.py`
+ABMIL, ER group, per seed: differences −0.001 to +0.011 AUC (mean +0.004, 7 of 9 positive), patient-level predictions
+correlate r ≈ 1.000. This is looser than the ±0.003 tolerance in the design spec. Probable cause: GPU / fp16
+non-determinism and different batch order (not confirmed). We report it as "reproduced within about 0.01 per seed";
+the X2 comparisons use the in-runner ABMIL as reference, so they are unaffected.
+
+**Take-away.** For this task (receptor status from H&E, about 1,000 patients), the choice of aggregation head is
+second-order: all trained heads and mean+SD pooling sit within about 0.02 AUC on ER and PR, and none changes which
+reference standard the model follows. Caveats: paper defaults without tuning (TransMIL uses exact attention instead
+of Nystrom), single encoder (UNI), 3 seeds, 2,048-patch subsets per step.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |

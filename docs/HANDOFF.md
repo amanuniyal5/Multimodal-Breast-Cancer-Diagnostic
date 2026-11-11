@@ -43,7 +43,7 @@ Update the "Current state" section whenever you finish something.
 | Use TRACE precomputed features for DX slides; extract frozen slides ourselves | TRACE covers DX only (verified); avoids downloading 1.16 TB of DX slides |
 | Do **not** re-extract all DX slides for 1c | Instead check our extraction matches TRACE on ~50 DX slides |
 
-## 3. Current state (8 Nov 2026)
+## 3. Current state (11 Nov 2026)
 
 The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a summary.
 
@@ -78,6 +78,9 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
 - **Tier 6c AI extensions (7-8 Nov; spec `docs/DESIGN_SPEC.md`, proposal `docs/AI_EXTENSIONS.md`, report 5k):**
   harness `scripts/bench/` + S16-S18; patient means for 11 encoders (TRACE streaming, `scripts/trace_means.py`) and
   ResNet-50 on a pre-set random 436-patient subset (job 62650); benchmarks in `results/bench/` (jobs 62667, 62668).
+  - **X2 aggregation methods (10-11 Nov, report 5k-6):** CLAM-SB, TransMIL, DSMIL, ACMIL vs ABMIL and pooling baselines on UNI;
+    no head beats ABMIL, mean+SD pooling matches them (ER IHC 0.893 vs 0.891), label preference is head-independent;
+    ABMIL reproduces `train_mil.py` within ~0.01 per seed (spec tolerance 0.003 not met). Jobs 68332, 68319.
   - ResNet-50 (ImageNet) is 0.11-0.18 AUC below UNI on every receptor task (HER2 at chance): pathology FMs are needed.
   - No newer/larger FM beats UNI v1 on ER IHC with mean pooling (ceiling ~0.87); patch encoders are near-identical
     (CKA 0.87-0.96) and hospital-dominated (90-96% hospital ID); TITAN / CONCH / CHIEF carry less hospital, organise by

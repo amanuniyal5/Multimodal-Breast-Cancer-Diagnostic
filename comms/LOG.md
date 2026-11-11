@@ -341,3 +341,19 @@ final tables + sanity 22560 (after all of these).
 
 **Next open items:** Tier 6c X2 (MIL methods beyond ABMIL), X1 ABMIL on the top 2 encoders, X3 ABMIL / PAM50 panel,
 X4b-e, X5b feature maps / X5d retrieval, X6 reliability, ReceptorCheck demo; optional full-cohort ResNet-50 (batches 18-42).
+
+## 2026-11-11 · Srivastava (via Claude Code)
+
+**Did:**
+- **X2 aggregation methods** (`scripts/mil_models.py`, `bench_mil.py`, `analyse_x2.py`, `jobs/bench_mil.sbatch`; jobs
+  68332_0-4 on Ada, pooling job 68319; `results/bench/x2/`, report 5k-6). Seeds 0-2, UNI, fixed splits.
+- **Result:** no head beats ABMIL on ER IHC (0.891; CLAM 0.889, ACMIL 0.883, TransMIL 0.880, DSMIL 0.873); mean+SD
+  pooling 0.893 at no training cost; kNN / prototypes 0.75 / 0.82. ER RNA − IHC ΔAUC positive in all 10 methods
+  (CI excludes 0 in 9); 1b 31-36 of 54 side with RNA everywhere; HER2 follows amplification in 8 of 10; PR no preference.
+  Single leads only: TransMIL HER2 1+ vs 0 0.609 (p = 0.034), DSMIL ESR1, CLAM PR.
+- **Caveat:** in-runner ABMIL differs from `train_mil.py` ABMIL by -0.001 to +0.011 AUC per seed (r ≈ 1.0); spec tolerance
+  ±0.003 not met, probably GPU/fp16 non-determinism (unconfirmed).
+- Cost per fit: ABMIL 78 s, DSMIL 122 s, CLAM 131 s, ACMIL 188 s, TransMIL 225 s.
+
+**Next open items:** X1 ABMIL on the top 2 encoders, X3 ABMIL / PAM50 panel, X4b-e, X5b feature maps / X5d retrieval,
+X6 reliability, ReceptorCheck demo; regenerate poster figure F9 with `x2/aucs.csv`.

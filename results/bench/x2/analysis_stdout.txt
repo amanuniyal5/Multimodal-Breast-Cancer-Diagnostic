@@ -1,0 +1,182 @@
+AUC (seed-averaged):
+task      ERBB2_AMP  ER_IHC  ER_RPPApos  ESR1_RNApos  HER2_STRICT  HER2low_1plus  PGR_prevmatch  PR_IHC
+method                                                                                                 
+mean          0.681   0.869       0.910        0.906        0.630          0.499          0.785   0.794
+meanstd       0.719   0.893       0.920        0.923        0.678          0.537          0.799   0.803
+meanmax       0.669   0.873       0.911        0.911        0.636          0.507          0.803   0.795
+knn25         0.534   0.754       0.807        0.787        0.551          0.508          0.717   0.707
+proto         0.604   0.817       0.839        0.848        0.580          0.509          0.767   0.753
+abmil         0.702   0.891       0.891        0.910        0.695          0.531          0.806   0.806
+clam          0.709   0.889       0.901        0.917        0.709          0.525          0.800   0.818
+transmil      0.704   0.880       0.905        0.910        0.675          0.609          0.810   0.809
+dsmil         0.644   0.873       0.901        0.925        0.672          0.480          0.817   0.814
+acmil         0.682   0.883       0.903        0.912        0.702          0.529          0.803   0.808
+
+vs ABMIL / vs mean pool (ΔAUC, p):
+  method          task   auc  diff_vs_abmil  p_vs_abmil  diff_vs_mean  p_vs_mean
+    mean        ER_IHC 0.869         -0.022       0.010           NaN        NaN
+ meanstd        ER_IHC 0.893          0.002       0.796         0.024      0.000
+ meanmax        ER_IHC 0.873         -0.019       0.022         0.003      0.527
+   knn25        ER_IHC 0.754         -0.137       0.000        -0.115      0.000
+   proto        ER_IHC 0.817         -0.075       0.000        -0.053      0.000
+   abmil        ER_IHC 0.891            NaN         NaN         0.022      0.010
+    clam        ER_IHC 0.889         -0.002       0.667         0.020      0.023
+transmil        ER_IHC 0.880         -0.011       0.261         0.011      0.350
+   dsmil        ER_IHC 0.873         -0.018       0.019         0.004      0.719
+   acmil        ER_IHC 0.883         -0.008       0.197         0.014      0.140
+    mean   ESR1_RNApos 0.906         -0.005       0.525           NaN        NaN
+ meanstd   ESR1_RNApos 0.923          0.013       0.105         0.017      0.002
+ meanmax   ESR1_RNApos 0.911          0.001       0.892         0.006      0.199
+   knn25   ESR1_RNApos 0.787         -0.123       0.000        -0.118      0.000
+   proto   ESR1_RNApos 0.848         -0.063       0.000        -0.058      0.000
+   abmil   ESR1_RNApos 0.910            NaN         NaN         0.005      0.525
+    clam   ESR1_RNApos 0.917          0.006       0.163         0.011      0.166
+transmil   ESR1_RNApos 0.910         -0.000       0.998         0.005      0.631
+   dsmil   ESR1_RNApos 0.925          0.014       0.017         0.019      0.015
+   acmil   ESR1_RNApos 0.912          0.002       0.718         0.007      0.435
+    mean    ER_RPPApos 0.910          0.019       0.047           NaN        NaN
+ meanstd    ER_RPPApos 0.920          0.029       0.005         0.010      0.099
+ meanmax    ER_RPPApos 0.911          0.019       0.056         0.001      0.891
+   knn25    ER_RPPApos 0.807         -0.084       0.000        -0.103      0.000
+   proto    ER_RPPApos 0.839         -0.052       0.001        -0.071      0.000
+   abmil    ER_RPPApos 0.891            NaN         NaN        -0.019      0.047
+    clam    ER_RPPApos 0.901          0.010       0.104        -0.009      0.318
+transmil    ER_RPPApos 0.905          0.014       0.172        -0.005      0.538
+   dsmil    ER_RPPApos 0.901          0.010       0.159        -0.009      0.287
+   acmil    ER_RPPApos 0.903          0.012       0.135        -0.007      0.451
+    mean        PR_IHC 0.794         -0.013       0.236           NaN        NaN
+ meanstd        PR_IHC 0.803         -0.003       0.756         0.009      0.187
+ meanmax        PR_IHC 0.795         -0.011       0.332         0.002      0.823
+   knn25        PR_IHC 0.707         -0.100       0.000        -0.087      0.000
+   proto        PR_IHC 0.753         -0.053       0.001        -0.040      0.003
+   abmil        PR_IHC 0.806            NaN         NaN         0.013      0.236
+    clam        PR_IHC 0.818          0.011       0.044         0.024      0.019
+transmil        PR_IHC 0.809          0.002       0.812         0.015      0.170
+   dsmil        PR_IHC 0.814          0.007       0.372         0.020      0.069
+   acmil        PR_IHC 0.808          0.002       0.802         0.014      0.157
+    mean PGR_prevmatch 0.785         -0.021       0.041           NaN        NaN
+ meanstd PGR_prevmatch 0.799         -0.007       0.483         0.014      0.065
+ meanmax PGR_prevmatch 0.803         -0.003       0.791         0.018      0.016
+   knn25 PGR_prevmatch 0.717         -0.089       0.000        -0.068      0.000
+   proto PGR_prevmatch 0.767         -0.039       0.002        -0.018      0.135
+   abmil PGR_prevmatch 0.806            NaN         NaN         0.021      0.041
+    clam PGR_prevmatch 0.800         -0.006       0.307         0.015      0.171
+transmil PGR_prevmatch 0.810          0.004       0.619         0.025      0.026
+   dsmil PGR_prevmatch 0.817          0.010       0.153         0.031      0.004
+   acmil PGR_prevmatch 0.803         -0.004       0.491         0.017      0.083
+    mean   HER2_STRICT 0.630         -0.065       0.001           NaN        NaN
+ meanstd   HER2_STRICT 0.678         -0.017       0.363         0.048      0.001
+ meanmax   HER2_STRICT 0.636         -0.059       0.006         0.006      0.599
+   knn25   HER2_STRICT 0.551         -0.144       0.000        -0.079      0.003
+   proto   HER2_STRICT 0.580         -0.115       0.000        -0.050      0.083
+   abmil   HER2_STRICT 0.695            NaN         NaN         0.065      0.001
+    clam   HER2_STRICT 0.709          0.013       0.380         0.078      0.000
+transmil   HER2_STRICT 0.675         -0.020       0.284         0.045      0.047
+   dsmil   HER2_STRICT 0.672         -0.023       0.174         0.042      0.043
+   acmil   HER2_STRICT 0.702          0.007       0.591         0.071      0.000
+    mean     ERBB2_AMP 0.681         -0.021       0.257           NaN        NaN
+ meanstd     ERBB2_AMP 0.719          0.018       0.402         0.038      0.009
+ meanmax     ERBB2_AMP 0.669         -0.032       0.142        -0.011      0.414
+   knn25     ERBB2_AMP 0.534         -0.168       0.000        -0.147      0.000
+   proto     ERBB2_AMP 0.604         -0.098       0.001        -0.077      0.007
+   abmil     ERBB2_AMP 0.702            NaN         NaN         0.021      0.257
+    clam     ERBB2_AMP 0.709          0.007       0.536         0.028      0.192
+transmil     ERBB2_AMP 0.704          0.003       0.913         0.024      0.390
+   dsmil     ERBB2_AMP 0.644         -0.058       0.006        -0.037      0.129
+   acmil     ERBB2_AMP 0.682         -0.019       0.069         0.002      0.935
+    mean HER2low_1plus 0.499         -0.032       0.296           NaN        NaN
+ meanstd HER2low_1plus 0.537          0.006       0.841         0.038      0.014
+ meanmax HER2low_1plus 0.507         -0.024       0.458         0.009      0.620
+   knn25 HER2low_1plus 0.508         -0.023       0.575         0.010      0.810
+   proto HER2low_1plus 0.509         -0.022       0.621         0.010      0.788
+   abmil HER2low_1plus 0.531            NaN         NaN         0.032      0.296
+    clam HER2low_1plus 0.525         -0.006       0.814         0.026      0.234
+transmil HER2low_1plus 0.609          0.078       0.034         0.110      0.013
+   dsmil HER2low_1plus 0.480         -0.051       0.160        -0.019      0.461
+   acmil HER2low_1plus 0.529         -0.002       0.940         0.030      0.102
+
+calibration:
+  method        task  brier   ece
+    mean      ER_IHC  0.125 0.090
+ meanstd      ER_IHC  0.106 0.056
+ meanmax      ER_IHC  0.115 0.067
+   knn25      ER_IHC  0.219 0.250
+   proto      ER_IHC  0.271 0.290
+   abmil      ER_IHC  0.114 0.088
+    clam      ER_IHC  0.108 0.087
+transmil      ER_IHC  0.101 0.068
+   dsmil      ER_IHC  0.117 0.086
+   acmil      ER_IHC  0.111 0.093
+    mean HER2_STRICT  0.237 0.216
+ meanstd HER2_STRICT  0.197 0.130
+ meanmax HER2_STRICT  0.227 0.192
+   knn25 HER2_STRICT  0.254 0.263
+   proto HER2_STRICT  0.352 0.352
+   abmil HER2_STRICT  0.214 0.198
+    clam HER2_STRICT  0.216 0.186
+transmil HER2_STRICT  0.210 0.165
+   dsmil HER2_STRICT  0.216 0.179
+   acmil HER2_STRICT  0.217 0.189
+
+label preference:
+  method                     pair   n  auc_ihc  auc_mol  delta     lo    hi     p  n_disc  side_molecular  side_IHC  p_binom
+    mean    ER_IHC vs ESR1_RNApos 801    0.869    0.906  0.036  0.007 0.065 0.014    54.0            34.0      20.0    0.076
+    mean     ER_IHC vs ER_RPPApos 801    0.869    0.910  0.041  0.010 0.071 0.008     NaN             NaN       NaN      NaN
+    mean  PR_IHC vs PGR_prevmatch 986    0.794    0.785 -0.009 -0.043 0.026 0.625   133.0            61.0      72.0    0.386
+    mean HER2_STRICT vs ERBB2_AMP 568    0.630    0.681  0.051 -0.010 0.112 0.105    60.0            44.0      16.0    0.000
+ meanstd    ER_IHC vs ESR1_RNApos 801    0.893    0.923  0.030  0.003 0.056 0.026    54.0            35.0      19.0    0.040
+ meanstd     ER_IHC vs ER_RPPApos 801    0.893    0.920  0.026 -0.003 0.055 0.075     NaN             NaN       NaN      NaN
+ meanstd  PR_IHC vs PGR_prevmatch 986    0.803    0.799 -0.004 -0.037 0.029 0.814   133.0            63.0      70.0    0.603
+ meanstd HER2_STRICT vs ERBB2_AMP 568    0.678    0.719  0.042 -0.016 0.099 0.160    60.0            42.0      18.0    0.003
+ meanmax    ER_IHC vs ESR1_RNApos 801    0.873    0.911  0.039  0.012 0.066 0.005    54.0            33.0      21.0    0.134
+ meanmax     ER_IHC vs ER_RPPApos 801    0.873    0.911  0.038  0.009 0.067 0.009     NaN             NaN       NaN      NaN
+ meanmax  PR_IHC vs PGR_prevmatch 986    0.795    0.803  0.008 -0.025 0.042 0.639   133.0            62.0      71.0    0.488
+ meanmax HER2_STRICT vs ERBB2_AMP 568    0.636    0.669  0.033 -0.028 0.095 0.290    60.0            49.0      11.0    0.000
+   knn25    ER_IHC vs ESR1_RNApos 801    0.754    0.787  0.033  0.001 0.066 0.042    54.0            36.0      18.0    0.020
+   knn25     ER_IHC vs ER_RPPApos 801    0.754    0.807  0.053  0.018 0.089 0.003     NaN             NaN       NaN      NaN
+   knn25  PR_IHC vs PGR_prevmatch 986    0.707    0.717  0.011 -0.024 0.045 0.550   133.0            66.0      67.0    1.000
+   knn25 HER2_STRICT vs ERBB2_AMP 568    0.551    0.534 -0.017 -0.083 0.049 0.610    60.0            35.0      25.0    0.245
+   proto    ER_IHC vs ESR1_RNApos 801    0.817    0.848  0.031  0.003 0.059 0.030    54.0            34.0      20.0    0.076
+   proto     ER_IHC vs ER_RPPApos 801    0.817    0.839  0.023 -0.009 0.054 0.158     NaN             NaN       NaN      NaN
+   proto  PR_IHC vs PGR_prevmatch 986    0.753    0.767  0.014 -0.018 0.045 0.390   133.0            68.0      65.0    0.862
+   proto HER2_STRICT vs ERBB2_AMP 568    0.580    0.604  0.023 -0.026 0.073 0.355    60.0            21.0      39.0    0.027
+   abmil    ER_IHC vs ESR1_RNApos 801    0.891    0.910  0.019 -0.007 0.045 0.148    54.0            34.0      20.0    0.076
+   abmil     ER_IHC vs ER_RPPApos 801    0.891    0.891  0.000 -0.032 0.032 0.995     NaN             NaN       NaN      NaN
+   abmil  PR_IHC vs PGR_prevmatch 986    0.806    0.806 -0.000 -0.033 0.033 0.989   133.0            64.0      69.0    0.729
+   abmil HER2_STRICT vs ERBB2_AMP 568    0.695    0.702  0.007 -0.054 0.068 0.830    60.0            47.0      13.0    0.000
+    clam    ER_IHC vs ESR1_RNApos 801    0.889    0.917  0.028  0.001 0.054 0.041    54.0            33.0      21.0    0.134
+    clam     ER_IHC vs ER_RPPApos 801    0.889    0.901  0.012 -0.018 0.043 0.431     NaN             NaN       NaN      NaN
+    clam  PR_IHC vs PGR_prevmatch 986    0.818    0.800 -0.017 -0.051 0.016 0.312   133.0            64.0      69.0    0.729
+    clam HER2_STRICT vs ERBB2_AMP 568    0.709    0.709  0.000 -0.055 0.056 0.991    60.0            45.0      15.0    0.000
+transmil    ER_IHC vs ESR1_RNApos 801    0.880    0.910  0.030  0.004 0.057 0.026    54.0            32.0      22.0    0.220
+transmil     ER_IHC vs ER_RPPApos 801    0.880    0.905  0.025 -0.006 0.056 0.117     NaN             NaN       NaN      NaN
+transmil  PR_IHC vs PGR_prevmatch 986    0.809    0.810  0.002 -0.032 0.035 0.928   133.0            64.0      69.0    0.729
+transmil HER2_STRICT vs ERBB2_AMP 568    0.675    0.704  0.029 -0.038 0.096 0.399    60.0            45.0      15.0    0.000
+   dsmil    ER_IHC vs ESR1_RNApos 801    0.873    0.925  0.052  0.025 0.078 0.000    54.0            35.0      19.0    0.040
+   dsmil     ER_IHC vs ER_RPPApos 801    0.873    0.901  0.028 -0.001 0.057 0.063     NaN             NaN       NaN      NaN
+   dsmil  PR_IHC vs PGR_prevmatch 986    0.814    0.817  0.003 -0.029 0.035 0.868   133.0            62.0      71.0    0.488
+   dsmil HER2_STRICT vs ERBB2_AMP 568    0.672    0.644 -0.028 -0.093 0.036 0.391    60.0            47.0      13.0    0.000
+   acmil    ER_IHC vs ESR1_RNApos 801    0.883    0.912  0.029  0.003 0.055 0.029    54.0            31.0      23.0    0.341
+   acmil     ER_IHC vs ER_RPPApos 801    0.883    0.903  0.020 -0.011 0.052 0.211     NaN             NaN       NaN      NaN
+   acmil  PR_IHC vs PGR_prevmatch 986    0.808    0.803 -0.005 -0.038 0.027 0.745   133.0            63.0      70.0    0.603
+   acmil HER2_STRICT vs ERBB2_AMP 568    0.702    0.682 -0.019 -0.080 0.042 0.535    60.0            48.0      12.0    0.000
+
+runtime:
+          fits  sec_per_fit  total_h   params
+method                                       
+abmil      129         78.3      2.8   328578
+acmil      129        187.9      6.7   330379
+clam       129        131.0      4.7   790278
+dsmil      129        122.5      4.4   378114
+transmil   129        224.8      8.1  2674177
+
+ABMIL reproduction:
+ER_IHC seed 0: same patients True (n 801 vs 801); AUC here 0.8769 vs train_mil 0.8710 (diff +0.0059); r(p) 1.000
+ER_IHC seed 1: same patients True (n 801 vs 801); AUC here 0.8830 vs train_mil 0.8716 (diff +0.0114); r(p) 1.000
+ER_IHC seed 2: same patients True (n 801 vs 801); AUC here 0.8863 vs train_mil 0.8828 (diff +0.0035); r(p) 1.000
+ESR1_RNApos seed 0: same patients True (n 801 vs 801); AUC here 0.8893 vs train_mil 0.8889 (diff +0.0004); r(p) 1.000
+ESR1_RNApos seed 1: same patients True (n 801 vs 801); AUC here 0.9163 vs train_mil 0.9100 (diff +0.0063); r(p) 1.000
+ESR1_RNApos seed 2: same patients True (n 801 vs 801); AUC here 0.9021 vs train_mil 0.8967 (diff +0.0054); r(p) 1.000
+ER_RPPApos seed 0: same patients True (n 801 vs 801); AUC here 0.8790 vs train_mil 0.8802 (diff -0.0012); r(p) 1.000
+ER_RPPApos seed 1: same patients True (n 801 vs 801); AUC here 0.8935 vs train_mil 0.8929 (diff +0.0007); r(p) 1.000
+ER_RPPApos seed 2: same patients True (n 801 vs 801); AUC here 0.8630 vs train_mil 0.8607 (diff +0.0023); r(p) 1.000
