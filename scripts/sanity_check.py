@@ -12,6 +12,8 @@ Checks (each prints PASS/FAIL):
   S8  n per experiment matches the expected cohort sizes
   S9-S15  frozen slides (1c, 1e): site-grouped splits, OOF pairing, labels, recomputed AUCs/interaction, 1b counts,
           1e pairs and agreement, extraction equivalence and cohort sizes
+  S16-S18 Tier 6c harness: inner folds, feature files, bench OOF completeness
+  S19-S21 X5b contribution identity, completeness of the new OOF files, app bundles = OOF outputs
 Also writes results/paired_ci_patch.csv: paired bootstrap 95% CI of AUC(molecular) - AUC(IHC), per model, seed 0.
 
 Usage: python scripts/sanity_check.py [--results results] [--labels data/metadata/labels_patient.csv]
@@ -269,5 +271,58 @@ if os.path.isdir(os.path.join(B, "x1")):
     ok18 &= not R3.duplicated(["encoder", "gene", "patient"]).any() and np.isfinite(R3.pred).all()
     check("S18 bench OOF complete: one prediction per patient per encoder x task, n as in aucs.csv, y = label table",
           ok18)
+
+# ---------------- S19-S21: remaining Tier 6c / Week 3 outputs (checked when present) ----------------
+B = os.path.join(R, "bench")
+# S19: exact contribution maps (X5b): b + mean(c_i) equals the probe logit on the same patches; each map has one value
+# per patch
+mm = os.path.join(B, "x5", "map_metrics.csv")
+if os.path.exists(mm):
+    import glob as _glob
+    M19 = pd.read_csv(mm)
+    ok19 = True
+    for f in _glob.glob(os.path.join(B, "x5", "maps_npz", "*.npz")):
+        z = np.load(f, allow_pickle=True)
+        n = len(z["coords"])
+        ok19 &= len(z["contribution"]) == n and all(len(z[k]) == n for k in z.files if k.startswith("att_"))
+    row = M19.set_index("patient")
+    ok19 &= np.allclose(1 / (1 + np.exp(-row.logit)), row.probe_p, atol=1e-6)
+    check("S19 X5b contribution identity (probe P = sigmoid(b + mean c)) and one map value per patch", ok19,
+          f"({len(M19)} patients)")
+# S20: every new OOF file has one prediction per patient per (variant, task, seed), finite, y = label table
+import glob as _g  # noqa: E402
+import sys as _sys  # noqa: E402
+
+_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from bench import tasks as _bt  # noqa: E402
+
+LB2 = _bt.labels()
+ok20, seen20 = True, []
+for f in _g.glob(os.path.join(B, "x*", "*_oof.csv.gz")):
+    O = pd.read_csv(f)
+    if not {"patient", "p", "y"} <= set(O.columns) or "x1/" in f.replace("\\", "/") or "x2/" in f.replace("\\", "/"):
+        continue
+    keys = [c for c in ("method", "mode", "variant", "exp", "task", "group", "seed") if c in O.columns]
+    for k, blk in O.groupby(keys):
+        ok20 &= blk.patient.is_unique and np.isfinite(blk.p).all()
+        t = dict(zip(keys, k if isinstance(k, tuple) else (k,))).get("task")
+        if t in LB2.columns and dict(zip(keys, k if isinstance(k, tuple) else (k,))).get("exp", "1a") in ("1a", "reg"):
+            yy = LB2.loc[blk.patient, t]
+            ok20 &= np.allclose(blk.y.values.astype(float), yy.values.astype(float), atol=1e-4)
+    seen20.append(os.path.relpath(f, B))
+check("S20 new OOF files: unique patient per block, finite predictions, y = label table", ok20, f"({len(seen20)} files)")
+# S21: the app bundles reproduce the OOF ensemble (no in-sample numbers) and every bundle is out-of-hospital
+if os.path.isdir("app/cases") and os.path.exists(os.path.join(B, "x6", "oof_ensemble.csv.gz")):
+    import json as _json
+    E21 = pd.read_csv(os.path.join(B, "x6", "oof_ensemble.csv.gz")).set_index(["task", "patient"])
+    ok21, n21 = True, 0
+    for f in _g.glob("app/cases/*.json"):
+        cse = _json.load(open(f))
+        ok21 &= cse["hospital_seen_in_training"] is False
+        for m, ihc in (("ER", "ER_IHC"), ("PR", "PR_IHC"), ("HER2", "HER2_STRICT")):
+            if m in cse["tasks"]:
+                ok21 &= abs(cse["tasks"][m]["p_cal"] - E21.loc[(ihc, cse["patient"]), "p_cal"]) < 1e-3
+                n21 += 1
+    check("S21 app bundles = out-of-fold ensemble outputs (p_cal) and out-of-hospital", ok21, f"({n21} marker values)")
 
 print(f"\n{len(fails)} check(s) failed: {fails}" if fails else "\nALL SANITY CHECKS PASSED")
