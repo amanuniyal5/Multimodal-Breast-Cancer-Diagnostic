@@ -357,3 +357,33 @@ X4b-e, X5b feature maps / X5d retrieval, X6 reliability, ReceptorCheck demo; opt
 
 **Next open items:** X1 ABMIL on the top 2 encoders, X3 ABMIL / PAM50 panel, X4b-e, X5b feature maps / X5d retrieval,
 X6 reliability, ReceptorCheck demo; regenerate poster figure F9 with `x2/aucs.csv`.
+
+## 2026-11-17 · Srivastava (via Claude Code)
+
+**Did (all remaining Tier 6c items + Week 3 experiments C, D, E, G, H; report 5k-7 to 5k-11 and 5l):**
+- **Ada jobs:** 85664 (H-optimus-0 streamed to /scratch + ABMIL), 85665_0-5 (`bench_mil_ext.py`: regression,
+  multi-task, single-task reference, DANN, noisy labels, MC-dropout / half-bags), 85677 / 85678 (full patch sets of
+  14 map patients, UNI / CONCH; first attempts 85666 / 85667 failed: /scratch full on gnode012), 85668 (frozen slide
+  means), 85703 (maps). Home 39 GB (+0.4 GB map patches in `data/features/maps_*`).
+- **X1:** H-optimus-0 ABMIL ER IHC 0.881 (UNI ABMIL 0.891): no encoder beats UNI on ER. ER RNA preference +0.059,
+  1b 39 : 15. HER2 1+ vs 0 0.651 (UNI 0.531; ERBB2 mRNA 0.649): lead, one encoder, both heads.
+- **X3:** ABMIL regression ESR1 r 0.728 vs ridge 0.671 (+0.057, CI excludes 0), ERBB2 +0.084, PGR n.s. PAM50 panel:
+  luminal / proliferation genes predictable (r 0.65-0.73), ERBB2 / GRB7 not.
+- **X4:** latent-class soft labels improve ER (+0.015 to +0.028 vs IHC, 3 of 3 encoders linear; ABMIL same direction);
+  per-hospital standardisation removes hospital identity (82-96 % -> below chance) and keeps the ER preference; DANN does
+  nothing at lambda 0.1; multi-task only PR +0.018; 10x + 20x nothing beyond patch SD.
+- **X5b / X5d:** maps for 14 patients (S19 identity 3.9e-6); 4 MIL heads attend where the probe's evidence is (median
+  signed Spearman 0.41-0.50); 86 % of attention on tumour concepts. Retrieval weak (ER vote 0.79 vs chance 0.77).
+- **X6:** split conformal ER / PR coverage 0.900 / 0.909 (per hospital 0.68-0.98); abstentions enriched for 1e flips
+  (OR 4.5, p 0.003) and IHC/RNA discordance (OR 2.5); MC-dropout / half-bag SD add nothing over |p - 0.5|.
+- **Week 3:** C latent truth: RNA most accurate ER test (spec 0.98 vs IHC 0.89); every H&E model scores +0.03 to +0.05
+  higher vs latent truth (7 of 7). D auditor: AUC 0.78-0.87 for IHC != RNA, top 1 % precision 0.9 (consensus); dropping
+  flagged labels does not help. E: RNA-trained ER models >= IHC-trained even vs IHC. G: FFPE <-> frozen transfer costs
+  ~0.05 AUC and calibration (DX-calibrated conformal covers 0.80 on TS); preference survives; 1b on TS 41 : 11.
+  H: top-ranked of 17 models changes with the reference standard in 57-91 % of bootstraps.
+- **ReceptorCheck** (`app/`, `streamlit run app/receptorcheck.py`): 215 OOF bundles; ER / PR pass acceptance (FLAG
+  precision 0.46 vs base rates 0.055 / 0.135); HER2 fails, so no HER2 check is offered.
+- Sanity checks S19-S21 added; all pass (S6 CONCH is the known old item).
+
+**Next open items:** X2 replication of the best heads on a second encoder (CONCH bags on Ada); optional stretch items
+(LoRA, sparse autoencoder, DINOv2 baseline, full-cohort ResNet-50, app live mode); compile decks; poster.

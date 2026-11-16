@@ -837,6 +837,344 @@ second-order: all trained heads and mean+SD pooling sit within about 0.02 AUC on
 reference standard the model follows. Caveats: paper defaults without tuning (TransMIL uses exact attention instead
 of Nystrom), single encoder (UNI), 3 seeds, 2,048-patch subsets per step.
 
+### 5k-7. Remaining X1 / X3 / X4 items (16-17 Nov 2026)
+
+Scripts: `scripts/bench_mil_ext.py` (GPU, job 85665, array of 6 modes), `jobs/x1_abmil_trace.sbatch` (job 85664: TRACE
+H-optimus-0 streamed once into node-local /scratch with a 2,048-patch bag per patient, ABMIL in the same job, nothing
+kept in home), `scripts/bench_improve.py` (CPU), `scripts/analyse_ext.py` (tables). Reporting rule as in 5k.
+
+**X1: ABMIL on the second-best encoder (H-optimus-0; UNI ABMIL is in X2).**
+
+H-optimus-0 tied UNI for the best mean-pool ER IHC AUC (X1). Its patch bags were never stored in home: job 85664 streamed
+the 122 TRACE parquet files once into node-local /scratch (patient means identical to the stored ones, max |diff| 0;
+2,048-patch reservoir bag per patient), then ran `bench_mil.py --method abmil` (X2 settings, 3 seeds), then deleted
+/scratch (`results/bench/x1_abmil/`).
+
+| Task | H-optimus-0 ABMIL (95 % CI) | vs H-optimus-0 mean pool | vs UNI ABMIL (X2) |
+|---|---|---|---|
+| ER IHC | 0.881 (0.852, 0.910) | +0.012 (n.s.) | −0.011 (n.s.) |
+| ER RNA | 0.940 (0.920, 0.960) | **+0.015** | **+0.029 (0.009, 0.050)** |
+| ER RPPA | 0.901 | +0.003 | +0.010 |
+| PR IHC | 0.822 | **+0.022** | +0.015 |
+| PR prevalence-matched RNA | 0.822 | **+0.028** | +0.015 |
+| HER2 strict | 0.703 | **+0.083 (0.041, 0.125)** | +0.007 |
+| ERBB2 amplification | 0.699 | +0.024 | −0.003 |
+| HER2 1+ vs 0 (n = 313) | 0.651 (0.577, 0.726) | +0.022 | **+0.120 (0.030, 0.210)** |
+
+- No encoder beats UNI on ER IHC with ABMIL either (as with mean pooling, 5k-2).
+- **The ER RNA preference is larger with H-optimus-0 ABMIL:** RNA − IHC +0.059 (0.034, 0.085); discordant patients
+  side with RNA 39 : 15 (p = 0.001). PR: no preference (64 : 69). HER2 follows amplification (48 : 12).
+- **HER2-low lead strengthened:** H-optimus-0 separates HER2 1+ from 0 with both heads (mean pool 0.629, ABMIL 0.651,
+  CI excluding 0.5), close to the ERBB2 mRNA comparator on the same patients (0.649); UNI ABMIL is at chance (0.531).
+  Still one encoder: a lead, not a finding (rule: ≥ 2 encoders).
+- 90 s per fit (459,650 parameters with 1,536-d inputs).
+
+**X3: ABMIL regression and the PAM50 gene panel.**
+
+- ABMIL with an MSE head on the z-scored target (UNI bags, 3 seeds; job 85665_0, `x3/abmil_regression.csv`) vs ridge on
+  the UNI means (X3, same patients, n = 1,039):
+
+| Gene | ABMIL r (95 % CI) | Ridge r | Δr (95 % CI) |
+|---|---|---|---|
+| ESR1 | 0.728 (0.694, 0.760) | 0.671 | **+0.057 (0.032, 0.083)** |
+| PGR | 0.568 (0.522, 0.611) | 0.559 | +0.009 (−0.024, 0.041) |
+| ERBB2 | 0.318 (0.257, 0.384) | 0.234 | **+0.084 (0.021, 0.146)** |
+
+  Used as a classifier score, the ABMIL regression equals the ABMIL classifier trained on the label (X2): ER IHC 0.895
+  vs 0.891, ESR1 RNA 0.926 vs 0.910 (+0.016, p = 0.042), PR IHC 0.813 vs 0.806, HER2 strict 0.707 vs 0.695 (others
+  n.s.). With linear heads the regression target already beat the IHC classifier for ER (5k-3); with ABMIL it matches it.
+
+- PAM50 panel (ridge on means, alpha per gene by inner CV, 5 seeds; `results/bench/x3/panel.csv`, data
+  `data/metadata/rna_panel.csv` from `scripts/fetch_rna_panel.py`, 1,082 patients × 50 genes): the most predictable
+  genes from H&E are luminal and proliferation genes: MLPH, ORC6, CDC20, CCNE1, KIF2C, ESR1, FOXA1 (mean r over 4
+  encoders 0.65-0.68; TITAN best for 43 of 50 genes and H-optimus-0 for the other 7, r up to 0.73). The least predictable: GRB7 (0.12), MDM2, FGFR4,
+  BAG1, BLVRA and ERBB2 (0.30). The ER and proliferation axes are visible in H&E; the HER2 amplicon (ERBB2, GRB7) is not.
+- PAM50 subtype from means (multinomial probe; `x4/pam50_lr.csv`): macro one-vs-rest AUC 0.80-0.84, balanced accuracy
+  0.53-0.56 (H-optimus-0 best).
+
+**X4b: multi-task ABMIL** (ER, PR, HER2 strict, PAM50, ESR1 / PGR / ERBB2 in one model vs single-task ABMIL on the same
+patients).
+
+Same patients (every patient with that label; jobs 85665_1 / 85665_2; `x4/multitask.csv`):
+
+| Task | Single-task ABMIL | Multi-task ABMIL | Δ (95 % CI) |
+|---|---|---|---|
+| ER IHC (n 1,004) | 0.908 | 0.907 | −0.000 (−0.014, 0.014) |
+| PR IHC (n 1,001) | 0.807 | 0.825 | **+0.018 (0.002, 0.034)** |
+| HER2 strict (n 590) | 0.701 | 0.712 | +0.011 (−0.023, 0.046) |
+| PAM50 (n 898) | linear probe: macro AUC 0.828, bal. acc. 0.532 | macro AUC 0.840, bal. acc. 0.531 | – |
+
+The extra heads cost nothing and help PR slightly (one head, one encoder: a lead). The regression heads inside the
+multi-task model reach r 0.69 (ESR1), 0.58 (PGR), 0.36 (ERBB2), close to the single-target ABMIL regression.
+
+**X4c: site-invariant features.**
+- (i) Per-hospital standardisation of the patient means (unlabelled, each hospital uses its own mean / SD;
+  `x4/site_std*.csv`): hospital identity disappears (10-site accuracy 82-96 % → ≤ 1.6 %, chance 18 %; the
+  below-chance value is an artefact of exact per-site centring) and receptor AUC barely changes (−0.008 to +0.029
+  across UNI, H-optimus-0, TITAN, CONCH and 6 tasks, except CONCH HER2 strict +0.079 and TITAN ERBB2 amp −0.033, the
+  only significant changes). **The ER RNA-over-IHC preference survives** in all 4 encoders (UNI +0.031, H-optimus-0 +0.032, TITAN +0.054,
+  CONCH +0.031; all CIs excluding 0), so it is not a hospital artefact.
+- (ii) Domain-adversarial ABMIL (gradient reversal, λ ramped 0 → 0.1):
+
+  AUC unchanged (ER IHC 0.891 vs 0.891, ESR1 RNA +0.002, HER2 strict −0.020, all n.s.; job 85665_3, `x4/dann.csv`) and
+  the ER RNA preference survives (+0.029, 0.002-0.055). But at this strength DANN does **not** remove hospital identity
+  from the ABMIL embedding (10-site accuracy 92.7 % → 93.4 % for ER, 96.2 % → 94.7 % for HER2; chance 18 % / 15 %).
+  The simple per-hospital standardisation (i) does what the adversarial loss does not.
+
+**X4d: noisy-label training.** Linear heads, ER group (n = 801; `x4/noisy_linear.csv`):
+
+| Training target | UNI vs IHC | H-optimus-0 vs IHC | TITAN vs IHC | vs RNA (3 encoders) |
+|---|---|---|---|---|
+| IHC (reference) | 0.870 | 0.869 | 0.873 | 0.892 / 0.903 / 0.910 |
+| Consensus only (IHC = RNA) | +0.009 | **+0.018** | **+0.012** | **+0.016 / +0.018 / +0.019** |
+| Soft label (latent class of IHC / RNA / RPPA, fitted per training fold) | **+0.015** | **+0.028** | **+0.016** | **+0.022 / +0.027 / +0.022** |
+| Label smoothing 0.1 | +0.004 | +0.002 | **+0.007** | +0.005 / +0.002 / +0.006 |
+
+Bold = DeLong CI excluding 0. **Soft labels from the latent class improve ER AUC in all 3 encoders, even when scored
+against IHC itself** (+0.015 to +0.028). Using the other two tests to correct the training labels helps; removing
+labels the H&E model itself flags does not (5l-2). ABMIL (bce / consensus / soft / GCE q 0.7 / smoothing, 3 seeds):
+
+
+
+| Training target (ABMIL, n = 801) | vs IHC | vs RNA | vs RPPA |
+|---|---|---|---|
+| IHC, BCE (reference) | 0.891 | 0.909 | 0.891 |
+| Consensus only | +0.007 | **+0.017** | **+0.022** |
+| Soft label (latent class) | +0.015 (p = 0.075) | **+0.024** | **+0.023** |
+| GCE (q 0.7) | +0.001 | +0.008 | +0.009 |
+| Label smoothing 0.1 | −0.004 | −0.003 | −0.003 |
+
+The soft-label gain has the same direction with both heads and 4 of 4 model × encoder combinations (linear: 3 of 3
+significant against IHC; ABMIL: borderline against IHC, significant against RNA and RPPA). Generic noise-robust
+losses (GCE, smoothing) do nothing; the gain comes from the information in the other tests.
+
+**X4e: multi-magnification** (UNI 20x + 10x means; `x4/multimag.csv`): concatenating 10x and 20x means gives
+nothing (ER IHC +0.001, all tasks |Δ| ≤ 0.014, none significant); the gain comes from the patch SD at 10x
+(UNI 10x mean + SD: ER IHC 0.895, +0.025, CI 0.008-0.042), consistent with the mean + SD result in X1 / X2.
+
+### 5k-8. X5b patch-level maps and X5d retrieval
+
+`scripts/maps.py` (job 85703; full UNI and CONCH patch sets of the 14 map patients streamed by `jobs/trace_keep.sbatch`,
+jobs 85677 / 85678). For each patient every model was trained without that patient's hospital (seed-0 fold).
+Overview figures `results/bench/x5/maps/<patient>.png` (H&E, exact contribution map, ABMIL / CLAM / DSMIL / ACMIL
+attention, UNI PCA-RGB, CONCH concept maps for tubules / pleomorphism / necrosis / apocrine, ResNet-50 PCA-RGB for the 3
+patients in its subset); single panels for the app in `maps/panels/`; per-patch values `maps_npz/`; metrics
+`map_metrics.csv`.
+
+- **S19 identity holds:** b + mean(cᵢ) equals the probe logit to 3.9e-6 on every patient.
+- **The four MIL heads attend to the same places, and where they attend the probe's evidence points to the call:**
+  Spearman correlation of attention with the contribution map, signed towards the predicted class, median 0.41-0.50
+  (ABMIL 0.48, CLAM 0.50, DSMIL 0.41, ACMIL 0.50), positive in 13 of 14 patients for every head.
+- **Evidence sits on tumour:** ABMIL puts a median 86 % of its attention on patches whose top CONCH concept is a tumour
+  concept (range 15-98 %), while those patches cover a median 44 % of the tissue; the probe draws 57 % of its total
+  |contribution| from them. The exception is TCGA-AR-A0TX (HER2-enriched, IHC+/RNA−, tumour concepts on only 5 % of
+  the slide): 77 % of attention on stroma / fat.
+- **Deletion test (exact for the probe):** removing the 5 % of patches pushing hardest towards the call moves the logit
+  by a median 0.44 vs 0.0006 for 5 % random patches. Confident calls need 35-76 % of the tissue removed to flip; the
+  borderline discordant cases flip after 0.2-7 % (TCGA-A2-A4S1, C8-A1HK, E2-A152, A1-A0SH), i.e. their call rests on
+  a small region.
+- Limits: 14 patients, one slide each, concepts are zero-shot CONCH labels (not pathologist annotation).
+
+**X5d retrieval** (5 nearest training-hospital patients by cosine on standardised UNI means, seed-0 folds;
+`x5/retrieval.csv`): majority vote of the neighbours' ER IHC is right for 0.793 of patients (chance 0.774; vote
+AUC 0.70) and the nearest neighbour shares the PAM50 subtype for 0.453 (chance 0.337). Retrieval is weak as a
+predictor (hospital identity dominates the raw feature space, 5k-5) and is shown in the application as context, not
+as evidence.
+
+### 5k-9. X6 reliability
+
+Predictor: ensemble of the UNI, H-optimus-0 and TITAN linear probes. Split conformal per outer fold (calibration set
+= the largest site-grouped inner fold of the training hospitals), α = 0.10. `scripts/bench_reliability.py`,
+`results/bench/x6/`.
+
+| Task | Coverage (target 0.90) | Fold range | Set size | Singleton rate | Accuracy on singletons (IHC / molecular) | ECE raw → Platt |
+|---|---|---|---|---|---|---|
+| ER | 0.900 (0.880, 0.917) | 0.85-0.94 | 1.07 | 0.93 | 0.893 / 0.915 | 0.094 → 0.048 |
+| PR | 0.909 (0.890, 0.925) | 0.89-0.93 | 1.40 | 0.60 | 0.849 / 0.858 | 0.094 → 0.056 |
+| HER2 | 0.942 (0.921, 0.958) | 0.88-0.99 | 1.71 | 0.29 | 0.803 / 0.822 | 0.164 → 0.067 |
+
+- Marginal coverage holds for ER and PR; HER2 over-covers because most sets are {+, −}. The Mondrian (class-
+  conditional) variant equalises coverage between classes (ER 0.911 / 0.938) at the cost of larger sets.
+- **Coverage per hospital is not guaranteed:** for ER it ranges 0.68-0.98 across the 17 hospitals with ≥ 15
+  patients. Marginal guarantees do not transfer to each site.
+- **The abstained ER cases are the ones where the truth is ambiguous:** they are enriched for frozen-section flips
+  (1e: 32 % of abstained vs 9.5 % of kept patients with a TS/BS pair, odds ratio 4.5, Fisher p = 0.003) and for
+  IHC/RNA discordance (11.6 % vs 5.0 %, OR 2.5, p = 0.047; ER-low OR 3.0, p = 0.11).
+- Risk-coverage (`selective.csv`): keeping the 80 % most confident raises ER AUC vs IHC 0.900 → 0.910 and lowers the
+  error 0.112 → 0.080 (vs RNA 0.093 → 0.054); the ensemble |p − 0.5| is the best simple score (AURC 0.064 vs 0.081 for
+  the member SD).
+- Uncertainty is not a discordance detector (AUC 0.51-0.59): the model is confident on discordant tumours and sides
+  with RNA, which is why the consistency score (5l-2), not the uncertainty, flags them.
+
+- **ABMIL uncertainties** (UNI ABMIL, 3 seeds, 20 MC-dropout passes and 20 random half-bags per patient; job 85665_5):
+  MC-dropout SD and half-bag SD add nothing over the plain confidence |p − 0.5| of the same model (ER AURC 0.044 / 0.044
+  vs 0.043). ABMIL's confidence is a better selector than the linear ensemble's (ER AURC 0.043 vs 0.064; error at 80 %
+  coverage 0.073 vs 0.080) and, unlike the ensemble, its low-confidence cases are somewhat enriched for IHC/RNA
+  discordance (AUC 0.68 vs 0.53 for ER; 10 of the 54 discordant patients in the least confident 10 %, p = 0.04).
+  Half-bag SD (patch resampling) is about twice the MC-dropout SD (HER2 0.03 vs 0.02).
+
+### 5k-10. Application: *ReceptorCheck* (research demo) and its retrospective evaluation
+
+`app/receptorcheck.py` (Streamlit, single page; run `streamlit run app/receptorcheck.py`), core logic
+`app/receptorcheck_core/`, case bundles `app/cases/*.json` built by `scripts/app_build_cases.py` from out-of-fold
+files only (every patient scored by models that never saw its hospital; sanity check S21). Demo set: 215 patients (all
+54 ER IHC/RNA-discordant, ER-low, the 14 map patients, 150 random concordant). Each case shows calibrated ER / PR /
+HER2 probabilities with conformal sets, a status (CONFIDENT / UNCERTAIN / OUT-OF-DISTRIBUTION), predicted ESR1 / PGR /
+ERBB2 expression, an IHC consistency check (FLAG FOR RETEST), maps (map patients), the CONCH concept profile, the 5
+most similar reference patients, a frozen-slide mode (experiment G) and scope statements (HER2-low not assessable;
+±0.10 around 0.5 is within section-to-section variability). Retrospective evaluation on all patients with OOF outputs
+(`scripts/app_evaluate.py`, `results/app_eval/`):
+
+| Use | Result |
+|---|---|
+| Triage (ER) | no abstention: accuracy 0.876 vs IHC / 0.890 vs RNA; abstain on the 20 % least confident: 0.927 / 0.944; on the 30 %: 0.945 / 0.960 |
+| QA second reader (ER) | FLAG rule: 57 flags, 26 truly IHC/RNA-discordant (precision 0.46, 0.33-0.58, vs 0.055 base rate; recall 0.48; 5 ER-low); top 1 %: 8 of 10 |
+| QA second reader (PR) | FLAG precision 0.46 (0.33-0.60) vs base rate 0.135 |
+| HER2 | FLAG precision 0.14, not above the base rate; coverage 0.94: **HER2 failed acceptance** and the app offers no HER2 check |
+| Robustness | per-hospital ER AUC 0.76-0.99 (median 0.92, 14 hospitals); OOD flag rate on held-out hospitals 0.2 % |
+| Acceptance | ER and PR pass (coverage within ±0.03 of 0.90; FLAG precision CI above the base rate); bundle load ≈ 1 ms |
+
+Frozen-section mode (208 of 215 demo cases have a frozen TS slide) applies the FFPE-trained probe to the frozen slide.
+Experiment G sets its limits, and the UI states them: ER AUC 0.852 vs 0.899 for a frozen-trained model, probabilities
+under-estimated (ECE 0.23) and FFPE-calibrated conformal sets covering 0.80 of frozen cases (target 0.90).
+
+Limits: retrospective, one public cohort, RNA as the oracle for "IHC error", no prospective or reader study; research
+use only.
+
+### 5k-11. Summary of 5k-7 to 5k-10
+
+- **Supported (≥ 2 encoders or both heads, CI excluding 0):** latent-class soft labels improve ER (linear: 3 of 3 encoders
+  against IHC; ABMIL: same direction); per-hospital standardisation removes hospital identity without losing accuracy and
+  the ER RNA preference survives it (4 of 4 encoders); ABMIL regression on ESR1 beats ridge; the four MIL heads agree on
+  where they look and that is where the probe's evidence lies (X5b); conformal sets hit 90 % marginal coverage for ER
+  and PR; abstentions are enriched for frozen-section flips.
+- **Null results:** DANN does not remove hospital identity at λ 0.1; multi-task adds little (PR +0.018, one head);
+  10x + 20x adds nothing beyond the patch SD; GCE / label smoothing do nothing; MC-dropout / half-bag SD add nothing over
+  |p − 0.5|; the application fails acceptance for HER2.
+- **Leads (one encoder):** H-optimus-0 sees HER2 1+ vs 0 (both heads, ≈ ERBB2 mRNA); multi-task PR gain.
+- **Not done:** X2 replication of the best heads on a second encoder (CONCH / H-optimus-0); stretch items (X4g LoRA,
+  X5f sparse autoencoder, DINOv2 baseline, full-cohort ResNet-50, application live mode).
+
+## 5l. Week 3 experiments C, D, E, G, H: evaluating without a gold standard (16 Nov 2026)
+
+All secondary / exploratory, same rules as 5k (fixed site-grouped folds, mean-pool linear probe C = 0.01 class-balanced,
+5 seeds averaged; a claim needs CI excluding 0 in ≥ 2 encoders). Scripts `scripts/week3_experiments.py` (C, D, E, H)
+and `scripts/bench_reliability.py` (G); outputs `results/week3/`. Encoders: UNI, H-optimus-0, TITAN, CONCH, UNI2-h,
+GigaPath, Hibou-L (no TCGA-pretrained contrasts).
+
+### 5l-1. C: a latent-class "truth" instead of IHC (Dawid–Skene, conditional independence)
+
+ER: IHC, RNA (GMM) and RPPA (GMM) as three imperfect raters, n = 824. HER2: IHC/FISH (strict), GISTIC amplification,
+ERBB2 RNA, HER2 RPPA, n = 489. Patient bootstrap (500) for sensitivity / specificity (`c_tests.csv`).
+
+| Test (ER) | Sensitivity | Specificity |
+|---|---|---|
+| IHC | 0.979 (0.967, 0.990) | 0.890 (0.844, 0.932) |
+| RNA (ESR1 GMM) | 0.986 (0.974, 0.997) | 0.982 (0.954, 1.000) |
+| RPPA | 0.991 (0.982, 0.997) | 0.846 (0.789, 0.895) |
+
+- Latent ER prevalence 0.749; only 12 of 824 patients have an uncertain posterior (0.2-0.8).
+- With nobody assumed perfect, **RNA is the most accurate ER test** and IHC's weakness is specificity (IHC-positive,
+  latent-negative tumours, i.e. the IHC+/RNA− group of 1b).
+- **Every H&E classifier scores higher against the latent truth than against IHC:** +0.033 to +0.053 AUC
+  (generalised DeLong, same patients), CI excluding 0 for all 7 encoders and both training labels (14 of 14;
+  `c_rescore.csv`). Example UNI (IHC-trained): 0.870 vs IHC → 0.909 vs latent truth.
+- The H&E model is still **less accurate than IHC** against the latent truth: at matched prevalence the H&E call is
+  right for 0.85-0.89 of patients vs 0.961 for IHC (difference −0.07 to −0.11, CI excluding 0 in all encoders).
+  So IHC labels understate the model, but the model does not replace IHC.
+- HER2: the latent model gives IHC/FISH sensitivity 0.973, specificity 0.890; RNA specificity 1.00; RPPA sensitivity
+  0.78. H&E classifiers again score higher against the latent truth (+0.03 to +0.10; CI excluding 0 in 10 of 14).
+- Caveat: two of the three ER tests are molecular, so the latent class leans towards the molecular definition, and
+  RNA and RPPA errors are probably correlated (the conditional-independence assumption is optimistic). Adding the UNI
+  H&E call as a fourth rater changes the test estimates by ≤ 0.01 and gives the H&E call sensitivity 0.92,
+  specificity 0.73.
+
+### 5l-2. D: the H&E model as an IHC auditor, with RNA as the independent oracle
+
+Score = P(opposite of the IHC call), out-of-fold; target = IHC ≠ RNA (54 of 989 patients, 5.5 %; `d_audit.csv`).
+
+| Auditor | AUC (95 % CI) | Precision top 1 % | top 2 % | top 5 % |
+|---|---|---|---|---|
+| UNI | 0.824 (0.755, 0.892) | 0.80 | 0.75 | 0.53 |
+| H-optimus-0 | 0.854 (0.789, 0.918) | 0.50 | 0.45 | 0.53 |
+| TITAN | 0.858 (0.794, 0.922) | 0.80 | 0.65 | 0.53 |
+| Consensus UNI + H-optimus-0 + TITAN | **0.870 (0.811, 0.930)** | **0.90** | **0.80** | 0.55 |
+| Random flagging | 0.5 | 0.055 | 0.055 | 0.055 |
+
+- All 7 encoders detect discordance far above chance (AUC 0.78-0.86; precision at the top 1 % 0.4-0.8 per encoder,
+  0.9 for the consensus; binomial p ≤ 0.001 against the 5.5 % base rate).
+- Baseline: on the 390 IHC-positive patients with a recorded % stained, the % alone gives AUC 0.895 and the H&E
+  consensus 0.847 (UNI 0.833). The % is only recorded for 40 % of the cohort, the H&E score for everyone.
+- **Cleaning the training labels with the auditor does not help:** dropping or flipping the top 5 % flagged training
+  patients (flagged from inner-fold predictions only) changes AUC by −0.000 to +0.007 (all CIs include 0; UNI,
+  H-optimus-0, TITAN; `d_retrain.csv`). The model can find the suspicious labels but does not need them removed.
+
+### 5l-3. E: which label should you train on?
+
+Same patients (989 ER, 986 PR, 568 HER2), models trained on the IHC label vs the molecular label, both scored against
+IHC (`e_train_label.csv`, learning curves `e_curves.csv`).
+
+- **ER: training on RNA is never worse and sometimes better, even when the hospital scores against IHC**: ΔAUC vs IHC
+  +0.000 to +0.020 (5 of 5 encoders ≥ 0; CI excluding 0 for H-optimus-0 +0.020 and TITAN +0.013). With 50 training
+  patients the gap is larger (UNI 0.750 → 0.789, H-optimus-0 0.736 → 0.764, TITAN 0.839 → 0.877).
+- PR (prevalence-matched PGR): no advantage (−0.022 to −0.003 vs IHC; none significant).
+- HER2 (amplification): mixed (TITAN −0.052, CI excluding 0; UNI2-h +0.038, borderline); no recommendation.
+
+### 5l-4. H: does the reference standard change the leaderboard?
+
+17 models (7 encoders mean pool + 5 MIL heads + 5 pooling baselines on UNI, from X1 / X2), same patients, ranked by
+AUC under each label (`h_ranks.csv`, `h_tau.csv`; patient bootstrap, 500).
+
+| Marker | Labels | Kendall τ (95 % CI) | Best model (IHC) | Best model (molecular) | P(best model changes) | Max rank shift |
+|---|---|---|---|---|---|---|
+| ER | IHC vs RNA | 0.62 (0.38, 0.72) | UNI mean+SD | TITAN | 0.91 | 9 of 17 |
+| ER | IHC vs RPPA | 0.54 (0.25, 0.71) | UNI mean+SD | UNI mean+SD | 0.57 | 9 |
+| PR | IHC vs prev.-matched RNA | 0.74 (0.43, 0.81) | UNI CLAM | TITAN | 0.86 | 6 |
+| HER2 | strict vs amplification | 0.54 (0.23, 0.69) | UNI CLAM | UNI mean+SD | 0.84 | 8 |
+
+- **The winner of a benchmark depends on which "truth" it uses.** Rankings agree only moderately (τ 0.54-0.74), and
+  in 57-91 % of bootstrap samples the top-ranked model changes when the label changes. Example: H-optimus-0 mean pool
+  is 11th of 17 against ER IHC and 2nd against ER RNA.
+- Implication for benchmarks of medical foundation models: report the reference standard and, where possible,
+  more than one.
+
+### 5l-5. G: FFPE (DX) ↔ frozen (TS) transfer
+
+UNI mean-pool probes trained on the FFPE diagnostic slide (DX) and tested on the frozen slide cut next to the
+sequenced tissue (TS, primary TS per patient), and the reverse, vs within-slide-type models; same patients (ER 947,
+PR 944, HER2 537), same fixed folds, 5 seeds (`g_transfer.csv`, `g_preference.csv`; frozen features
+`data/features/frozen_uni_v1_slides.npz` from `scripts/frozen_means.py`, job 85668).
+
+| ER (IHC label) | AUC | ECE | Mean P vs prevalence 0.769 |
+|---|---|---|---|
+| DX → DX | 0.881 | 0.094 | 0.680 |
+| TS → TS | 0.899 | 0.095 | 0.677 |
+| DX → TS (transfer) | 0.852 | 0.227 | 0.541 |
+| TS → DX (transfer) | 0.814 | 0.060 | 0.760 |
+
+- **Transfer costs accuracy and calibration.** A DX-trained ER model loses 0.046 AUC on frozen slides against a
+  TS-trained one (−0.072, −0.021); TS → DX loses 0.067. The DX model under-predicts on frozen slides (mean P 0.54 vs
+  prevalence 0.77; ECE 0.09 → 0.23). PR: DX → TS costs nothing (−0.002), TS → DX −0.103. HER2 hardly transfers (AUC
+  0.49-0.54, transfer cost −0.11 to −0.12).
+- **The RNA preference survives the domain change:** ER ΔAUC (RNA − IHC) +0.032 within DX, +0.032 within TS, +0.031
+  DX → TS and +0.058 TS → DX (all CIs excluding 0). PR and HER2: no preference in any direction.
+- **1b under transfer:** the DX-trained model, applied to the frozen slides of the 52 ER-discordant patients, sides
+  with RNA 41 : 11 (p < 0.001), vs 33 : 19 on their DX slides (as in 1c, the frozen slide next to the sequenced
+  tissue agrees more with RNA). HER2 follows amplification on both slide types (DX 41 : 15, TS 48 : 8).
+- **Conformal sets do not transfer:** DX-calibrated ER sets cover 0.903 of DX cases but only **0.800** of the same
+  patients' frozen slides (same set sizes). A frozen-section tool needs its own calibration data.
+
+### 5l-6. Summary
+
+- Supported (≥ 2 encoders, CI excluding 0): H&E models look better against a latent multi-test truth than against IHC
+  (all 7 encoders); the H&E auditor finds IHC/RNA-discordant tumours (all 7 encoders); training on RNA labels is
+  at least as good as training on IHC labels for ER when scored against IHC (2 of 5 significant, 5 of 5 ≥ 0);
+  benchmark rankings change with the reference standard; FFPE ↔ frozen transfer costs AUC and calibration but keeps
+  the RNA preference (G).
+- Not supported: removing auditor-flagged labels before training (no gain); RNA-label training for PR and HER2.
+- Caveats: the latent class leans towards molecular tests; the auditor is evaluated against RNA, itself imperfect
+  (latent specificity 0.98); D and E share the patients of 1a/1b, so they are not independent confirmations of P1-P2.
+
 ## 6. Caveats and next steps
 
 | Caveat | Next step |

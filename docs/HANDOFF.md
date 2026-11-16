@@ -43,7 +43,7 @@ Update the "Current state" section whenever you finish something.
 | Use TRACE precomputed features for DX slides; extract frozen slides ourselves | TRACE covers DX only (verified); avoids downloading 1.16 TB of DX slides |
 | Do **not** re-extract all DX slides for 1c | Instead check our extraction matches TRACE on ~50 DX slides |
 
-## 3. Current state (11 Nov 2026)
+## 3. Current state (17 Nov 2026)
 
 The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a summary.
 
@@ -81,6 +81,14 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
   - **X2 aggregation methods (10-11 Nov, report 5k-6):** CLAM-SB, TransMIL, DSMIL, ACMIL vs ABMIL and pooling baselines on UNI;
     no head beats ABMIL, mean+SD pooling matches them (ER IHC 0.893 vs 0.891), label preference is head-independent;
     ABMIL reproduces `train_mil.py` within ~0.01 per seed (spec tolerance 0.003 not met). Jobs 68332, 68319.
+  - **Rest of Tier 6c + Week 3 (16-17 Nov, report 5k-7 to 5k-11 and 5l):** X1 H-optimus-0 ABMIL (no ER gain over UNI;
+    HER2 1+ vs 0 lead), X3 ABMIL regression + PAM50 panel, X4b-e, X5b maps (14 patients) + X5d, X6 conformal / selective
+    prediction, experiments C (latent-class truth), D (auditor), E (training label), G (FFPE <-> frozen transfer),
+    H (leaderboard flips). Headline: against a latent multi-test truth every H&E model looks better than against IHC;
+    soft labels from that truth improve ER; benchmark winners change with the reference standard.
+  - **ReceptorCheck application** (`app/`): `python scripts/app_build_cases.py` then `streamlit run app/receptorcheck.py`;
+    OOF-only bundles; evaluation `scripts/app_evaluate.py` (ER/PR pass, HER2 not offered).
+  - Open: X2 replication on a second encoder; stretch items (see `docs/PROJECT_PLAN.md`).
   - ResNet-50 (ImageNet) is 0.11-0.18 AUC below UNI on every receptor task (HER2 at chance): pathology FMs are needed.
   - No newer/larger FM beats UNI v1 on ER IHC with mean pooling (ceiling ~0.87); patch encoders are near-identical
     (CKA 0.87-0.96) and hospital-dominated (90-96% hospital ID); TITAN / CONCH / CHIEF carry less hospital, organise by

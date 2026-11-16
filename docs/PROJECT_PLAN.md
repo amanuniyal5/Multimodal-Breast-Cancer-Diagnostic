@@ -164,7 +164,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] Frozen slides with ABMIL: 1c (DX vs TS × IHC vs molecular) and 1e (TS vs BS) with the ABMIL head, fixed folds, 3 seeds (`scripts/frozen_abmil.py`). Jobs 40963 (array) + 40965; report 5j. ER interaction +0.018 (−0.008, +0.046), TOST ±0.05 equivalent (p = 0.012); 1b TS 41 : 11; 1e 7.9% / 8.7% flipped
 - [x] Label-free audit with zero-shot CONCH: ER/HER2 prompts (1a/1b without any training label), concept scores, concept-only model (`scripts/conch_zeroshot.py`; day-1 check that TRACE CONCH features are pre-projection). Job 40983; report 5i. TRACE CONCH is pre-projection; receptor prompts at chance (AUC 0.40-0.56); 14-concept model ER ΔAUC +0.036, 1b 36 : 18
 - [x] Statistics beyond p-values: TOST equivalence for 1c, Wilson/exact CIs, Bayesian posteriors and Bayes factors for 1b, McNemar for paired calls (1b DX vs TS, 1e), prevalence-robust agreement (PABAK, AC1, Bland–Altman) for 1e, calibration vs each reference (`scripts/stats_extended.py`). `results/stats_ext_*.csv` (job 40965 incl. ABMIL rows); report 5h, 5j
-- [~] in progress (Srivastava, 2026-11-16) New foundation-model experiments: C latent-class truth, D label auditor, E which label to train on, G DX-frozen transfer, H leaderboard under each reference standard (`docs/WEEK3_EXPERIMENTS.md`)
+- [x] New foundation-model experiments: C latent-class truth, D label auditor, E which label to train on, G DX-frozen transfer, H leaderboard under each reference standard (`scripts/week3_experiments.py`, `bench_reliability.py`; `results/week3`; report 5l, 16-17 Nov)
 
 ## Tier 6c: AI extensions (spec: `docs/DESIGN_SPEC.md`, proposal: `docs/AI_EXTENSIONS.md`) 🟨
 
@@ -175,12 +175,14 @@ reference standards). We do **not** propose a new architecture.
 - [x] X4a encoder fusion / ensembling; X4f calibration (mean-pool) (`results/bench/x4`, report 5k-4)
 - [x] X5a t-SNE + kNN purity metrics (UMAP skipped: not installed); X5c CKA between encoders; X5e concept probing (`results/bench/x5`, report 5k-5)
 - [x] X2 aggregation methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL, pooling variants) on UNI: no head beats ABMIL, mean+SD matches them, preference head-independent (jobs 68332, 68319; `results/bench/x2`, report 5k-6, 11 Nov)
-- [~] in progress (Srivastava, 2026-11-16) X1 ABMIL on the top 2 encoders (needs bags; storage gate)
-- [~] in progress (Srivastava, 2026-11-16) X3 ABMIL regression; PAM50 gene-panel regression
-- [~] in progress (Srivastava, 2026-11-16) X4b multi-task ABMIL; X4c site-invariant features; X4d noisy-label training (after experiment C); X4e multi-magnification
-- [~] in progress (Srivastava, 2026-11-16) X5b patch-level feature maps (contribution, attention, concept, PCA-RGB) + map metrics; X5d retrieval
-- [~] in progress (Srivastava, 2026-11-16) X6 reliability: ensembles, conformal prediction, risk–coverage, links to 1e flips and discordance
-- [~] in progress (Srivastava, 2026-11-16) ReceptorCheck demo app (case bundles + Streamlit) and its retrospective evaluation (spec §7)
+- [x] X1 ABMIL on the top 2 encoders: UNI (X2) and H-optimus-0 (streamed to /scratch, job 85664; ER IHC 0.881, no gain over UNI; HER2 1+ vs 0 0.651, lead; `results/bench/x1_abmil`, report 5k-7, 17 Nov)
+- [x] X3 ABMIL regression (ESR1 r 0.728 vs ridge 0.671) and PAM50 gene-panel ridge (`scripts/fetch_rna_panel.py`, `bench_improve.py`; job 85665_0; report 5k-7, 16 Nov)
+- [x] X4b multi-task ABMIL (PR +0.018 only); X4c per-hospital standardisation (removes hospital identity, preference survives) + DANN (no effect); X4d noisy labels (latent-class soft labels +0.015 to +0.028 ER); X4e multi-magnification (nothing beyond SD) (jobs 85665_1-4, `bench_improve.py`, `analyse_ext.py`; report 5k-7, 17 Nov)
+- [x] X5b maps for 14 patients (contribution, 4 attention maps, concept maps, PCA-RGB; S19 pass; jobs 85677/85678/85703, `scripts/maps.py`) + X5d retrieval (`results/bench/x5`, report 5k-8, 17 Nov)
+- [x] X6 reliability: ensemble + split conformal (ER/PR coverage 0.90/0.91; per-hospital 0.68-0.98), risk-coverage, abstentions enriched for 1e flips (OR 4.5), MC-dropout / half-bags (job 85665_5) (`scripts/bench_reliability.py`, report 5k-9, 17 Nov)
+- [x] ReceptorCheck demo app (`app/`, `scripts/app_build_cases.py`, `app_evaluate.py`): 215 OOF bundles, ER/PR pass acceptance (FLAG precision 0.46 vs base 0.055 / 0.135), HER2 fails and is not offered (report 5k-10, 17 Nov)
+- [ ] X2 replication: the best 2 aggregation heads on a second encoder (CONCH bags on Ada; H-optimus-0 needs re-streaming) (spec §5.2)
+- [ ] Stretch (optional): X4g LoRA, X5f sparse autoencoder, DINOv2 natural-image baseline, full-cohort ResNet-50, app live mode
 
 ## Tier 7: Deliverables ⬜
 
@@ -204,7 +206,7 @@ reference standards). We do **not** propose a new architecture.
 | 5 Consolidation | Done (15 Oct, `docs/FINAL_RESULTS.md`) | — |
 | 6 Optional | On hold (CPTAC); 1f and Kamineni dropped | — |
 | 6b Week 3 extensions | 3 of 4 done (27 Oct: frozen ABMIL 5j, zero-shot CONCH 5i, extended statistics 5h) | New experiments: pick from `docs/WEEK3_EXPERIMENTS.md` |
-| 6c AI extensions | 7 of 13 done (harness, feature store, X1, X3 ridge, X4a/f, X5a/c/e, X2; report 5k, 11 Nov) | MIL items, X5b/d, X6, ReceptorCheck open |
+| 6c AI extensions | 13 of 13 done (report 5k, 5k-7 to 5k-11; 17 Nov); Week 3 C/D/E/G/H done (5l) | X2 replication on a 2nd encoder, stretch items open |
 | 7 Deliverables | 3 of 5 done (report, docs, repo); decks updated but not compiled | Compile decks (no LaTeX); rehearsal
 
 ## Key files
