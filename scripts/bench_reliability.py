@@ -26,6 +26,7 @@ os.environ.setdefault("LOKY_MAX_CPU_COUNT", "4")
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from scipy.stats import binomtest, fisher_exact  # noqa: E402
+from sklearn.linear_model import LogisticRegression  # noqa: E402
 from sklearn.metrics import roc_auc_score  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -60,6 +61,11 @@ erlow = (L.ER_pct_IHC == "<10%") & (L.ER_IHC == 1)
 
 def fitp(e, tr, te, y):
     return linear_probe().fit(FE[e].loc[tr].values, y).predict_proba(FE[e].loc[te].values)[:, 1]
+
+
+def logit(p):
+    p = np.clip(p, 1e-6, 1 - 1e-6)
+    return np.log(p / (1 - p))
 
 
 def qhat(scores, alpha):
@@ -98,7 +104,7 @@ for ihc, mol in TASKS.items():
     sd = np.std([P[e] for e in ENS], 0)
     ent = -(pe * np.log(pe + 1e-12) + (1 - pe) * np.log(1 - pe + 1e-12))
     # ---- split conformal (seed 0 folds), standard and Mondrian ----
-    pc = np.zeros(len(pts))
+    pc, pcal_out = np.zeros(len(pts)), np.zeros(len(pts))
     sets = {"standard": np.zeros((len(pts), 2), bool), "mondrian": np.zeros((len(pts), 2), bool)}
     fold_of = np.zeros(len(pts), int)
     for k, (tr, te) in enumerate(site_folds(pts, 0)):
@@ -109,6 +115,8 @@ for ihc, mol in TASKS.items():
         pcal = np.mean([fitp(e, pts[prop], pts[cal], y[prop]) for e in ENS], 0)
         pte = np.mean([fitp(e, pts[prop], pts[te], y[prop]) for e in ENS], 0)
         pc[te] = pte
+        platt = LogisticRegression(C=1e6).fit(logit(pcal)[:, None], y[cal])  # Platt scaling on the calibration set
+        pcal_out[te] = platt.predict_proba(logit(pte)[:, None])[:, 1]
         sc = np.where(y[cal] == 1, 1 - pcal, pcal)
         q = qhat(sc, a.alpha)
         sets["standard"][te] = np.c_[pte <= q, 1 - pte <= q]  # class 0 in set if 1 - p0 = p <= q; class 1 if 1 - p <= q
@@ -190,10 +198,13 @@ for ihc, mol in TASKS.items():
         unc_rows.append({"task": ihc, "score": name, "auc_detect_discordance": roc_auc_score(
             ((~np.isnan(ym)) & (ym != y))[~np.isnan(ym)], -conf[~np.isnan(ym)])})
     oofs.append(pd.DataFrame({"task": ihc, "patient": pts, "y": y, "y_mol": ym, "p_ens": pe, "sd_ens": sd,
-                              "p_conformal_model": pc, "set_standard_neg": sets["standard"][:, 0],
+                              "p_conformal_model": pc, "p_cal": pcal_out, "set_standard_neg": sets["standard"][:, 0],
                               "set_standard_pos": sets["standard"][:, 1], "set_mondrian_neg": sets["mondrian"][:, 0],
                               "set_mondrian_pos": sets["mondrian"][:, 1],
                               **{f"p_{e}": P[e] for e in ENS}}))
+    conf_rows.append({"task": ihc, "kind": "calibration (Platt on the calibration set)", "n": len(y),
+                      "ece_raw": ece(y, pc), "ece_platt": ece(y, pcal_out),
+                      "brier_raw": np.mean((pc - y) ** 2), "brier_platt": np.mean((pcal_out - y) ** 2)})
     log(f"{ihc} done: n {len(y)}")
 
 C = pd.DataFrame(conf_rows)
