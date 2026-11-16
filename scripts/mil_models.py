@@ -178,3 +178,54 @@ class ACMIL(MIL):
 
 
 MODELS = {"abmil": ABMIL, "clam": CLAMSB, "transmil": TransMIL, "dsmil": DSMIL, "acmil": ACMIL}
+
+
+# ---------------- X4b / X4c variants (scripts/bench_mil_ext.py); shared layers keep ABMIL's order and initialisation ----
+class _GradReverse(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, lam):
+        ctx.lam = lam
+        return x.view_as(x)
+
+    @staticmethod
+    def backward(ctx, g):
+        return -ctx.lam * g, None
+
+
+class ABMILDANN(ABMIL):
+    """ABMIL + a site classifier behind a gradient-reversal layer on the attention-pooled embedding (DANN, Ganin et al.
+    2016). lam is set by the training loop (ramped 0 -> lam_max); site_y is the current bag's training-site index.
+    use_site = False gives the plain-ABMIL control that still returns the embedding z."""
+
+    def __init__(self, d, n_sites, use_site=True, h=256, att=128, p=0.25):
+        super().__init__(d, h, att, p)
+        self.site = nn.Sequential(nn.Linear(h, 64), nn.ReLU(), nn.Linear(64, n_sites))
+        self.use_site, self.lam, self.site_y = use_site, 0.0, None
+
+    def forward(self, x):
+        hdn = self.fc(x)
+        w = torch.softmax(self.c(self.a(hdn) * self.b(hdn)).squeeze(-1), dim=0)
+        z = (w[:, None] * hdn).sum(0)
+        return self.cls(z).squeeze(), {"attention": w, "z": z, "site_logit": self.site(_GradReverse.apply(z, self.lam))}
+
+    def objective(self, logit, aux, y, lossf):
+        loss = lossf(logit, y)
+        if self.use_site and self.site_y is not None:
+            loss = loss + F.cross_entropy(aux["site_logit"].float()[None], self.site_y[None])
+        return loss
+
+
+class MultiTaskABMIL(ABMIL):
+    """shared fc + gated attention; heads: n_bin binary logits, an n_cls-way class head (PAM50), n_reg regressions"""
+
+    def __init__(self, d, n_bin, n_cls, n_reg, h=256, att=128, p=0.25):
+        super().__init__(d, h, att, p)
+        self.cls = nn.Linear(h, n_bin)
+        self.cls_pam = nn.Linear(h, n_cls)
+        self.reg = nn.Linear(h, n_reg)
+
+    def forward(self, x):
+        hdn = self.fc(x)
+        w = torch.softmax(self.c(self.a(hdn) * self.b(hdn)).squeeze(-1), dim=0)
+        z = (w[:, None] * hdn).sum(0)
+        return self.cls(z), {"attention": w, "pam": self.cls_pam(z), "reg": self.reg(z), "z": z}

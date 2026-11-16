@@ -1,0 +1,15 @@
+patient,role
+TCGA-A2-A4S1,overlay
+TCGA-AR-A0TP,overlay
+TCGA-AR-A0TX,overlay
+TCGA-E2-A152,overlay
+TCGA-A1-A0SH,overlay
+TCGA-B6-A0RG,overlay
+TCGA-AN-A0FS,overlay (reference ER+)
+TCGA-E2-A1LL,overlay (reference ER-)
+TCGA-LL-A5YP,overlay
+TCGA-BH-A0WA,overlay (reference ER-)
+TCGA-BH-A0BT,reference ER+ (LumA)
+TCGA-AC-A3TN,reference ER+
+TCGA-D8-A13Z,reference ER- (HER2-enriched)
+TCGA-C8-A1HK,reference ER- (HER2-enriched)

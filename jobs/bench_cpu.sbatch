@@ -26,6 +26,7 @@ for s in $STEPS; do
     x5)    python -u scripts/embeddings.py --out results/bench/x5 ;;
     x2pool) python -u scripts/bench_mil.py --method pool --name ${NAME:-uni_v1_20x} --out results/bench/x2 ;;
     x2an)  python -u scripts/analyse_x2.py --dir results/bench/x2 --name ${NAME:-uni_v1_20x} ;;
+    frozen_means) python -u scripts/frozen_means.py ;;
   esac
 done
 echo BENCH_CPU_OK
