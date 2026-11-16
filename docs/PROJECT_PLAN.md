@@ -181,7 +181,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] X5b maps for 14 patients (contribution, 4 attention maps, concept maps, PCA-RGB; S19 pass; jobs 85677/85678/85703, `scripts/maps.py`) + X5d retrieval (`results/bench/x5`, report 5k-8, 17 Nov)
 - [x] X6 reliability: ensemble + split conformal (ER/PR coverage 0.90/0.91; per-hospital 0.68-0.98), risk-coverage, abstentions enriched for 1e flips (OR 4.5), MC-dropout / half-bags (job 85665_5) (`scripts/bench_reliability.py`, report 5k-9, 17 Nov)
 - [x] ReceptorCheck demo app (`app/`, `scripts/app_build_cases.py`, `app_evaluate.py`): 215 OOF bundles, ER/PR pass acceptance (FLAG precision 0.46 vs base 0.055 / 0.135), HER2 fails and is not offered (report 5k-10, 17 Nov)
-- [ ] X2 replication: the best 2 aggregation heads on a second encoder (CONCH bags on Ada; H-optimus-0 needs re-streaming) (spec §5.2)
+- [~] in progress (Srivastava, 2026-11-17) X2 replication: the best 2 aggregation heads on a second encoder (CONCH bags on Ada; H-optimus-0 needs re-streaming) (spec §5.2)
 - [ ] Stretch (optional): X4g LoRA, X5f sparse autoencoder, DINOv2 natural-image baseline, full-cohort ResNet-50, app live mode
 
 ## Tier 7: Deliverables ⬜
