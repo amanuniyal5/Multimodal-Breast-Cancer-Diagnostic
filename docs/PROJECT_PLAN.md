@@ -164,7 +164,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] Frozen slides with ABMIL: 1c (DX vs TS × IHC vs molecular) and 1e (TS vs BS) with the ABMIL head, fixed folds, 3 seeds (`scripts/frozen_abmil.py`). Jobs 40963 (array) + 40965; report 5j. ER interaction +0.018 (−0.008, +0.046), TOST ±0.05 equivalent (p = 0.012); 1b TS 41 : 11; 1e 7.9% / 8.7% flipped
 - [x] Label-free audit with zero-shot CONCH: ER/HER2 prompts (1a/1b without any training label), concept scores, concept-only model (`scripts/conch_zeroshot.py`; day-1 check that TRACE CONCH features are pre-projection). Job 40983; report 5i. TRACE CONCH is pre-projection; receptor prompts at chance (AUC 0.40-0.56); 14-concept model ER ΔAUC +0.036, 1b 36 : 18
 - [x] Statistics beyond p-values: TOST equivalence for 1c, Wilson/exact CIs, Bayesian posteriors and Bayes factors for 1b, McNemar for paired calls (1b DX vs TS, 1e), prevalence-robust agreement (PABAK, AC1, Bland–Altman) for 1e, calibration vs each reference (`scripts/stats_extended.py`). `results/stats_ext_*.csv` (job 40965 incl. ABMIL rows); report 5h, 5j
-- [ ] New foundation-model experiments (candidates in `docs/WEEK3_EXPERIMENTS.md`; pick before starting)
+- [~] in progress (Srivastava, 2026-11-16) New foundation-model experiments: C latent-class truth, D label auditor, E which label to train on, G DX-frozen transfer, H leaderboard under each reference standard (`docs/WEEK3_EXPERIMENTS.md`)
 
 ## Tier 6c: AI extensions (spec: `docs/DESIGN_SPEC.md`, proposal: `docs/AI_EXTENSIONS.md`) 🟨
 
@@ -175,12 +175,12 @@ reference standards). We do **not** propose a new architecture.
 - [x] X4a encoder fusion / ensembling; X4f calibration (mean-pool) (`results/bench/x4`, report 5k-4)
 - [x] X5a t-SNE + kNN purity metrics (UMAP skipped: not installed); X5c CKA between encoders; X5e concept probing (`results/bench/x5`, report 5k-5)
 - [x] X2 aggregation methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL, pooling variants) on UNI: no head beats ABMIL, mean+SD matches them, preference head-independent (jobs 68332, 68319; `results/bench/x2`, report 5k-6, 11 Nov)
-- [ ] X1 ABMIL on the top 2 encoders (needs bags; storage gate)
-- [ ] X3 ABMIL regression; PAM50 gene-panel regression
-- [ ] X4b multi-task ABMIL; X4c site-invariant features; X4d noisy-label training (after experiment C); X4e multi-magnification
-- [ ] X5b patch-level feature maps (contribution, attention, concept, PCA-RGB) + map metrics; X5d retrieval
-- [ ] X6 reliability: ensembles, conformal prediction, risk–coverage, links to 1e flips and discordance
-- [ ] ReceptorCheck demo app (case bundles + Streamlit) and its retrospective evaluation (spec §7)
+- [~] in progress (Srivastava, 2026-11-16) X1 ABMIL on the top 2 encoders (needs bags; storage gate)
+- [~] in progress (Srivastava, 2026-11-16) X3 ABMIL regression; PAM50 gene-panel regression
+- [~] in progress (Srivastava, 2026-11-16) X4b multi-task ABMIL; X4c site-invariant features; X4d noisy-label training (after experiment C); X4e multi-magnification
+- [~] in progress (Srivastava, 2026-11-16) X5b patch-level feature maps (contribution, attention, concept, PCA-RGB) + map metrics; X5d retrieval
+- [~] in progress (Srivastava, 2026-11-16) X6 reliability: ensembles, conformal prediction, risk–coverage, links to 1e flips and discordance
+- [~] in progress (Srivastava, 2026-11-16) ReceptorCheck demo app (case bundles + Streamlit) and its retrospective evaluation (spec §7)
 
 ## Tier 7: Deliverables ⬜
 
