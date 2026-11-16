@@ -1,0 +1,125 @@
+{
+ "patient": "TCGA-B6-A0RE",
+ "slide_type": "DX",
+ "hospital_seen_in_training": false,
+ "site": "B6",
+ "group": "random concordant",
+ "model": {
+  "encoder": "UNI + H-optimus-0 + TITAN (ensemble)",
+  "head": "mean-pool linear probe, Platt",
+  "version": "d30350f"
+ },
+ "ood": {
+  "score": 6.88,
+  "threshold": 12.58,
+  "flag": false
+ },
+ "tasks": {
+  "ER": {
+   "p": 0.09,
+   "p_cal": 0.273,
+   "set": [
+    "neg"
+   ],
+   "tau": 0.792,
+   "expr": {
+    "gene": "ESR1",
+    "pred_log2": 8.29,
+    "pct_vs_RNApos": 0
+   },
+   "status": "CONFIDENT",
+   "ihc": 0,
+   "consistency": {
+    "state": "CONSISTENT",
+    "score": 0.273,
+    "contradicting_singleton": false
+   }
+  },
+  "PR": {
+   "p": 0.146,
+   "p_cal": 0.264,
+   "set": [
+    "neg"
+   ],
+   "tau": 0.798,
+   "expr": {
+    "gene": "PGR",
+    "pred_log2": 7.03,
+    "pct_vs_RNApos": 0
+   },
+   "status": "CONFIDENT",
+   "ihc": 0,
+   "consistency": {
+    "state": "CONSISTENT",
+    "score": 0.264,
+    "contradicting_singleton": false
+   }
+  }
+ },
+ "concepts": {
+  "tubules": -0.28,
+  "low_grade_nuclei": -0.7,
+  "pleomorphism": 2.09,
+  "mitoses": 0.72,
+  "necrosis": -0.21,
+  "lymphocytes": -0.11,
+  "apocrine": -0.44,
+  "solid_sheets": -0.3,
+  "lobular": -0.61,
+  "mucin": -0.18,
+  "stroma": 0.05,
+  "adipose": 0.34,
+  "dcis": -0.31,
+  "normal_breast": -0.65
+ },
+ "neighbours": [
+  {
+   "patient": "TCGA-AO-A12A",
+   "sim": 0.463,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  },
+  {
+   "patient": "TCGA-GM-A2DA",
+   "sim": 0.462,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  },
+  {
+   "patient": "TCGA-JL-A3YW",
+   "sim": 0.438,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 0,
+   "PAM50": null
+  },
+  {
+   "patient": "TCGA-AO-A126",
+   "sim": 0.418,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  },
+  {
+   "patient": "TCGA-E9-A5FL",
+   "sim": 0.392,
+   "ER_IHC": 0,
+   "ESR1_RNApos": 0,
+   "PAM50": "Basal"
+  }
+ ],
+ "assets": {},
+ "frozen": {
+  "ER": {
+   "p": 0.027,
+   "note": "DX-trained UNI probe on the frozen TS slide"
+  }
+ },
+ "truth_for_evaluation_only": {
+  "ESR1_RNApos": 0,
+  "PGR_prevmatch": 0,
+  "PAM50": "Basal",
+  "ER_pct_IHC": "[Not Available]"
+ }
+}

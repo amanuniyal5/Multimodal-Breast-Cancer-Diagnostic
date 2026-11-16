@@ -1,0 +1,9 @@
+task,check,value,pass
+ER_IHC,coverage within 0.90 +- 0.03 (DX),0.900398406374502,True
+ER_IHC,"FLAG precision above base rate, CI excluding it",0.45614035087719296,True
+PR_IHC,coverage within 0.90 +- 0.03 (DX),0.9090909090909091,True
+PR_IHC,"FLAG precision above base rate, CI excluding it",0.4583333333333333,True
+HER2_STRICT,coverage within 0.90 +- 0.03 (DX),0.9423728813559322,False
+HER2_STRICT,"FLAG precision above base rate, CI excluding it",0.14285714285714285,False
+app,bundle load time < 2 s (mean over bundles),0.016977088395939317,True
+app,"every number from an OOF file (by construction: x6/oof_ensemble, x3/oof_reg)",,True

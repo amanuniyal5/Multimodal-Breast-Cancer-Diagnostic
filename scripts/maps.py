@@ -325,7 +325,7 @@ for p in TARGETS:
             rnd.append(R["probe_b"] + c[kr].mean())
         r[f"logit_del_rand{kpct}"] = np.mean(rnd)
     flip = np.nan
-    cs = np.cumsum((sgn * c)[order])
+    cs = np.cumsum(c[order])  # sum of the removed contributions (removed in order of pushing towards the call)
     for kk in range(1, len(c)):
         if sgn * (R["probe_b"] + (c.sum() - cs[kk - 1]) / (len(c) - kk)) < 0:
             flip = 100 * kk / len(c)

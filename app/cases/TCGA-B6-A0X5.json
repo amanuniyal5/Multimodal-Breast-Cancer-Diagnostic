@@ -1,0 +1,120 @@
+{
+ "patient": "TCGA-B6-A0X5",
+ "slide_type": "DX",
+ "hospital_seen_in_training": false,
+ "site": "B6",
+ "group": "random concordant",
+ "model": {
+  "encoder": "UNI + H-optimus-0 + TITAN (ensemble)",
+  "head": "mean-pool linear probe, Platt",
+  "version": "d30350f"
+ },
+ "ood": {
+  "score": 5.23,
+  "threshold": 12.58,
+  "flag": false
+ },
+ "tasks": {
+  "ER": {
+   "p": 0.923,
+   "p_cal": 0.933,
+   "set": [
+    "pos"
+   ],
+   "tau": 0.792,
+   "expr": {
+    "gene": "ESR1",
+    "pred_log2": 13.57,
+    "pct_vs_RNApos": 56
+   },
+   "status": "CONFIDENT",
+   "ihc": 1,
+   "consistency": {
+    "state": "CONSISTENT",
+    "score": 0.067,
+    "contradicting_singleton": false
+   }
+  },
+  "PR": {
+   "p": 0.81,
+   "p_cal": 0.83,
+   "set": [
+    "pos"
+   ],
+   "tau": 0.798,
+   "expr": {
+    "gene": "PGR",
+    "pred_log2": 10.92,
+    "pct_vs_RNApos": 44
+   },
+   "status": "CONFIDENT",
+   "ihc": 1,
+   "consistency": {
+    "state": "CONSISTENT",
+    "score": 0.17,
+    "contradicting_singleton": false
+   }
+  }
+ },
+ "concepts": {
+  "tubules": -0.43,
+  "low_grade_nuclei": 1.31,
+  "pleomorphism": -0.47,
+  "mitoses": 5.41,
+  "necrosis": -0.21,
+  "lymphocytes": -0.45,
+  "apocrine": -0.53,
+  "solid_sheets": 1.14,
+  "lobular": -0.71,
+  "mucin": -0.17,
+  "stroma": 1.4,
+  "adipose": 0.43,
+  "dcis": 0.24,
+  "normal_breast": -0.63
+ },
+ "neighbours": [
+  {
+   "patient": "TCGA-E9-A5UP",
+   "sim": 0.443,
+   "ER_IHC": null,
+   "ESR1_RNApos": 1,
+   "PAM50": null
+  },
+  {
+   "patient": "TCGA-A2-A0CQ",
+   "sim": 0.339,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  },
+  {
+   "patient": "TCGA-A2-A3XS",
+   "sim": 0.322,
+   "ER_IHC": 0,
+   "ESR1_RNApos": 0,
+   "PAM50": null
+  },
+  {
+   "patient": "TCGA-A2-A0ER",
+   "sim": 0.32,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  },
+  {
+   "patient": "TCGA-A2-A0CT",
+   "sim": 0.312,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  }
+ ],
+ "assets": {},
+ "frozen": null,
+ "truth_for_evaluation_only": {
+  "ESR1_RNApos": 1,
+  "PGR_prevmatch": 1,
+  "PAM50": "LumB",
+  "ER_pct_IHC": "[Not Available]"
+ }
+}

@@ -1,0 +1,3 @@
+slides,n,coverage,mean_set_size,abstain_rate
+DX,960,0.903125,1.1510416666666667,0.15104166666666666
+TS (DX-calibrated),960,0.8,1.153125,0.153125

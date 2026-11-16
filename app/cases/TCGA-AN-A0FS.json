@@ -1,0 +1,158 @@
+{
+ "patient": "TCGA-AN-A0FS",
+ "slide_type": "DX",
+ "hospital_seen_in_training": false,
+ "site": "AN",
+ "group": "map reference \u00b7 maps",
+ "model": {
+  "encoder": "UNI + H-optimus-0 + TITAN (ensemble)",
+  "head": "mean-pool linear probe, Platt",
+  "version": "d30350f"
+ },
+ "ood": {
+  "score": 7.55,
+  "threshold": 12.58,
+  "flag": false
+ },
+ "tasks": {
+  "ER": {
+   "p": 0.982,
+   "p_cal": 0.986,
+   "set": [
+    "pos"
+   ],
+   "tau": 0.792,
+   "expr": {
+    "gene": "ESR1",
+    "pred_log2": 14.1,
+    "pct_vs_RNApos": 71
+   },
+   "status": "CONFIDENT",
+   "ihc": 1,
+   "consistency": {
+    "state": "CONSISTENT",
+    "score": 0.014,
+    "contradicting_singleton": false
+   }
+  },
+  "PR": {
+   "p": 0.867,
+   "p_cal": 0.894,
+   "set": [
+    "pos"
+   ],
+   "tau": 0.798,
+   "expr": {
+    "gene": "PGR",
+    "pred_log2": 10.93,
+    "pct_vs_RNApos": 44
+   },
+   "status": "CONFIDENT",
+   "ihc": 0,
+   "consistency": {
+    "state": "FLAG FOR RETEST",
+    "score": 0.894,
+    "contradicting_singleton": true
+   }
+  },
+  "HER2": {
+   "p": 0.146,
+   "p_cal": 0.222,
+   "set": [
+    "neg"
+   ],
+   "tau": 0.86,
+   "expr": {
+    "gene": "ERBB2",
+    "pred_log2": 12.73,
+    "pct_vs_RNApos": 1
+   },
+   "status": "CONFIDENT",
+   "ihc": 0,
+   "consistency": {
+    "state": "NOT VALIDATED",
+    "score": null
+   },
+   "her2_low": "not assessable from H&E (HER2 0 vs 1+ AUC 0.42-0.54 across models)"
+  }
+ },
+ "concepts": {
+  "tubules": -0.46,
+  "low_grade_nuclei": -0.45,
+  "pleomorphism": -0.49,
+  "mitoses": -0.33,
+  "necrosis": -0.31,
+  "lymphocytes": -0.54,
+  "apocrine": -0.72,
+  "solid_sheets": -0.35,
+  "lobular": 0.97,
+  "mucin": -0.18,
+  "stroma": -0.95,
+  "adipose": 0.62,
+  "dcis": -0.45,
+  "normal_breast": -0.1
+ },
+ "neighbours": [
+  {
+   "patient": "TCGA-AR-A5QN",
+   "sim": 0.446,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  },
+  {
+   "patient": "TCGA-AR-A2LJ",
+   "sim": 0.418,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": null
+  },
+  {
+   "patient": "TCGA-AR-A2LQ",
+   "sim": 0.417,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "Normal"
+  },
+  {
+   "patient": "TCGA-BH-A0HK",
+   "sim": 0.402,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  },
+  {
+   "patient": "TCGA-BH-A0BA",
+   "sim": 0.392,
+   "ER_IHC": 1,
+   "ESR1_RNApos": 1,
+   "PAM50": "LumA"
+  }
+ ],
+ "assets": {
+  "abmil_attention": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_abmil_attention.png",
+  "acmil_attention": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_acmil_attention.png",
+  "clam_attention": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_clam_attention.png",
+  "conch_concept_apocrine": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_conch_concept_apocrine.png",
+  "conch_concept_necrosis": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_conch_concept_necrosis.png",
+  "conch_concept_pleomorphism": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_conch_concept_pleomorphism.png",
+  "conch_concept_tubules": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_conch_concept_tubules.png",
+  "contribution": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_contribution.png",
+  "dsmil_attention": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_dsmil_attention.png",
+  "he": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_he.png",
+  "uni_pca-rgb": "../../results/bench/x5/maps/panels/TCGA-AN-A0FS_uni_pca-rgb.png"
+ },
+ "frozen": {
+  "ER": {
+   "p": 0.948,
+   "note": "DX-trained UNI probe on the frozen TS slide"
+  }
+ },
+ "truth_for_evaluation_only": {
+  "ESR1_RNApos": 1,
+  "PGR_prevmatch": 1,
+  "ERBB2_AMP": 0,
+  "PAM50": "LumA",
+  "ER_pct_IHC": "90-99%"
+ }
+}

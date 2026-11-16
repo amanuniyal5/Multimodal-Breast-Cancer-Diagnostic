@@ -1,0 +1,11 @@
+task,metric,n_hospitals,min,median,max,overall
+ER_IHC,"per-hospital AUC (>= 20 patients, both classes)",14.0,0.759090909090909,0.9188959674779003,0.9878048780487805,0.9002602350619973
+PR_IHC,"per-hospital AUC (>= 20 patients, both classes)",14.0,0.643939393939394,0.8306593095642332,0.9368888888888889,0.8048231946890665
+HER2_STRICT,"per-hospital AUC (>= 20 patients, both classes)",10.0,0.525,0.6928104575163399,0.8650000000000001,0.6109684314632552
+all,OOD flag rate on held-out hospitals (in-distribution: 1 %),,,,,0.0018957345971563982
+ER_IHC,frozen: train DX -> test DX AUC (ECE 0.094),,,,,0.8810088313512972
+ER_IHC,frozen: train DX -> test TS AUC (ECE 0.227),,,,,0.8524762908324552
+ER_IHC,frozen: train TS -> test DX AUC (ECE 0.060),,,,,0.8144224496964223
+ER_IHC,frozen: train TS -> test TS AUC (ECE 0.095),,,,,0.898972602739726
+ER_IHC,conformal coverage on DX,,,,,0.903125
+ER_IHC,conformal coverage on TS (DX-calibrated),,,,,0.8

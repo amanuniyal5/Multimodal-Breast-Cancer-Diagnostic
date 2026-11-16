@@ -11,7 +11,7 @@ Per patient (seed-0 site-grouped folds; the patient's hospital is never in train
   concepts   CONCH zero-shot concept shares (results/conch_zeroshot_scores.csv) as z-scores vs the cohort.
   neighbours X5d: 5 most similar training-fold patients (cosine on standardised UNI means) with their labels.
   frozen     DX-trained UNI probe applied to the patient's frozen TS slide (experiment G), if available.
-  assets     X5b map panels (results/bench/x5/maps/panels) copied to app/cases/<patient>/.
+  assets     X5b map panels, referenced in place from results/bench/x5/maps/panels.
 Demo set: all ER IHC/RNA-discordant patients, all ER-low, the map patients and 150 random concordant patients (seed 0).
 Also writes results/bench/x5/retrieval.csv (neighbour-vote accuracy) and app/cases/index.csv.
 Usage: python scripts/app_build_cases.py [--all]
@@ -19,7 +19,6 @@ Usage: python scripts/app_build_cases.py [--all]
 import argparse
 import glob
 import os
-import shutil
 import subprocess
 import sys
 
@@ -146,6 +145,11 @@ for p in maps:
 if os.path.isdir(a.out):
     for f in glob.glob(os.path.join(a.out, "*.json")):
         os.remove(f)
+    for d in glob.glob(os.path.join(a.out, "TCGA-*")):  # image copies made by older versions of this script
+        if os.path.isdir(d):
+            for f in glob.glob(os.path.join(d, "*.png")):
+                os.remove(f)
+            os.rmdir(d)
 rows = []
 for p in demo:
     case = {"patient": p, "slide_type": "DX", "hospital_seen_in_training": False, "site": str(L.at[p, "site"]),
@@ -182,12 +186,8 @@ for p in demo:
         if len(g):
             case["frozen"] = {"ER": {"p": round(float(g.p.iloc[0]), 3), "note": "DX-trained UNI probe on the frozen TS slide"}}
     panels = sorted(glob.glob(os.path.join("results/bench/x5/maps/panels", f"{p}_*.png")))
-    if panels:
-        dst = os.path.join(a.out, p)
-        os.makedirs(dst, exist_ok=True)
-        for f in panels:
-            shutil.copy(f, dst)
-            case["assets"][os.path.basename(f)[len(p) + 1:-4]] = f"{p}/{os.path.basename(f)}"
+    for f in panels:  # referenced in place (relative to the bundle folder), not copied
+        case["assets"][os.path.basename(f)[len(p) + 1:-4]] = os.path.relpath(f, a.out).replace(os.sep, "/")
     write(case, a.out)
     rows.append({"patient": p, "group": case["group"], "site": case["site"],
                  "ER_status": case["tasks"].get("ER", {}).get("status"),

@@ -71,6 +71,10 @@ ood = case["ood"]
 if ood["flag"]:
     st.warning(f"OUT-OF-DISTRIBUTION: this slide's features are far from the training cohort "
                f"(Mahalanobis {ood['score']} > {ood['threshold']}). Do not use the estimates below.")
+if slide.startswith("TS"):
+    st.warning("Frozen-section mode: FFPE-trained model applied to the frozen slide. AUC drops (ER 0.85 vs 0.90 for a "
+               "frozen-trained model), probabilities are under-estimated and FFPE-calibrated sets cover only 80 % of "
+               "frozen cases (experiment G): read the probability as a ranking, not as a calibrated estimate.")
 cols = st.columns(3)
 for col, m in zip(cols, MARKERS):
     with col:

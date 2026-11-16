@@ -1,0 +1,216 @@
+patient,group,site,ER_status,ER_consistency,ood,frozen,maps
+TCGA-3C-AALI,ER IHC/RNA discordant,3C,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-4H-AAAK,random concordant,4H,CONFIDENT,CONSISTENT,False,True,False
+TCGA-5T-A9QA,random concordant,5T,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A1-A0SB,ER IHC/RNA discordant,A1,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-A1-A0SE,random concordant,A1,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A1-A0SH,ER IHC/RNA discordant · maps,A1,CONFIDENT,FLAG FOR RETEST,False,True,True
+TCGA-A1-A0SP,random concordant,A1,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A04R,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A04X,random concordant,A2,UNCERTAIN,CONSISTENT,False,False,False
+TCGA-A2-A0CL,ER IHC/RNA discordant,A2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-A2-A0CO,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0CT,random concordant,A2,CONFIDENT,CONSISTENT,False,False,False
+TCGA-A2-A0CX,ER IHC/RNA discordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0EO,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0EQ,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0ET,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0EY,random concordant,A2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-A2-A0ST,ER IHC/RNA discordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0T1,random concordant,A2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-A2-A0T4,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0YC,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0YG,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0YJ,ER IHC/RNA discordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0YK,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A0YL,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A1G1,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A1G6,ER IHC/RNA discordant,A2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-A2-A25A,ER-low (IHC+ <10%),A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A2-A3XV,ER IHC/RNA discordant,A2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-A2-A3XX,random concordant,A2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-A2-A3Y0,ER IHC/RNA discordant,A2,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-A2-A4RX,ER IHC/RNA discordant,A2,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-A2-A4S1,ER IHC/RNA discordant · maps,A2,CONFIDENT,FLAG FOR RETEST,False,True,True
+TCGA-A2-A4S2,random concordant,A2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A7-A13E,ER IHC/RNA discordant,A7,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-A7-A13F,random concordant,A7,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A7-A4SD,random concordant,A7,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A7-A5ZW,random concordant,A7,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A7-A6VX,random concordant,A7,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A8-A08C,random concordant,A8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A8-A08H,random concordant,A8,CONFIDENT,CONSISTENT,False,False,False
+TCGA-A8-A08I,random concordant,A8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A8-A097,random concordant,A8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A8-A09G,ER IHC/RNA discordant,A8,CONFIDENT,CONSISTENT,False,False,False
+TCGA-A8-A09Q,random concordant,A8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A8-A09W,random concordant,A8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A8-A09Z,random concordant,A8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-A8-A0AB,random concordant,A8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AC-A23E,random concordant,AC,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AC-A23H,ER IHC/RNA discordant,AC,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AC-A2FG,random concordant,AC,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AC-A2FK,ER IHC/RNA discordant,AC,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AC-A3TN,random concordant · maps,AC,CONFIDENT,CONSISTENT,False,True,True
+TCGA-AC-A3W5,ER IHC/RNA discordant,AC,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AC-A3YI,random concordant,AC,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AC-A5EH,ER IHC/RNA discordant,AC,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AC-A62X,ER IHC/RNA discordant,AC,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AN-A046,random concordant,AN,CONFIDENT,CONSISTENT,False,False,False
+TCGA-AN-A0FD,random concordant,AN,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-AN-A0FJ,ER IHC/RNA discordant,AN,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-AN-A0FS,map reference · maps,AN,CONFIDENT,CONSISTENT,False,True,True
+TCGA-AN-A0FT,random concordant,AN,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AN-A0FW,random concordant,AN,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AN-A0XN,ER IHC/RNA discordant,AN,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-AN-A0XO,random concordant,AN,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AN-A0XS,ER IHC/RNA discordant,AN,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-AO-A03N,random concordant,AO,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AO-A03V,random concordant,AO,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AO-A0J3,ER-low (IHC+ <10%),AO,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AO-A0JA,random concordant,AO,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AO-A0JM,random concordant,AO,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-AO-A125,random concordant,AO,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AO-A12G,random concordant,AO,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AO-A1KP,random concordant,AO,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AO-A1KS,random concordant,AO,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AQ-A54N,random concordant,AQ,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AR-A0TP,ER IHC/RNA discordant · maps,AR,CONFIDENT,FLAG FOR RETEST,False,True,True
+TCGA-AR-A0TT,random concordant,AR,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-AR-A0TX,ER IHC/RNA discordant · maps,AR,CONFIDENT,CONSISTENT,False,True,True
+TCGA-AR-A0U1,ER IHC/RNA discordant,AR,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AR-A0U2,random concordant,AR,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AR-A1AH,ER IHC/RNA discordant,AR,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-AR-A1AJ,ER IHC/RNA discordant,AR,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-AR-A1AN,random concordant,AR,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AR-A1AO,ER IHC/RNA discordant,AR,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-AR-A1AS,random concordant,AR,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-AR-A1AT,ER-low (IHC+ <10%),AR,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-AR-A24Q,ER IHC/RNA discordant,AR,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-AR-A24S,random concordant,AR,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AR-A24X,random concordant,AR,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AR-A251,ER IHC/RNA discordant,AR,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-AR-A2LH,ER IHC/RNA discordant,AR,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-AR-A2LM,random concordant,AR,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AR-A5QN,random concordant,AR,CONFIDENT,CONSISTENT,False,True,False
+TCGA-AR-A5QP,random concordant,AR,CONFIDENT,CONSISTENT,False,True,False
+TCGA-B6-A0I1,random concordant,B6,CONFIDENT,CONSISTENT,False,True,False
+TCGA-B6-A0IC,random concordant,B6,CONFIDENT,CONSISTENT,False,True,False
+TCGA-B6-A0IE,ER IHC/RNA discordant,B6,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-B6-A0IJ,ER IHC/RNA discordant,B6,CONFIDENT,CONSISTENT,False,True,False
+TCGA-B6-A0IK,ER IHC/RNA discordant,B6,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-B6-A0RE,random concordant,B6,CONFIDENT,CONSISTENT,False,True,False
+TCGA-B6-A0RG,ER IHC/RNA discordant · maps,B6,CONFIDENT,FLAG FOR RETEST,False,True,True
+TCGA-B6-A0RN,ER IHC/RNA discordant,B6,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-B6-A0X0,random concordant,B6,CONFIDENT,CONSISTENT,False,True,False
+TCGA-B6-A0X1,random concordant,B6,CONFIDENT,CONSISTENT,False,True,False
+TCGA-B6-A0X5,random concordant,B6,CONFIDENT,CONSISTENT,False,False,False
+TCGA-B6-A1KC,random concordant,B6,CONFIDENT,CONSISTENT,False,True,False
+TCGA-B6-A1KN,ER IHC/RNA discordant,B6,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-B6-A2IU,random concordant,B6,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0AW,ER IHC/RNA discordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0B0,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0B1,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0B7,ER IHC/RNA discordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0BF,random concordant,BH,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-BH-A0BR,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0BT,map reference · maps,BH,CONFIDENT,CONSISTENT,False,True,True
+TCGA-BH-A0BZ,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0DO,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0E1,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0E6,random concordant,BH,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-BH-A0EI,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0H6,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0HI,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0HN,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0HO,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A0WA,random concordant · maps,BH,CONFIDENT,CONSISTENT,False,True,True
+TCGA-BH-A18P,ER-low (IHC+ <10%),BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A18Q,random concordant,BH,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-BH-A18U,random concordant,BH,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-BH-A1EV,random concordant,BH,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-BH-A1EW,ER IHC/RNA discordant,BH,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-BH-A1FB,random concordant,BH,CONFIDENT,CONSISTENT,False,True,False
+TCGA-BH-A1FJ,ER IHC/RNA discordant,BH,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-BH-A202,random concordant,BH,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-BH-A42U,ER IHC/RNA discordant,BH,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-C8-A12L,random concordant,C8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-C8-A12Q,random concordant,C8,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-C8-A12T,random concordant,C8,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-C8-A12U,random concordant,C8,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-C8-A12Z,random concordant,C8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-C8-A135,random concordant,C8,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-C8-A138,random concordant,C8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-C8-A1HI,random concordant,C8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-C8-A1HK,map reference · maps,C8,CONFIDENT,FLAG FOR RETEST,False,True,True
+TCGA-C8-A27A,random concordant,C8,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-C8-A27B,random concordant,C8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-C8-A3M8,random concordant,C8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A13Z,random concordant · maps,D8,CONFIDENT,CONSISTENT,False,True,True
+TCGA-D8-A142,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A147,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A1JF,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A1JH,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A1JM,ER-low (IHC+ <10%),D8,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-D8-A1JS,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A1XF,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A1XO,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A1XT,random concordant,D8,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-D8-A1Y2,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A27V,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A3Z6,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A73U,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-D8-A73X,random concordant,D8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A105,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A10C,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A10F,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A14O,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A14Q,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A14X,random concordant,E2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-E2-A14Y,ER IHC/RNA discordant,E2,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-E2-A152,ER IHC/RNA discordant · maps,E2,CONFIDENT,CONSISTENT,False,True,True
+TCGA-E2-A155,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A15C,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A15L,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A1AZ,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A1B1,ER IHC/RNA discordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A1B5,ER IHC/RNA discordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A1IH,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A1L7,ER IHC/RNA discordant,E2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-E2-A1LE,random concordant,E2,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-E2-A1LL,map reference · maps,E2,CONFIDENT,CONSISTENT,False,True,True
+TCGA-E2-A2P5,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A570,random concordant,E2,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E2-A9RU,random concordant,E2,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-E9-A1N9,ER IHC/RNA discordant,E9,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-E9-A22H,ER-low (IHC+ <10%),E9,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E9-A295,random concordant,E9,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E9-A54Y,random concordant,E9,CONFIDENT,CONSISTENT,False,True,False
+TCGA-E9-A5FK,random concordant,E9,CONFIDENT,CONSISTENT,False,True,False
+TCGA-EW-A1IY,random concordant,EW,CONFIDENT,CONSISTENT,False,True,False
+TCGA-EW-A1J6,random concordant,EW,CONFIDENT,CONSISTENT,False,True,False
+TCGA-EW-A1OY,random concordant,EW,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-EW-A1P1,random concordant,EW,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-EW-A1P4,random concordant,EW,CONFIDENT,CONSISTENT,False,True,False
+TCGA-EW-A1PF,random concordant,EW,CONFIDENT,CONSISTENT,False,True,False
+TCGA-EW-A2FV,random concordant,EW,CONFIDENT,CONSISTENT,False,True,False
+TCGA-GM-A2DA,random concordant,GM,CONFIDENT,CONSISTENT,False,True,False
+TCGA-GM-A2DI,ER IHC/RNA discordant,GM,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-GM-A2DK,random concordant,GM,CONFIDENT,CONSISTENT,False,True,False
+TCGA-GM-A3NW,ER IHC/RNA discordant,GM,CONFIDENT,FLAG FOR RETEST,False,False,False
+TCGA-GM-A3XG,random concordant,GM,CONFIDENT,CONSISTENT,False,True,False
+TCGA-JL-A3YW,ER IHC/RNA discordant,JL,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-LD-A74U,ER-low (IHC+ <10%),LD,CONFIDENT,CONSISTENT,False,True,False
+TCGA-LL-A441,random concordant,LL,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-LL-A5YL,random concordant,LL,CONFIDENT,CONSISTENT,False,True,False
+TCGA-LL-A5YP,ER IHC/RNA discordant · maps,LL,CONFIDENT,CONSISTENT,False,True,True
+TCGA-LL-A6FQ,random concordant,LL,CONFIDENT,CONSISTENT,False,True,False
+TCGA-LL-A73Y,random concordant,LL,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-LL-A8F5,ER IHC/RNA discordant,LL,CONFIDENT,FLAG FOR RETEST,False,True,False
+TCGA-LL-A9Q3,random concordant,LL,CONFIDENT,CONSISTENT,False,True,False
+TCGA-OL-A66I,random concordant,OL,CONFIDENT,CONSISTENT,False,True,False
+TCGA-OL-A66J,random concordant,OL,CONFIDENT,CONSISTENT,False,True,False
+TCGA-OL-A97C,ER IHC/RNA discordant,OL,UNCERTAIN,CONSISTENT,False,True,False
+TCGA-UL-AAZ6,random concordant,UL,CONFIDENT,CONSISTENT,False,True,False
+TCGA-W8-A86G,random concordant,W8,CONFIDENT,CONSISTENT,False,True,False
+TCGA-XX-A89A,random concordant,XX,CONFIDENT,CONSISTENT,False,True,False
