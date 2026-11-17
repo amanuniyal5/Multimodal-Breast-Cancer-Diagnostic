@@ -48,6 +48,22 @@ standards); no new architecture.
 - Site leakage is real: embeddings identify the hospital 82% of the time, and HER2 0 vs 1+ looks learnable with random
   folds (0.63) but not with site-grouped folds.
 
+## Extensions (Nov 2026; secondary, `docs/FINAL_RESULTS.md` 1.1, report sections 6-7)
+
+- **Do we need pathology foundation models?** Yes: an ImageNet ResNet-50 is 0.11-0.18 AUC below UNI. But none of 11
+  pathology encoders (UNI2-h, GigaPath, H-optimus-0, Hibou-L, CONCH, TITAN, CHIEF, ...) beats UNI v1 on ER.
+- **Aggregation is second-order:** CLAM, TransMIL, DSMIL and ACMIL do not beat ABMIL, and mean + SD pooling matches them
+  (replicated on UNI and CONCH).
+- **Labels matter more than models:** soft labels from a latent-class model of IHC, RNA and protein improve ER even when
+  scored against IHC; against that latent truth every H&E model gains 0.03-0.05 AUC; the top model of a 17-model
+  leaderboard changes with the reference standard in 57-91 % of bootstraps.
+- **Reliability:** conformal sets reach 90 % coverage overall (not per hospital); abstentions are enriched for
+  frozen-section flips and IHC/RNA discordance. FFPE → frozen transfer costs ~0.05 AUC and breaks calibration.
+- **Interpretability:** exact per-patch contribution maps, four MIL attention maps and CONCH concept maps for 14 patients
+  (`results/bench/x5/maps/`): attention and evidence sit on tumour.
+- **Application:** *ReceptorCheck* (`app/`), a research-only second reader: calibrated ER/PR/HER2 with conformal sets,
+  reliability status, IHC consistency flag (precision 0.46 vs 5.5 % base rate for ER), maps and similar cases.
+
 ## Where every result comes from
 
 | Result | File(s) | Script → job |
@@ -63,7 +79,22 @@ standards); no new architecture.
 | Extraction equivalence (ours vs TRACE) | `results/equivalence_check.csv` | `scripts/equivalence_check.py` → `jobs/equivalence_check.sbatch` |
 | 1c, 1e | `results/frozen_1c*`, `results/frozen_1e*` | `scripts/frozen_1c.py`, `frozen_1e.py` → `jobs/frozen_analysis.sbatch` |
 | Attention maps and overlays | `results/attention/`, `results/attention_v2/`, `results/attention_overlay/` | `scripts/attention_maps.py`, `attention_overlay.py` → `jobs/attention_maps.sbatch`, `attention_overlay.sbatch` |
-| Final tables T1-T5, sanity checks S1-S15 | `docs/FINAL_RESULTS.md`, `results/final_tables.csv` | `scripts/final_tables.py`, `scripts/sanity_check.py` → `jobs/final_tables.sbatch` |
+| Final tables T1-T5, sanity checks S1-S21 | `docs/FINAL_RESULTS.md`, `results/final_tables.csv` | `scripts/final_tables.py`, `scripts/sanity_check.py` → `jobs/final_tables.sbatch` |
+| Week 3 statistics (TOST, Bayes, McNemar, calibration), report 5h | `results/stats_ext_*` | `scripts/stats_extended.py` → `jobs/week3_stats.sbatch` |
+| Zero-shot CONCH audit and concepts, 5i | `results/conch_zeroshot_*`, `results/conch_concepts_*` | `scripts/conch_zeroshot.py` → `jobs/conch_zeroshot.sbatch` |
+| Frozen slides with ABMIL (1c, 1e), 5j | `results/frozen_abmil_*` | `scripts/frozen_abmil.py` → `jobs/frozen_abmil.sbatch` |
+| Benchmark harness, encoder registry | `scripts/bench/`, `configs/encoders.json` | (library) |
+| Encoder means (11 encoders), ResNet-50 subset | Ada `data/features/*_mean.npz`, `dx_resnet50/` | `scripts/trace_means.py` → `jobs/trace_means.sbatch`; `extract_frozen.py --encoder resnet50` → `jobs/extract_frozen.sbatch` |
+| X1 encoder benchmark, label efficiency, hospital ID, 5k-1/5k-2 | `results/bench/x1/`, `x1_subset/` | `scripts/bench_encoders.py` → `jobs/bench_cpu.sbatch` (x1, x1sub) |
+| X1 ABMIL on H-optimus-0, 5k-7 | `results/bench/x1_abmil/` | `scripts/trace_means.py --bags` + `bench_mil.py` → `jobs/x1_abmil_trace.sbatch` (job 85664) |
+| X2 aggregation methods (UNI, CONCH), 5k-6/5k-6b | `results/bench/x2/` (`aucs*.csv`, `preference*.csv`, `repro*.txt`) | `scripts/mil_models.py`, `bench_mil.py`, `analyse_x2.py` → `jobs/bench_mil.sbatch`, `bench_cpu.sbatch` (x2pool) |
+| X3 regression (ridge, ABMIL, PAM50 panel), 5k-3/5k-7 | `results/bench/x3/`, `data/metadata/rna_panel.csv` | `scripts/bench_regression.py`, `fetch_rna_panel.py`, `bench_improve.py`, `bench_mil_ext.py --mode regress` → `jobs/bench_mil_ext.sbatch` |
+| X4 fusion, calibration, multi-task, site standardisation, DANN, noisy labels, multi-magnification, 5k-4/5k-7 | `results/bench/x4/` | `scripts/bench_fusion.py`, `bench_improve.py`, `bench_mil_ext.py`, `analyse_ext.py` |
+| X5 embeddings, CKA, concepts, maps, retrieval, 5k-5/5k-8 | `results/bench/x5/` (`maps/`, `map_metrics.csv`, `retrieval.csv`) | `scripts/embeddings.py`; `trace_means.py --keep` → `jobs/trace_keep.sbatch`; `scripts/maps.py` → `jobs/maps.sbatch`; `app_build_cases.py` (retrieval) |
+| X6 reliability (ensemble, conformal, selective prediction, MC-dropout), 5k-9 | `results/bench/x6/` | `scripts/bench_reliability.py`; `bench_mil_ext.py --mode reliab` |
+| Week 3 C, D, E, H (latent class, auditor, training label, leaderboard), 5l | `results/week3/` | `scripts/week3_experiments.py`; latent class `scripts/bench/latent.py` |
+| Week 3 G (FFPE ↔ frozen transfer), 5l-5 | `results/week3/g_*`, `results/bench/x6/conformal_frozen.csv` | `scripts/frozen_means.py` → `jobs/bench_cpu.sbatch` (frozen_means); `scripts/bench_reliability.py` |
+| ReceptorCheck application and its evaluation, 5k-10 | `app/`, `app/cases/`, `results/app_eval/` | `scripts/app_build_cases.py`, `app_evaluate.py`; UI `app/receptorcheck.py` |
 
 Ada maintenance jobs: `setup_env`, `trident_setup`, `fix_torch` (restore the pinned PyTorch), `check_env`,
 `requeue_frozen.sh`, `list_hf_archive` (one-off). Ada usage and gotchas: [`docs/ADA.md`](docs/ADA.md), [`docs/HANDOFF.md`](docs/HANDOFF.md) section 5.
@@ -79,6 +110,14 @@ python scripts/sanity_check.py         # S1-S15 on the committed result files
 python scripts/final_tables.py         # rebuild T1-T5 in docs/FINAL_RESULTS.md from the committed *_final files
 ```
 
+ReceptorCheck demo (laptop; uses only committed out-of-fold results):
+
+```bash
+pip install -r app/requirements.txt
+python scripts/app_build_cases.py      # case bundles -> app/cases/ (also needs data/features/uni_v1_20x_mean.npz)
+streamlit run app/receptorcheck.py
+```
+
 Run everything from the repo root. Patch-feature models and frozen slides need a GPU cluster (see `docs/ADA.md`).
 
 ## Repository layout
@@ -91,10 +130,12 @@ docs/
   FINAL_REPORT.md/.docx final report
   HANDOFF.md            full context: history, decisions, current state, gotchas
   PROJECT_PLAN.md       tiered plan with checklists and guardrails
-  baseline_report.md    detailed results with methods, sanity checks and interpretation (Sections 4-5g)
+  baseline_report.md    detailed results with methods, sanity checks and interpretation (Sections 4-5l)
+  DESIGN_SPEC.md        design of the extensions and the application; AI_EXTENSIONS.md, WEEK3_EXPERIMENTS.md
   DATASET.md            dataset study; PIPELINE_AND_MODELS.md, ADA.md, NOVELTY_RESEARCH.md, archive/
 comms/LOG.md            append-only team log
-scripts/                all analysis code;  jobs/  SLURM jobs for the Ada cluster
+scripts/                all analysis code (scripts/bench/ = shared benchmark harness);  jobs/  SLURM jobs for Ada
+app/                    ReceptorCheck research demo (Streamlit) and its case bundles
 data/metadata/          small TCGA metadata tables, frozen-slide manifest, IDC slide listing (committed)
 data/splits/folds.csv   fixed site-grouped folds used by every experiment
 results/                result tables, predictions, attention figures (committed; features are not)

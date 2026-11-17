@@ -1,7 +1,7 @@
 ---
 title: "Which Truth Does the Slide See? Auditing what H&E foundation-model classifiers learn when IHC, RNA and protein disagree"
 author: "Aman Uniyal, Aman Srivastava — Topics in AI for Healthcare, IIIT Hyderabad"
-date: "October 2026"
+date: "November 2026"
 ---
 
 # Abstract
@@ -22,7 +22,13 @@ and their calls followed the PAM50 intrinsic subtype. HER2 predictions tracked a
 label; PR showed no reliable preference; HER2-low was not detectable from H&E. Two frozen sections of one tumour agreed
 well (ICC ≈ 0.88) but about one ER call in ten flipped. H&E models therefore learn morphology that aligns with the
 transcriptional state of a tumour rather than with its IHC readout, which matters for how such models are trained,
-validated and interpreted.
+validated and interpreted. Extensions across 11 pathology encoders and 10 aggregation methods showed that a pathology
+foundation model is needed (an ImageNet ResNet-50 was 0.11-0.18 AUC lower) but that newer encoders and complex MIL heads
+do not improve ER (mean + SD pooling matched them); that soft labels from a latent-class model of IHC, RNA and protein
+improve ER even against IHC; that every model looks better against this latent truth than against IHC; that benchmark
+rankings change with the reference standard; and that conformal abstention concentrates on cases where the reference
+standards themselves disagree. A research demo (ReceptorCheck) flags likely IHC errors with precision 0.46 against a
+5.5 % base rate in out-of-hospital evaluation.
 
 # 1. Clinical problem
 
@@ -90,7 +96,16 @@ the time, and a HER2-low signal that appears with random folds (AUC 0.63) vanish
 Holm correction; all other results are secondary, reported for every model, and called robust only if consistent in
 direction across at least two encoders and across RNA cut-offs. Sanity checks S1-S15 (prediction integrity, pairing,
 label identity, recomputed statistics, negative controls, cohort sizes, extraction equivalence) all pass except one
-explained environment difference (Section 6).
+explained environment difference (Section 8).
+
+**Extensions (Sections 6-7).** Mean-pooled features of eleven encoders (TRACE; an ImageNet ResNet-50 extracted with
+TRIDENT on a pre-set random 436-patient subset); four further MIL heads re-implemented in PyTorch with paper defaults
+(CLAM-SB, TransMIL, DSMIL, ACMIL) and five pooling baselines; ridge and ABMIL regression on mRNA; latent-class soft
+labels, per-hospital feature standardisation, domain-adversarial training and multi-task ABMIL; split-conformal
+prediction calibrated on a site-grouped inner fold; exact contribution maps of the linear probe and MIL attention maps;
+a two-class Dawid–Skene latent-class model of IHC, RNA and protein. All tuning, calibration and latent-class fitting
+used training hospitals only. Sanity checks S16-S21 cover the inner folds, feature files, every new prediction file,
+the contribution-map identity and the application's case files.
 
 # 5. Results
 
@@ -169,7 +184,117 @@ the HER2-enriched exceptions attract attention to cohesive or apocrine-like cell
 
 ![IHC+, RNA−, HER2-enriched tumour called ER+](../results/attention_overlay/TCGA-E2-A152.png)
 
-# 6. Robustness and sanity checks
+# 6. Extensions: what the models need, what they see, and how reliable they are
+
+These analyses answer the questions raised at the progress review (do we need pathology foundation models, do other
+encoders and aggregation methods change the answer, can performance be improved, what do the models look at, and can
+this become an application). They are secondary: all use the same patients and fixed folds, and none changes the
+primary claims. Details for every number: `docs/baseline_report.md` 5k.
+
+## 6.1 Do we need pathology foundation models, and which one?
+
+- **Yes, a pathology foundation model is needed.** An ImageNet-pretrained ResNet-50, on a pre-set random subset of 436
+  patients, is 0.11-0.18 AUC below UNI on every receptor task and at chance for HER2.
+- **But newer or larger ones do not help for ER.** Across 11 encoders (UNI, UNI2-h, Prov-GigaPath, H-optimus-0,
+  Hibou-L, CONCH, UNI at 10x, TITAN, GigaPath-slide, and the TCGA-pretrained contrasts CTransPath and CHIEF) the ER IHC
+  AUC tops out near 0.87 with mean pooling; with ABMIL, H-optimus-0 reaches 0.881 against 0.891 for UNI.
+- **Patch encoders are nearly interchangeable and hospital-dominated:** linear CKA 0.87-0.96 between patch encoders,
+  and 90-96 % hospital-identification accuracy. The slide-level TITAN and the vision-language CONCH carry less hospital
+  information (82-85 %) and TITAN is the most label-efficient (ER AUC 0.83 from 25 training patients).
+- **The ER RNA preference is not a property of one model:** RNA − IHC ΔAUC is positive in all 11 encoders (CI excluding
+  0 in 9) and with every aggregation method on two encoders.
+
+## 6.2 Does the aggregation method matter?
+
+Four MIL methods beyond ABMIL (CLAM-SB, TransMIL, DSMIL, ACMIL) and five pooling baselines were run on UNI, and the
+best two heads plus all baselines were replicated on CONCH. **No head beats ABMIL** on either encoder, and **simple
+mean + standard-deviation pooling with a linear probe matches the trained MIL heads** (UNI 0.893 vs 0.891; CONCH 0.872 vs
+0.868) while beating plain mean pooling by 0.024 on both encoders. Trained heads help only for HER2, and only over
+plain mean pooling. The choice of aggregator is therefore second-order for receptor status, and the label preference
+is the same for every aggregator.
+
+## 6.3 Can performance be improved?
+
+- **Better labels help more than better models.** Training on soft labels from a latent-class model of IHC, RNA and
+  protein (fitted on the training patients only) improves ER AUC even when scored against IHC itself: +0.015 to +0.028
+  in all three encoders tested with linear heads (CI excluding 0), same direction with ABMIL. Generic noise-robust
+  losses (generalised cross-entropy, label smoothing) do nothing.
+- **Regression on mRNA** with ABMIL predicts ESR1 expression with r = 0.728 (ridge 0.671). Across the 50 PAM50 genes,
+  luminal and proliferation genes are predictable from H&E (r up to 0.73) and the HER2 amplicon (ERBB2, GRB7) is not.
+- **Hospital signal can be removed** by standardising each hospital's features with its own unlabelled statistics:
+  hospital identification falls from 82-96 % to chance, receptor AUC is unchanged, and the ER RNA preference survives
+  in all four encoders, so it is not a hospital artefact. Domain-adversarial training (DANN) did not remove it.
+- Fusing encoders, adding 10x to 20x features and multi-task training gave no meaningful gain.
+
+## 6.4 What do the models look at?
+
+For 14 patients (the discordant and ER-low cases reviewed earlier plus concordant references), every model was trained
+without the patient's hospital and drawn on the slide: the **exact** per-patch contribution of the linear probe
+(logit = bias + mean of patch contributions, verified to 4·10⁻⁶), the attention of four MIL heads, CONCH zero-shot
+concept maps and PCA colour maps. The four attention maps agree with each other and with the probe's evidence
+(signed Spearman 0.41-0.50, positive in 13 of 14 patients); 86 % of attention lies on patches whose top concept is
+tumour, which cover 44 % of the tissue. Removing the 5 % most influential patches shifts the probe's logit by 0.44
+versus 0.0006 for random patches; confident calls survive removing a third or more of the tissue, while the borderline
+discordant cases flip after 0.2-7 %.
+
+![Maps for an IHC-positive, RNA-negative basal tumour called ER-negative: H&E, exact contribution, four attention maps, PCA colours and CONCH concepts](../results/bench/x5/maps/TCGA-AR-A0TP.png)
+
+## 6.5 How reliable are the predictions?
+
+An ensemble of three encoders with split-conformal prediction (calibration on held-out training hospitals) reaches the
+target 90 % coverage overall (ER 0.900, PR 0.909), but **not in every hospital** (ER 0.68-0.98 across 17 hospitals).
+The cases on which the model abstains are where the truth itself is ambiguous: they are enriched for frozen-section
+call flips (32 % vs 9.5 %, odds ratio 4.5) and for IHC/RNA-discordant tumours (odds ratio 2.5). Platt scaling halves the
+calibration error (ER 0.094 → 0.048). MC-dropout and patch-resampling uncertainty add nothing over the model's own
+confidence.
+
+## 6.6 An application: ReceptorCheck
+
+We built a research-only second-reader demo (`app/`, Streamlit). For a slide it shows calibrated ER/PR/HER2
+probabilities with conformal sets, a reliability status (confident, uncertain, out of distribution), predicted
+ESR1/PGR/ERBB2 expression, an IHC consistency check that flags likely IHC errors, attention and contribution maps,
+concept profiles, similar reference cases and a frozen-section mode. Every number in the demo comes from out-of-fold,
+out-of-hospital predictions. In a retrospective evaluation on all patients, abstaining on the least confident 20 % of ER
+cases raises accuracy from 0.876 to 0.927 against IHC; the "flag for retest" rule finds IHC/RNA-discordant tumours with
+precision 0.46 (ER, base rate 0.055) and 0.46 (PR, base rate 0.135). HER2 failed the acceptance checks and is not
+offered. Frozen-section mode carries an explicit warning (Section 7.4).
+
+# 7. Evaluating without a gold standard
+
+IHC, RNA and protein give three independent measurements of the same biology on the same patients, which lets us ask
+questions that most medical-AI studies cannot. Details: `docs/baseline_report.md` 5l.
+
+## 7.1 A latent "truth" instead of IHC
+
+A latent-class (Dawid–Skene) model treats IHC, RNA and protein as three imperfect tests of ER. It finds RNA the most
+accurate test (specificity 0.98, against 0.89 for IHC: IHC's errors are mostly false positives). Scored against this
+latent truth, **every H&E model gains 0.033-0.053 AUC** (all 7 encoders), so IHC-only evaluation understates the
+models. They remain less accurate than IHC itself (correct for 85-89 % of patients vs 96 % for IHC). Caveat: two of the
+three tests are molecular, so the latent class leans towards the molecular definition.
+
+## 7.2 The model as an IHC auditor
+
+Ranking patients by how strongly the H&E model disagrees with their IHC result finds IHC/RNA-discordant tumours with
+AUC 0.78-0.87; 9 of the top 10 flags of a three-encoder consensus are truly discordant (base rate 5.5 %). Removing the
+flagged labels before training does not improve the model, but replacing hard labels with the latent-class soft labels
+does (Section 6.3): the useful extra information comes from the other tests, not from the model's own disagreement.
+
+## 7.3 Which label to train on, and which model wins
+
+For ER, training on the RNA label is never worse and sometimes better than training on IHC, **even when the hospital
+scores the model against IHC** (+0.000 to +0.020; significant for H-optimus-0 and TITAN; larger with 50 training
+patients). PR and HER2 show no such advantage. Ranking 17 models by AUC under each label shows that **the winner of a
+benchmark depends on the reference standard**: the rankings agree only moderately (Kendall τ 0.54-0.74) and the
+top-ranked model changes in 57-91 % of bootstrap samples.
+
+## 7.4 FFPE to frozen
+
+Models trained on FFPE slides and applied to frozen sections lose about 0.05 ER AUC and their calibration (ECE 0.09 →
+0.23; predicted probabilities too low); FFPE-calibrated conformal sets cover only 80 % of frozen cases. The RNA
+preference survives the change of slide type, and on the frozen slides of the discordant patients the FFPE-trained
+model sides with RNA 41 : 11. A frozen-section tool would need its own calibration data.
+
+# 8. Robustness and sanity checks
 
 - Every RNA-label claim was repeated with GMM, prevalence-matched and confident-only cut-offs; the ER result holds under
   all three, the PR "IHC preference" does not (hence reported as no preference).
@@ -177,10 +302,12 @@ the HER2-enriched exceptions attract attention to cohesive or apocrine-like cell
 - Fixed splits were introduced after we found that two scikit-learn versions produce different folds from the same seed;
   all final numbers use them. Rerunning ABMIL on the fixed splits lowered UNI ABMIL's ER ΔAUC from +0.034 to +0.018
   (no longer significant): we report the fixed-split value.
-- Sanity checks S1-S15 pass; the one exception (S6, CONCH) compares an old laptop run with the Ada run and reflects the
+- Sanity checks S1-S21 pass; the one exception (S6, CONCH) compares an old laptop run with the Ada run and reflects the
   library difference above, not a data problem.
+- The re-implemented ABMIL used for the extensions reproduces the original ABMIL to within 0.0002 AUC per seed on
+  CONCH (up to 0.011 on one UNI run, attributed to GPU non-determinism).
 
-# 7. Interpretation
+# 9. Interpretation
 
 Across encoders, heads, cut-offs and slide types, H&E models align more with the transcriptional ER state than with the
 IHC readout, and with DNA amplification rather than the clinical HER2 call. The discordant cases suggest why: the model
@@ -188,25 +315,35 @@ reads intrinsic-subtype morphology (basal vs luminal), which RNA reflects more f
 For model development this means that IHC-trained H&E models are partly penalised for being "right" against RNA, and
 that IHC-only benchmarks understate how much ER biology the slide carries. For interpretation it means that an H&E model
 should not be expected to recover IHC in low-expression or HER2-enriched tumours, and that a single slide is not the
-whole tumour (1e).
+whole tumour (1e). The extensions point the same way: the labels matter more than the model (soft labels from several
+tests help, bigger encoders and complex aggregators do not), and an evaluation that treats IHC as the truth both
+understates H&E models and can change which model is declared best.
 
-# 8. Limitations
+# 10. Limitations
 
 - One cohort (TCGA-BRCA), retrospective, with heterogeneous IHC practice across 40 sites; an external check on
-  CPTAC-BRCA is planned (Tier 6).
+  CPTAC-BRCA was prepared but is on hold.
 - Discordant groups are small (ER 54, HER2 60, ER-low 10): 1b and subgroup findings are suggestive, not definitive.
 - RNA "positivity" depends on a cut-off; we tested three, but no cut-off is clinically validated.
 - Frozen encoders only; fine-tuning could change which truth is learned (not tested).
 - Frozen-slide features come from our extraction (verified equal to TRACE on DX slides); 268 of 653 CPTAC slides and
   48 TCGA DX slides are JPEG-2000 encoded in IDC and could not be read by our pipeline.
-- The attention review is qualitative and by non-pathologists.
+- The attention review is qualitative and by non-pathologists; the 14-patient maps use zero-shot concept labels, not
+  pathologist annotation.
+- The latent-class model assumes the tests err independently given the true status; RNA and protein errors are
+  probably correlated, which favours the molecular definition.
+- The ResNet-50 comparison uses a 436-patient subset; the aggregation methods use paper defaults without tuning.
+- ReceptorCheck is evaluated retrospectively on one public cohort with RNA as the oracle for IHC errors; no reader study
+  or prospective test; research use only.
 
-# 9. Conclusion
+# 11. Conclusion
 
 When IHC and RNA disagree about ER, H&E foundation-model classifiers side with RNA and with the tumour's intrinsic
 subtype, and this does not depend on whether the slide is the FFPE diagnostic slide or the frozen section next to the
 sequenced tissue. HER2 predictions track amplification, PR shows no preference, and HER2-low is invisible in H&E.
-Reference-standard choice should be reported, and ideally varied, when H&E models of receptor status are developed.
+Reference-standard choice should be reported, and ideally varied, when H&E models of receptor status are developed:
+against a latent truth built from several tests the models look better, benchmark winners change with the label, and
+labels built from several tests improve training more than a larger encoder or a more complex aggregator does.
 
 # Reproducibility
 
@@ -227,3 +364,18 @@ detailed results with the command and job that produced each number.
 - Fedorov A et al. NCI Imaging Data Commons. *Cancer Research* 2021.
 - The Cancer Genome Atlas Network. Comprehensive molecular portraits of human breast tumours. *Nature* 2012.
 - TRACE precomputed TCGA features: huggingface.co/datasets/IUCompPath/TRACE. TRIDENT: github.com/mahmoodlab/TRIDENT.
+- Xu H et al. A whole-slide foundation model for digital pathology from real-world data (Prov-GigaPath). *Nature* 2024.
+- Wang X et al. A pathology foundation model for cancer diagnosis and prognosis prediction (CHIEF). *Nature* 2024.
+- Wang X et al. Transformer-based unsupervised contrastive learning for histopathological image classification (CTransPath). *Medical Image Analysis* 2022.
+- Nechaev D et al. Hibou: a family of foundational vision transformers for pathology. arXiv 2024. H-optimus-0 (Bioptimus) and UNI2-h (Mahmood Lab): Hugging Face model cards.
+- He K et al. Deep residual learning for image recognition (ResNet). *CVPR* 2016.
+- Lu MY et al. Data-efficient and weakly supervised computational pathology on whole-slide images (CLAM). *Nature Biomedical Engineering* 2021.
+- Shao Z et al. TransMIL: transformer based correlated multiple instance learning for whole slide image classification. *NeurIPS* 2021.
+- Li B, Li Y, Eliceiri KW. Dual-stream multiple instance learning network for whole slide image classification (DSMIL). *CVPR* 2021.
+- Zhang Y et al. Attention-challenging multiple instance learning for whole slide image classification (ACMIL). *ECCV* 2024.
+- Dawid AP, Skene AM. Maximum likelihood estimation of observer error-rates using the EM algorithm. *Applied Statistics* 1979.
+- Angelopoulos AN, Bates S. A gentle introduction to conformal prediction and distribution-free uncertainty quantification. arXiv 2021.
+- Ganin Y et al. Domain-adversarial training of neural networks. *JMLR* 2016.
+- Platt J. Probabilistic outputs for support vector machines. In *Advances in Large Margin Classifiers*, 1999.
+- Kornblith S et al. Similarity of neural network representations revisited (CKA). *ICML* 2019.
+- Parker JS et al. Supervised risk predictor of breast cancer based on intrinsic subtypes (PAM50). *J Clin Oncol* 2009.

@@ -6,6 +6,16 @@ the application as described in §8. Section numbers X1–X6 refer to the propos
 
 ---
 
+> **Implementation status (18 Nov 2026).** Everything in §5 and §7 is implemented and run, except the stretch items
+> (X4g LoRA, X5f sparse autoencoder, DINOv2 natural-image encoder, application live mode). Results:
+> `docs/baseline_report.md` 5k-5l, `docs/FINAL_RESULTS.md` 1.1. Deviations from this spec: ResNet-50 on a pre-set
+> random 436-patient subset (not the full cohort); X2 heads run with paper defaults, no inner-fold tuning, and TransMIL
+> uses exact attention instead of Nyström; X2 replicated on CONCH only (H-optimus-0 bags would need re-streaming);
+> H-optimus-0 bags for X1 ABMIL lived only in node-local /scratch (streamed and trained in one job, nothing kept in
+> home); X4f / X6 calibration uses Platt scaling on the conformal calibration set (not temperature scaling); the ABMIL
+> reproduction tolerance (±0.003) was met on CONCH (≤ 0.0002) but not on one UNI run (≤ 0.011, GPU non-determinism);
+> map patients are the 10 earlier overlay patients plus 4 references (14, `data/metadata/maps_patients.csv`).
+
 ## 1. Goals and non-goals
 
 **Goals**

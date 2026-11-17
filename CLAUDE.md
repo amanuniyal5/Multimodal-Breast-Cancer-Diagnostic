@@ -1,6 +1,6 @@
 # CLAUDE.md: everything a new Claude Code session needs
 
-*Last updated 19 Oct 2026. Read this file fully before doing anything. It is the condensed memory of all earlier
+*Last updated 18 Nov 2026. Read this file fully before doing anything. It is the condensed memory of all earlier
 sessions; the repo itself (docs, results, comms/LOG.md) is the source of truth for details.*
 
 Two people work on this project, each with their own Claude Code session: **Aman Uniyal** (repo owner,
@@ -28,11 +28,17 @@ the team's memory: https://github.com/amanuniyal5/Multimodal-Breast-Cancer-Diagn
   - **1d** is HER2 0 vs 1+ / 0 vs low visible in H&E (vs ERBB2 mRNA alone)
   - **1e** do two frozen sections (TS vs BS) of one tumour agree (ICC, κ, % flipped)
 
-## 2. Status (19 Oct 2026)
+## 2. Status (18 Nov 2026)
 
 - **Plan tiers 0-5 are DONE** (`docs/PROJECT_PLAN.md`): data, baselines, robustness, interpretation, frozen slides
   (1c, 1e), final statistics and tables.
 - **Tier 6 (optional):** CPTAC-BRCA external check **on hold**; LoRA fine-tuning (1f) and Kamineni data **dropped**.
+- **Tier 6b (Week 3) and 6c (AI extensions, after the professor's feedback) are DONE** (17 Nov): 11-encoder benchmark
+  incl. ResNet-50, 10 aggregation methods (UNI + CONCH), regression, improvements, maps, reliability, Week 3
+  experiments C/D/E/G/H and the *ReceptorCheck* application (`app/`). Secondary results only; summary in
+  `docs/FINAL_RESULTS.md` 1.1, details in `docs/baseline_report.md` 5h-5l, report sections 6-7. Open: optional stretch
+  items only (LoRA, sparse autoencoder, DINOv2 baseline, full-cohort ResNet-50, app live mode).
+- **Poster** for the 20 Nov showcase was submitted: do not change `poster/` or `scripts/poster_figures.py`.
 - **Tier 7 (deliverables):** final report `docs/FINAL_REPORT.md` (+ `.docx`), `docs/FINAL_RESULTS.md` (claims + tables
   T1-T5), `docs/QA_SHEET.md`, README with result→script→job map: done. **Open:** compile the Beamer decks on Overleaf
   (no LaTeX on laptop or Ada) and rehearse.
@@ -57,6 +63,12 @@ Five model variants: TITAN linear, UNI mean-pool (**pre-specified primary model*
 | Leakage | embeddings identify hospital 81.6% (chance 18.4%); HER2 0 vs 1+ 0.63 random folds → chance site-grouped | Why site-grouped CV |
 | Controls | shuffled labels 0.43-0.51; hospital-ID-only 0.53-0.59; label-only mRNA→IHC AUC ER 0.96, PR 0.92, HER2 0.87 | Pass |
 | Attention | on real slides attention sits on tumour; ER-low Basal → high-grade cells; HER2-enriched → cohesive/apocrine cells | Qualitative |
+
+Extensions (secondary; `docs/FINAL_RESULTS.md` E1-E15): ResNet-50 0.11-0.18 AUC below UNI; no encoder beats UNI on ER;
+no MIL head beats ABMIL and mean + SD pooling matches it (UNI and CONCH); latent-class soft labels +0.015 to +0.028 ER;
+every model +0.03-0.05 AUC against a latent IHC/RNA/protein truth; leaderboard top model changes with the label in
+57-91 % of bootstraps; conformal ER/PR coverage 0.90/0.91 (per hospital 0.68-0.98); ReceptorCheck ER flag precision
+0.46 vs 5.5 % base rate; lead: H-optimus-0 HER2 1+ vs 0 AUC 0.65.
 
 Note: fixed-split ABMIL rerun lowered UNI ABMIL ER ΔAUC from +0.034 (old folds) to **+0.018 (not significant)**; always
 quote the fixed-split numbers. ~80 tests in total; only P1-P3 are confirmatory (Holm); single borderline results
