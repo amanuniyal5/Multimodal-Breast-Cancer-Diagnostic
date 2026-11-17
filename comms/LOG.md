@@ -387,3 +387,14 @@ X6 reliability, ReceptorCheck demo; regenerate poster figure F9 with `x2/aucs.cs
 
 **Next open items:** X2 replication of the best heads on a second encoder (CONCH bags on Ada); optional stretch items
 (LoRA, sparse autoencoder, DINOv2 baseline, full-cohort ResNet-50, app live mode); compile decks; poster.
+
+## 2026-11-17 (2) · Srivastava (via Claude Code)
+
+**Did:** X2 replication on CONCH (jobs 86805 array ABMIL + CLAM, 86806 pooling; report 5k-6b). Every X2 conclusion
+replicates: no head beats ABMIL (CLAM ER IHC −0.003, n.s.); mean + SD pooling matches ABMIL (+0.004, n.s.) and beats plain
+mean (ER IHC +0.024, CI 0.007-0.040); trained heads beat plain mean for HER2 (+0.10); ER RNA preference +0.040 to
++0.045, 1b 35-36 : 18-19. The runner's ABMIL reproduces train_mil.py CONCH ABMIL to 0.0002 AUC per seed, so the UNI gap
+in 5k-6 was run-to-run GPU non-determinism. `analyse_x2.py` now suffixes non-UNI outputs (`aucs_conch_v1_20x.csv`, ...).
+
+**Next open items:** only optional stretch items (LoRA, sparse autoencoder, DINOv2 baseline, full-cohort ResNet-50, app
+live mode); compile decks; poster.

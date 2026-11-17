@@ -88,7 +88,8 @@ The checkbox list in **`docs/PROJECT_PLAN.md`** is the live status; this is a su
     soft labels from that truth improve ER; benchmark winners change with the reference standard.
   - **ReceptorCheck application** (`app/`): `python scripts/app_build_cases.py` then `streamlit run app/receptorcheck.py`;
     OOF-only bundles; evaluation `scripts/app_evaluate.py` (ER/PR pass, HER2 not offered).
-  - Open: X2 replication on a second encoder; stretch items (see `docs/PROJECT_PLAN.md`).
+  - X2 replicated on CONCH (report 5k-6b): no head beats ABMIL, mean + SD matches it; ABMIL reproduction exact on CONCH.
+  - Open: only optional stretch items (see `docs/PROJECT_PLAN.md`).
   - ResNet-50 (ImageNet) is 0.11-0.18 AUC below UNI on every receptor task (HER2 at chance): pathology FMs are needed.
   - No newer/larger FM beats UNI v1 on ER IHC with mean pooling (ceiling ~0.87); patch encoders are near-identical
     (CKA 0.87-0.96) and hospital-dominated (90-96% hospital ID); TITAN / CONCH / CHIEF carry less hospital, organise by

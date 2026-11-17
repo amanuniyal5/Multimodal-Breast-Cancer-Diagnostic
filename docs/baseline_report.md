@@ -837,6 +837,33 @@ second-order: all trained heads and mean+SD pooling sit within about 0.02 AUC on
 reference standard the model follows. Caveats: paper defaults without tuning (TransMIL uses exact attention instead
 of Nystrom), single encoder (UNI), 3 seeds, 2,048-patch subsets per step.
 
+### 5k-6b. X2 replication on CONCH (ABMIL, CLAM, pooling baselines; 17 Nov 2026)
+
+The best two trained heads from 5k-6 (ABMIL, CLAM-SB) and all pooling baselines rerun on the CONCH v1 20x bags, same
+runner, folds and settings (jobs 86805 array, 86806; `results/bench/x2/*_conch_v1_20x_*`, `aucs_conch_v1_20x.csv`,
+`preference_conch_v1_20x.csv`; `scripts/analyse_x2.py --name conch_v1_20x`).
+
+| AUC (CONCH; UNI in brackets) | ER IHC | ER RNA | PR IHC | HER2 strict |
+|---|---|---|---|---|
+| mean | 0.848 (0.869) | 0.878 (0.906) | 0.782 (0.794) | 0.575 (0.630) |
+| mean + SD | 0.872 (0.893) | 0.916 (0.923) | 0.796 (0.803) | 0.643 (0.678) |
+| ABMIL | 0.868 (0.891) | 0.913 (0.910) | 0.809 (0.806) | 0.672 (0.695) |
+| CLAM-SB | 0.865 (0.889) | 0.905 (0.917) | 0.812 (0.818) | 0.676 (0.709) |
+
+- **Every X2 conclusion replicates on the second encoder, so they now meet the reporting rule (≥ 2 encoders):**
+  - no trained head beats ABMIL (CLAM vs ABMIL on CONCH: ER IHC −0.003, n.s.; ER RNA −0.008, p = 0.015);
+  - **mean + SD pooling matches ABMIL** (ER IHC +0.004, n.s.) and beats plain mean pooling (ER IHC +0.024, CI
+    0.007-0.040; ER RNA +0.038; HER2 strict +0.068);
+  - trained heads beat plain mean pooling for HER2 (+0.097 / +0.101, CI excluding 0) but not mean + SD;
+  - kNN and prototype pooling are worse (ER IHC −0.040 / −0.068 vs ABMIL).
+- **The label preference is head- and encoder-independent:** ER RNA − IHC +0.045 (ABMIL, 0.018-0.072), +0.040 (CLAM),
+  +0.044 (mean + SD); 1b 35-36 : 18-19 of 54 towards RNA; PR none; HER2 follows amplification with mean / mean+max
+  pooling (39-44 : 16-21) but not significantly with ABMIL / CLAM on CONCH (32-34 : 26-28).
+- **Reproduction check passes on CONCH:** the runner's ABMIL equals the fixed-split `train_mil.py` CONCH ABMIL to
+  ≤ 0.0002 AUC per seed (r = 1.000; spec tolerance 0.003). The 0.004-0.011 gap on UNI (5k-6) is therefore run-to-run
+  GPU non-determinism of that UNI run, not a difference in code.
+- Runtime: ABMIL 86 s per fit, CLAM 128 s (CONCH is 512-d).
+
 ### 5k-7. Remaining X1 / X3 / X4 items (16-17 Nov 2026)
 
 Scripts: `scripts/bench_mil_ext.py` (GPU, job 85665, array of 6 modes), `jobs/x1_abmil_trace.sbatch` (job 85664: TRACE
@@ -1052,8 +1079,10 @@ use only.
   10x + 20x adds nothing beyond the patch SD; GCE / label smoothing do nothing; MC-dropout / half-bag SD add nothing over
   |p − 0.5|; the application fails acceptance for HER2.
 - **Leads (one encoder):** H-optimus-0 sees HER2 1+ vs 0 (both heads, ≈ ERBB2 mRNA); multi-task PR gain.
-- **Not done:** X2 replication of the best heads on a second encoder (CONCH / H-optimus-0); stretch items (X4g LoRA,
-  X5f sparse autoencoder, DINOv2 baseline, full-cohort ResNet-50, application live mode).
+- **X2 replicated on CONCH (5k-6b):** no head beats ABMIL and mean + SD pooling matches the trained heads on both
+  encoders.
+- **Not done (stretch):** X4g LoRA, X5f sparse autoencoder, DINOv2 baseline, full-cohort ResNet-50, application live
+  mode.
 
 ## 5l. Week 3 experiments C, D, E, G, H: evaluating without a gold standard (16 Nov 2026)
 

@@ -1,0 +1,9 @@
+ER_IHC seed 0: same patients True (n 801 vs 801); AUC here 0.8642 vs train_mil 0.8641 (diff +0.0000); r(p) 1.000
+ER_IHC seed 1: same patients True (n 801 vs 801); AUC here 0.8652 vs train_mil 0.8652 (diff -0.0001); r(p) 1.000
+ER_IHC seed 2: same patients True (n 801 vs 801); AUC here 0.8501 vs train_mil 0.8501 (diff -0.0000); r(p) 1.000
+ESR1_RNApos seed 0: same patients True (n 801 vs 801); AUC here 0.9097 vs train_mil 0.9097 (diff -0.0000); r(p) 1.000
+ESR1_RNApos seed 1: same patients True (n 801 vs 801); AUC here 0.9071 vs train_mil 0.9071 (diff -0.0001); r(p) 1.000
+ESR1_RNApos seed 2: same patients True (n 801 vs 801); AUC here 0.9025 vs train_mil 0.9026 (diff -0.0001); r(p) 1.000
+ER_RPPApos seed 0: same patients True (n 801 vs 801); AUC here 0.8562 vs train_mil 0.8562 (diff +0.0000); r(p) 1.000
+ER_RPPApos seed 1: same patients True (n 801 vs 801); AUC here 0.8731 vs train_mil 0.8730 (diff +0.0002); r(p) 1.000
+ER_RPPApos seed 2: same patients True (n 801 vs 801); AUC here 0.8565 vs train_mil 0.8564 (diff +0.0001); r(p) 1.000

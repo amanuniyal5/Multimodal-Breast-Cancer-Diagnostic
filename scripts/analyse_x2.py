@@ -6,6 +6,7 @@ Reads <dir>/*_<name>_oof.csv.gz, averages predictions over seeds per patient and
   preference.csv   method x label pair: ΔAUC molecular − IHC (generalised DeLong) and 1b counts (binomial)
   runtime.csv      seconds per fit and parameters (GPU methods)
   repro.txt        ABMIL through this runner vs the fixed-split train_mil.py ABMIL (ER group, per seed)
+Files get a _<name> suffix for encoders other than UNI (e.g. aucs_conch_v1_20x.csv).
 Usage: python scripts/analyse_x2.py [--dir results/bench/x2] [--name uni_v1_20x]
 """
 import argparse
@@ -26,6 +27,7 @@ ap.add_argument("--dir", default="results/bench/x2")
 ap.add_argument("--name", default="uni_v1_20x")
 ap.add_argument("--ref-abmil", default="results/mil_uni_v1_20x_fixedsplits_abmil_oof.csv.gz")
 a = ap.parse_args()
+SFX = "" if a.name == "uni_v1_20x" else f"_{a.name}"  # UNI keeps the original file names
 pd.set_option("display.width", 250)
 O = pd.concat([pd.read_csv(f) for f in glob.glob(os.path.join(a.dir, f"*_{a.name}_oof.csv.gz"))])
 ORDER = [m for m in ["mean", "meanstd", "meanmax", "knn25", "proto", "abmil", "clam", "transmil", "dsmil", "acmil"]
@@ -60,11 +62,11 @@ for (t, g), _ in A1.groupby(["task", "group"], sort=False):
             r["auc_ERBB2_mRNA"] = stats.safe_auc(y, L.loc[b.index, "ERBB2_log2"].to_numpy())
         rows.append(r)
 A = pd.DataFrame(rows)
-A.to_csv(os.path.join(a.dir, "aucs.csv"), index=False)
+A.to_csv(os.path.join(a.dir, f"aucs{SFX}.csv"), index=False)
 print("AUC (seed-averaged):\n" + A.pivot(index="method", columns="task", values="auc").reindex(ORDER).round(3)
       .to_string())
-print("\nvs ABMIL / vs mean pool (ΔAUC, p):\n" + A[["method", "task", "auc", "diff_vs_abmil", "p_vs_abmil",
-                                                      "diff_vs_mean", "p_vs_mean"]].round(3).to_string(index=False))
+COLS = [c for c in ["method", "task", "auc", "diff_vs_abmil", "p_vs_abmil", "diff_vs_mean", "p_vs_mean"] if c in A.columns]
+print("\nvs ABMIL / vs mean pool (ΔAUC, p):\n" + A[COLS].round(3).to_string(index=False))
 print("\ncalibration:\n" + A[A.task.isin(["ER_IHC", "HER2_STRICT"])][["method", "task", "brier", "ece"]].round(3)
       .to_string(index=False))
 
@@ -83,14 +85,14 @@ for m in ORDER:
                 r.update(n_disc=len(b1), side_molecular=k, side_IHC=len(b1) - k, p_binom=binomtest(k, len(b1)).pvalue)
             pref.append(r)
 P = pd.DataFrame(pref)
-P.to_csv(os.path.join(a.dir, "preference.csv"), index=False)
+P.to_csv(os.path.join(a.dir, f"preference{SFX}.csv"), index=False)
 print("\nlabel preference:\n" + P.round(3).to_string(index=False))
 
 rt = [pd.read_csv(f) for f in glob.glob(os.path.join(a.dir, f"*_{a.name}_runtime.csv"))]
 if rt:
     R = pd.concat(rt).groupby("method").agg(fits=("seconds", "size"), sec_per_fit=("seconds", "mean"),
                                            total_h=("seconds", lambda s: s.sum() / 3600), params=("params", "first"))
-    R.to_csv(os.path.join(a.dir, "runtime.csv"))
+    R.to_csv(os.path.join(a.dir, f"runtime{SFX}.csv"))
     print("\nruntime:\n" + R.round(1).to_string())
 
 if "abmil" in ORDER and os.path.exists(a.ref_abmil):
@@ -107,5 +109,5 @@ if "abmil" in ORDER and os.path.exists(a.ref_abmil):
                          f"train_mil {a0:.4f} (diff {a1 - a0:+.4f}); r(p) "
                          f"{pearsonr(x.p, r0.p)[0] if same else float('nan'):.3f}")
     txt = "\n".join(lines)
-    open(os.path.join(a.dir, "repro.txt"), "w").write(txt + "\n")
+    open(os.path.join(a.dir, f"repro{SFX}.txt"), "w").write(txt + "\n")
     print("\nABMIL reproduction:\n" + txt)

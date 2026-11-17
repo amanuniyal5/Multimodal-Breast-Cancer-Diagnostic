@@ -181,7 +181,7 @@ reference standards). We do **not** propose a new architecture.
 - [x] X5b maps for 14 patients (contribution, 4 attention maps, concept maps, PCA-RGB; S19 pass; jobs 85677/85678/85703, `scripts/maps.py`) + X5d retrieval (`results/bench/x5`, report 5k-8, 17 Nov)
 - [x] X6 reliability: ensemble + split conformal (ER/PR coverage 0.90/0.91; per-hospital 0.68-0.98), risk-coverage, abstentions enriched for 1e flips (OR 4.5), MC-dropout / half-bags (job 85665_5) (`scripts/bench_reliability.py`, report 5k-9, 17 Nov)
 - [x] ReceptorCheck demo app (`app/`, `scripts/app_build_cases.py`, `app_evaluate.py`): 215 OOF bundles, ER/PR pass acceptance (FLAG precision 0.46 vs base 0.055 / 0.135), HER2 fails and is not offered (report 5k-10, 17 Nov)
-- [~] in progress (Srivastava, 2026-11-17) X2 replication: the best 2 aggregation heads on a second encoder (CONCH bags on Ada; H-optimus-0 needs re-streaming) (spec §5.2)
+- [x] X2 replication on CONCH: ABMIL, CLAM and pooling baselines (jobs 86805, 86806); every X2 conclusion replicates, ABMIL reproduction within 0.0002 (`results/bench/x2/*conch*`, report 5k-6b, 17 Nov)
 - [ ] Stretch (optional): X4g LoRA, X5f sparse autoencoder, DINOv2 natural-image baseline, full-cohort ResNet-50, app live mode
 
 ## Tier 7: Deliverables ⬜
@@ -206,7 +206,7 @@ reference standards). We do **not** propose a new architecture.
 | 5 Consolidation | Done (15 Oct, `docs/FINAL_RESULTS.md`) | — |
 | 6 Optional | On hold (CPTAC); 1f and Kamineni dropped | — |
 | 6b Week 3 extensions | 3 of 4 done (27 Oct: frozen ABMIL 5j, zero-shot CONCH 5i, extended statistics 5h) | New experiments: pick from `docs/WEEK3_EXPERIMENTS.md` |
-| 6c AI extensions | 13 of 13 done (report 5k, 5k-7 to 5k-11; 17 Nov); Week 3 C/D/E/G/H done (5l) | X2 replication on a 2nd encoder, stretch items open |
+| 6c AI extensions | 13 of 13 done (report 5k, 5k-7 to 5k-11; 17 Nov); Week 3 C/D/E/G/H done (5l) | stretch items only (optional) |
 | 7 Deliverables | 3 of 5 done (report, docs, repo); decks updated but not compiled | Compile decks (no LaTeX); rehearsal
 
 ## Key files
