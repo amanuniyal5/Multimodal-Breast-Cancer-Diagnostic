@@ -11,6 +11,7 @@ Team: Aman Uniyal · Aman Srivastava
 > [`docs/HANDOFF.md`](docs/HANDOFF.md) → [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) → [`comms/LOG.md`](comms/LOG.md).
 > Claude Code sessions should also read [`CLAUDE.md`](CLAUDE.md).
 > **Final results:** [`docs/FINAL_RESULTS.md`](docs/FINAL_RESULTS.md) · **Report:** [`docs/FINAL_REPORT.md`](docs/FINAL_REPORT.md) (Word: `docs/FINAL_REPORT.docx`).
+> **Showcase poster (20 Nov): explanation and spoken script:** [`docs/POSTER_GUIDE.md`](docs/POSTER_GUIDE.md).
 
 ---
 
